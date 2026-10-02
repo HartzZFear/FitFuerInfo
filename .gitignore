@@ -1,0 +1,12 @@
+# lokale Zugangsdaten - NIEMALS committen
+/src/web/config.php
+
+# Logs und Dumps
+*.log
+/src/db/dumps/
+
+# Editor / OS
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
