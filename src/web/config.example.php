@@ -23,7 +23,7 @@ define('DB_CHARSET', 'utf8mb4');
 
 // Basispfad im Browser. Bei C:\xampp\htdocs\fitfuerinfo ist das
 // "/fitfuerinfo". Liegt das Projekt direkt in htdocs, hier "" eintragen.
-define('BASE_URL', '/fitfuerinfo/FitFuerInfo');
+define('BASE_URL', '/fitfuerinfo');
 
 // Auf true lassen, solange entwickelt wird: zeigt Fehlermeldungen an.
 // Fuer die Abgabe auf false setzen.
