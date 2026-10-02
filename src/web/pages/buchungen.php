@@ -63,6 +63,20 @@ $meineKurse = buchbare_kurse($meineId, $istAdmin);
 
 $jetzt = new DateTime();
 
+// Gegenstueck zum Link "Listenansicht" in belegung.php: dieselben Filter,
+// der Kalender startet beim "ab"-Datum (Standard: Wochenansicht).
+$kalenderParameter = array('datum' => $abDatum);
+if ($filterRaumId > 0) {
+    $kalenderParameter['raum_id'] = $filterRaumId;
+}
+if ($filterKursId > 0) {
+    $kalenderParameter['kurs_id'] = $filterKursId;
+}
+if ($nurMeine) {
+    $kalenderParameter['nur_meine'] = 1;
+}
+$urlKalender = 'belegung.php?' . http_build_query($kalenderParameter);
+
 /**
  * Nur fuer die Anzeige der Buttons: gehoert die Buchung dem eingeloggten
  * Benutzer? Die Daten liegen durch den JOIN schon vor, deshalb hier ohne
@@ -452,6 +466,16 @@ function ist_eigene_buchung($buchung, $benutzerId, $istAdmin)
   }
   .link-zuruecksetzen:hover { text-decoration: underline; }
 
+  .link-ansicht {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--blue);
+    text-decoration: none;
+  }
+  .link-ansicht:hover { text-decoration: underline; }
+
   .btn-add {
     position: absolute;
     bottom: 18px;
@@ -507,7 +531,7 @@ function ist_eigene_buchung($buchung, $benutzerId, $istAdmin)
     <nav class="tab-group">
       <a href="kurse.php" class="tab">Kurse</a>
       <a href="raeume.php" class="tab">Räume</a>
-      <a href="buchungen.php" class="tab active">Belegung</a>
+      <a href="belegung.php" class="tab active">Belegung</a>
     </nav>
 
     <div class="header-actions">
@@ -631,6 +655,7 @@ function ist_eigene_buchung($buchung, $benutzerId, $istAdmin)
           </label>
         </div>
 
+        <a class="link-ansicht" href="<?php echo h($urlKalender); ?>">Kalenderansicht</a>
         <a class="link-zuruecksetzen" href="buchungen.php">Filter zurücksetzen</a>
 
         <button type="submit" class="filter-submit">Filtern</button>

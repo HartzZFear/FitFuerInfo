@@ -295,7 +295,8 @@ Kostet fünf Sekunden und erspart die meisten Merge-Konflikte.
 | `src/web/pages/raeume.php` | Raumliste mit Suche und Filtern (Software, Mindestanzahl Arbeitsplätze, „nur meine / alle"; alle kombinierbar) | Lesen: jeder Eingeloggte. „bearbeiten" nur bei Räumen, für die man als Bearbeiter eingetragen ist; „löschen" und der „+"-Knopf nur für den Admin |
 | `src/web/pages/raum_bearbeiten.php` | Raum anlegen (ohne `?id=`) oder bearbeiten (mit `?id=N`) | Anlegen: nur Admin. Bearbeiten: Admin und Einträge in `raum_bearbeiter`. Der Checkbox-Block „Bearbeiter" ist nur für den Admin sichtbar |
 | `src/web/pages/raum_loeschen.php` | Sicherheitsabfrage + Löschen eines Raums | nur Admin |
-| `src/web/pages/buchungen.php` | Belegungsliste mit Filtern (Raum, Kurs, „nur meine", ab Datum) | Lesen: jeder Eingeloggte. Buttons „bearbeiten"/„löschen" nur bei eigenen Buchungen. „+"-Knopf nur, wenn man mindestens einen Kurs buchen darf |
+| `src/web/pages/belegung.php` | Belegungskalender: Monat (Raster Mo–Fr), Woche (ein Raum, Halbstunden-Slots 07:00–20:00), Tag (alle Räume nebeneinander). Filter Raum, Kurs, „nur meine"; Blättern und „Heute"; Link „Listenansicht" auf `buchungen.php` mit denselben Filtern | Lesen: jeder Eingeloggte. Klick auf eine Buchung führt nur zu `buchung_bearbeiten.php`, wenn `buchung_darf_bearbeiten()` true liefert (eigene bzw. Admin, nicht vergangen). Klick auf einen freien Slot (Woche/Tag) nur, wenn man mindestens einen Kurs buchen darf und der Slot nicht vorbei ist |
+| `src/web/pages/buchungen.php` | Belegungsliste mit Filtern (Raum, Kurs, „nur meine", ab Datum); Link „Kalenderansicht" auf `belegung.php` mit denselben Filtern | Lesen: jeder Eingeloggte. Buttons „bearbeiten"/„löschen" nur bei eigenen Buchungen. „+"-Knopf nur, wenn man mindestens einen Kurs buchen darf |
 | `src/web/pages/buchung_bearbeiten.php` | Buchung anlegen (ohne `?id=`) oder bearbeiten (mit `?id=N`) | Anlegen: nur für eigene Kurse (Admin: alle). Bearbeiten: nur wer die Buchung angelegt hat, oder Admin |
 | `src/web/pages/buchung_loeschen.php` | Sicherheitsabfrage + Löschen einer Buchung | nur wer die Buchung angelegt hat, oder Admin |
 
@@ -327,7 +328,19 @@ und zeigt stattdessen, wie viele Buchungen betroffen sind. `raum_software` und
 ihm.
 
 Die Tab-Leiste oben (**Kurse | Räume | Belegung**) ist auf allen Seiten gleich.
-„Räume" zeigt auf `raeume.php`, „Belegung" auf `buchungen.php`.
+„Räume" zeigt auf `raeume.php`, „Belegung" auf den Kalender `belegung.php`;
+die Listenansicht `buchungen.php` ist von dort über „Listenansicht" erreichbar.
+Jede Raumkarte in `raeume.php` verlinkt auf die Wochenansicht des Raums, jede
+Kurskarte in `kurse.php` über „Termine" auf die Monatsansicht des Kurses.
+
+Die Logik des Kalenders (Parameter prüfen, Zeitraum berechnen, Buchungen auf
+Slots verteilen, Blättern) steht in `src/web/kalender_logik.php`. Alle
+Buchungen des sichtbaren Zeitraums kommen aus **einer** Abfrage. Die Filter
+Kurs und „nur meine" blenden Buchungen nur aus: in Woche und Tag bleibt ein
+so belegter Slot als schraffierter Block „belegt" sichtbar und bekommt keinen
+Buchen-Link, weil eine Buchung dort an Regel 2 scheitern würde. Ungültige
+Parameter (`datum=abc`, `ansicht=xyz`, `raum_id=999`) fallen still auf den
+Standard zurück (Woche, heute bzw. am Wochenende der nächste Montag).
 
 Schlägt eine serverseitige Rechteprüfung fehl, beendet
 `zugriff_verweigert_seite()` (in `src/web/kurs_rechte.php`) die Seite mit einer

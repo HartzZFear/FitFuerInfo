@@ -614,7 +614,7 @@ function ist_mein_raum($raum, $bearbeiterJeRaum, $benutzerId, $istAdmin)
     <nav class="tab-group">
       <a href="kurse.php" class="tab">Kurse</a>
       <a href="raeume.php" class="tab active">Räume</a>
-      <a href="buchungen.php" class="tab">Belegung</a>
+      <a href="belegung.php" class="tab">Belegung</a>
     </nav>
 
     <div class="header-actions">
@@ -675,7 +675,7 @@ function ist_mein_raum($raum, $bearbeiterJeRaum, $benutzerId, $istAdmin)
           </div>
           <?php endif; ?>
 
-          <a class="link-belegung" href="buchungen.php?raum_id=<?php echo (int) $raum['id']; ?>">
+          <a class="link-belegung" href="belegung.php?ansicht=woche&amp;raum_id=<?php echo (int) $raum['id']; ?>">
             <?php
               $anzahl = isset($buchungenJeRaum[$raum['id']]) ? $buchungenJeRaum[$raum['id']] : 0;
               echo $anzahl === 1 ? '1 kommende Buchung' : (int) $anzahl . ' kommende Buchungen';

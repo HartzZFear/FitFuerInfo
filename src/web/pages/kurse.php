@@ -517,6 +517,15 @@ function ist_eigene_karte($kurs, $eigentuemerJeKurs, $benutzerId)
     border: 1px solid rgba(26, 143, 156, 0.25);
   }
 
+  .link-belegung {
+    display: inline-block;
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--blue);
+    text-decoration: none;
+  }
+  .link-belegung:hover { text-decoration: underline; }
+
   .empty-state {
     grid-column: 1 / -1;
     text-align: center;
@@ -563,7 +572,7 @@ function ist_eigene_karte($kurs, $eigentuemerJeKurs, $benutzerId)
     <nav class="tab-group">
       <a href="kurse.php" class="tab active">Kurse</a>
       <a href="raeume.php" class="tab">Räume</a>
-      <a href="buchungen.php" class="tab">Belegung</a>
+      <a href="belegung.php" class="tab">Belegung</a>
     </nav>
 
     <div class="header-actions">
@@ -617,6 +626,8 @@ function ist_eigene_karte($kurs, $eigentuemerJeKurs, $benutzerId)
             <?php endforeach; ?>
           </div>
           <?php endif; ?>
+          <a class="link-belegung" href="belegung.php?ansicht=monat&amp;kurs_id=<?php echo (int) $kurs['id']; ?>">Termine</a>
+
           <?php if ($istAdmin || ist_eigene_karte($kurs, $eigentuemerJeKurs, $meineId)): ?>
           <div class="course-actions">
             <a href="kurs_bearbeiten.php?id=<?php echo (int) $kurs['id']; ?>" class="btn-edit">bearbeiten</a>

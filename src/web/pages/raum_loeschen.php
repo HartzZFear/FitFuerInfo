@@ -204,7 +204,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $fehler === '') {
     <nav class="tab-group">
       <a href="kurse.php" class="tab">Kurse</a>
       <a href="raeume.php" class="tab active">Räume</a>
-      <a href="buchungen.php" class="tab">Belegung</a>
+      <a href="belegung.php" class="tab">Belegung</a>
     </nav>
 
     <div class="karte">
