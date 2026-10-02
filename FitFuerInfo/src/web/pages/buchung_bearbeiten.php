@@ -353,7 +353,7 @@ $seitenTitel = $istBearbeiten ? 'Buchung bearbeiten' : 'Neue Buchung anlegen';
     <nav class="tab-group">
       <a href="kurse.php" class="tab">Kurse</a>
       <a href="raeume.php" class="tab">Räume</a>
-      <a href="buchungen.php" class="tab active">Belegung</a>
+      <a href="belegung.php" class="tab active">Belegung</a>
     </nav>
 
     <div class="karte">
