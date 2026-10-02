@@ -3,8 +3,8 @@ Projekt1: FitFuerInfo
 - Kurs- & Raum-Verwaltungsssoftware
 DIESE DATEI BEEINHALTET INIT & START/STOPP BEDIENUNGSANLEITUNG
 
-FÜR AUSFÜHRLICHE SOFTWAREINFOS:             ./doc.pdf 
-FÜR EINE DETAILIERTE BEDIENUNGSANLEITUNG:   ./Bedienungsanleitung.pdf
+FÜR AUSFÜHRLICHE SOFTWAREINFOS:             ./docs/doc.pdf 
+FÜR EINE DETAILIERTE BEDIENUNGSANLEITUNG:   ./docs/Bedienungsanleitung.pdf
 
 ## Requirements: 
 1. Installed XAMPP v.5.6.36 (Modules: Apache & MySQL)
