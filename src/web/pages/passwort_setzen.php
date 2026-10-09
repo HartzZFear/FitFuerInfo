@@ -13,6 +13,7 @@ require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../auth.php';
 
 session_starten();
+csrf_pruefen();
 
 $fehler       = array();
 $erfolg       = false;
@@ -204,6 +205,7 @@ body {
     <?php else: ?>
 
       <form method="post" action="passwort_setzen.php" novalidate>
+        <?php csrf_feld(); ?>
         <label for="username">Benutzername</label>
         <input type="text" id="username" name="username" placeholder="Benutzername"
                value="<?php echo h($benutzername); ?>" autofocus>

@@ -14,6 +14,7 @@ require_once __DIR__ . '/../kurs_rechte.php';
 require_once __DIR__ . '/../buchung_logik.php';
 
 erfordere_login();
+csrf_pruefen();
 
 $meineId  = benutzer_id();
 $istAdmin = ist_admin();
@@ -354,7 +355,12 @@ $seitenTitel = $istBearbeiten ? 'Buchung bearbeiten' : 'Neue Buchung anlegen';
       <a href="kurse.php" class="tab">Kurse</a>
       <a href="raeume.php" class="tab">Räume</a>
       <a href="belegung.php" class="tab active">Belegung</a>
+      <?php if ($istAdmin): ?>
+      <a href="benutzer.php" class="tab">Benutzer</a>
+      <?php endif; ?>
     </nav>
+
+    <?php session_fehler_anzeigen(); ?>
 
     <div class="karte">
       <h2 class="karte-titel"><?php echo h($seitenTitel); ?></h2>
@@ -390,6 +396,7 @@ $seitenTitel = $istBearbeiten ? 'Buchung bearbeiten' : 'Neue Buchung anlegen';
       <?php else: ?>
 
       <form method="post" action="buchung_bearbeiten.php<?php echo $istBearbeiten ? '?id=' . (int) $buchungId : ''; ?>">
+        <?php csrf_feld(); ?>
         <label for="kurs_id">Kurs</label>
         <select id="kurs_id" name="kurs_id" required>
           <option value="">– bitte wählen –</option>

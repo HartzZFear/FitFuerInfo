@@ -223,7 +223,7 @@ mit demselben Code schlägt danach erwartungsgemäß fehl.
 
 ## 7. Teamregeln
 
-Diese sechs Punkte sind das, woran Gruppenprojekte sonst scheitern.
+Diese sieben Punkte sind das, woran Gruppenprojekte sonst scheitern.
 
 **1. Datenbankänderungen immer über `schema.sql`.**
 Wer eine Tabelle oder Spalte ändert, ändert **die Datei** und pusht sie –
@@ -280,6 +280,13 @@ bei den anderen.
 **6. Vor dem Arbeiten immer `git pull`.**
 Kostet fünf Sekunden und erspart die meisten Merge-Konflikte.
 
+**7. Jedes neue POST-Formular braucht `csrf_feld()`.**
+Direkt nach dem `<form method="post" ...>`-Tag `<?php csrf_feld(); ?>`
+einfügen, und die Seite ruft oben – nach `erfordere_login()` bzw.
+`session_starten()` – `csrf_pruefen();` auf. Ohne das lehnt die Seite das
+Formular nicht ab, und es ist angreifbar (siehe Abschnitt 8, „CSRF-Schutz").
+GET-Formulare (Suche, Filter, Kalender) brauchen kein Token.
+
 ---
 
 ## 8. Seitenübersicht und Rechte
@@ -299,6 +306,8 @@ Kostet fünf Sekunden und erspart die meisten Merge-Konflikte.
 | `src/web/pages/buchungen.php` | Belegungsliste mit Filtern (Raum, Kurs, „nur meine", ab Datum); Link „Kalenderansicht" auf `belegung.php` mit denselben Filtern | Lesen: jeder Eingeloggte. Buttons „bearbeiten"/„löschen" nur bei eigenen Buchungen. „+"-Knopf nur, wenn man mindestens einen Kurs buchen darf |
 | `src/web/pages/buchung_bearbeiten.php` | Buchung anlegen (ohne `?id=`) oder bearbeiten (mit `?id=N`) | Anlegen: nur für eigene Kurse (Admin: alle). Bearbeiten: nur wer die Buchung angelegt hat, oder Admin |
 | `src/web/pages/buchung_loeschen.php` | Sicherheitsabfrage + Löschen einer Buchung | nur wer die Buchung angelegt hat, oder Admin |
+| `src/web/pages/benutzer.php` | Benutzerliste mit Rolle, Status (aktiv / gesperrt / wartet auf Freischaltung), Anzahl Kurse als Eigentümer, Räume als Bearbeiter und kommende Buchungen; Suche (Name/E-Mail), Filter Rolle und Status. Knöpfe „bearbeiten", „sperren"/„entsperren" und „Neuer Freischaltcode" (beide per POST mit Sicherheitsabfrage), „+" zum Anlegen | nur Admin (`erfordere_admin()`); „sperren" fehlt auf der eigenen Karte |
+| `src/web/pages/benutzer_bearbeiten.php` | Benutzer anlegen (ohne `?id=`) oder bearbeiten (mit `?id=N`): Name, E-Mail (optional), Rolle, aktiv. **Kein Passwortfeld.** Beim Anlegen wird einmalig ein Freischaltcode angezeigt | nur Admin. Der letzte aktive Admin kann weder gesperrt noch zum Mitarbeiter gemacht werden, niemand kann sich selbst sperren (`benutzer_darf_aendern()` in `src/web/benutzer_logik.php`) |
 
 **Eigentümer eines Kurses** sind der Ersteller (`kurs.ersteller_id`) und alle
 Einträge in `kurs_eigentuemer`. Nur Eigentümer und der Admin dürfen einen
@@ -327,7 +336,8 @@ und zeigt stattdessen, wie viele Buchungen betroffen sind. `raum_software` und
 `raum_bearbeiter` hängen per `ON DELETE CASCADE` am Raum und verschwinden mit
 ihm.
 
-Die Tab-Leiste oben (**Kurse | Räume | Belegung**) ist auf allen Seiten gleich.
+Die Tab-Leiste oben (**Kurse | Räume | Belegung | Benutzer**) ist auf allen Seiten gleich;
+der Tab „Benutzer" erscheint nur für den Admin.
 „Räume" zeigt auf `raeume.php`, „Belegung" auf den Kalender `belegung.php`;
 die Listenansicht `buchungen.php` ist von dort über „Listenansicht" erreichbar.
 Jede Raumkarte in `raeume.php` verlinkt auf die Wochenansicht des Raums, jede
@@ -342,11 +352,69 @@ Buchen-Link, weil eine Buchung dort an Regel 2 scheitern würde. Ungültige
 Parameter (`datum=abc`, `ansicht=xyz`, `raum_id=999`) fallen still auf den
 Standard zurück (Woche, heute bzw. am Wochenende der nächste Montag).
 
+**Benutzer werden nicht gelöscht, sondern gesperrt.** `kurs.ersteller_id` und
+`buchung.benutzer_id` stehen auf `RESTRICT`, ein Löschen würde also an Kursen
+und Buchungen scheitern (und deren Historie zerstören). Ein gesperrter Benutzer
+(`aktiv = 0`) kann sich nicht anmelden. Weil `erfordere_login()` das Konto bei
+jedem Seitenaufruf frisch aus der Datenbank liest, endet auch eine noch
+laufende Sitzung beim nächsten Klick; die Login-Seite zeigt dann „Ihr Konto
+wurde gesperrt". Auf dieselbe Weise wirkt eine geänderte Rolle sofort.
+
+### Freischaltcodes
+
+Der Admin kennt nie ein Passwort – auch nicht das erste. Ablauf:
+
+1. **Anlegen:** Der Admin legt in `benutzer_bearbeiten.php` einen Benutzer an.
+   Er wird ohne Passwort gespeichert (`passwort_hash = NULL`, Status „wartet
+   auf Freischaltung").
+2. **Code:** Das System erzeugt einen 8-stelligen Freischaltcode
+   (`benutzer_code_erzeugen()`, 7 Tage gültig) und zeigt ihn dem Admin genau
+   **einmal** groß an, zusammen mit dem Link auf `passwort_setzen.php`. Danach
+   ist der Code nirgends mehr abrufbar; die Liste zeigt nur noch, bis wann er
+   gilt. Der Admin gibt ihn persönlich weiter.
+3. **Einlösen:** Der Mitarbeiter gibt in `passwort_setzen.php` Benutzername,
+   Code und sein selbst gewähltes Passwort ein (`code_einloesen()`). Der Code
+   wird dabei entwertet.
+
+**Passwort vergessen:** Der Admin klickt in `benutzer.php` auf „Neuer
+Freischaltcode". Das alte Passwort bleibt gültig, bis der neue Code eingelöst
+ist – wer sich doch noch erinnert, ist also nicht ausgesperrt. Ein noch
+offener älterer Code wird durch den neuen ungültig.
+
+Die Codes kommen aus `openssl_random_pseudo_bytes()` (kryptografisch sicher,
+siehe `erzeuge_freischaltcode()` in `src/web/auth.php`), nicht aus `mt_rand()`.
+
 Schlägt eine serverseitige Rechteprüfung fehl, beendet
 `zugriff_verweigert_seite()` (in `src/web/kurs_rechte.php`) die Seite mit einer
 Meldung. Die Buchungs- und Raumseiten geben ihr Ziel für den Zurück-Link mit
 (`zugriff_verweigert_seite($meldung, 'raeume.php', 'Zurück zu den Räumen')`);
 ohne Angabe führt der Link zurück zur Kursliste.
+
+Ruft ein Mitarbeiter eine reine Admin-Seite auf, leitet `erfordere_admin()` auf
+`kurse.php` um und legt die Meldung in `$_SESSION['fehler']` ab. Jede Seite mit
+Tab-Leiste ruft oben `session_fehler_anzeigen()` (in `src/web/auth.php`) auf:
+Die Meldung erscheint einmal und wird danach aus der Session gelöscht.
+
+### CSRF-Schutz
+
+Ohne Schutz könnte eine fremde Webseite den Browser eines angemeldeten
+Benutzers dazu bringen, unbemerkt ein Formular an uns zu schicken – der
+Browser hängt das Session-Cookie automatisch an (z. B. „Benutzer sperren"
+oder „Raum löschen"). Deshalb trägt jedes Formular mit `method="post"` ein
+geheimes Token mit, das die fremde Seite nicht kennt:
+
+- `csrf_token()` erzeugt pro Session einmal ein Token
+  (`bin2hex(openssl_random_pseudo_bytes(32))`).
+- `csrf_feld()` gibt es als `<input type="hidden" name="csrf">` aus.
+- `csrf_pruefen()` vergleicht bei POST das gesendete mit dem gespeicherten
+  Token per `hash_equals()`. Fehlt es oder passt es nicht, endet die Seite mit
+  HTTP 400 und einer Meldung; es wird nichts gespeichert. Bei GET tut die
+  Funktion nichts, deshalb steht der Aufruf einfach oben auf der Seite.
+
+Nach dem Login verwirft `anmelden()` das Token der Login-Seite; die
+angemeldete Sitzung bekommt beim nächsten Formular ein neues. Nach dem
+Abmelden ist die Session und damit auch das Token weg. Ein Formular, das
+über einen Login/Logout hinweg offen war, muss deshalb neu geladen werden.
 
 ---
 

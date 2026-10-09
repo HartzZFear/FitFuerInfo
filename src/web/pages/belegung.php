@@ -758,6 +758,9 @@ function buchung_tooltip($buchung)
       <a href="kurse.php" class="tab">Kurse</a>
       <a href="raeume.php" class="tab">Räume</a>
       <a href="belegung.php" class="tab active">Belegung</a>
+      <?php if ($istAdmin): ?>
+      <a href="benutzer.php" class="tab">Benutzer</a>
+      <?php endif; ?>
     </nav>
 
     <div class="header-actions">
@@ -790,6 +793,8 @@ function buchung_tooltip($buchung)
   </div>
 
   <div class="main-area">
+
+    <?php session_fehler_anzeigen(); ?>
 
     <section class="kalender-karte">
 

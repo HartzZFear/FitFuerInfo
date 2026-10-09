@@ -5,6 +5,7 @@ require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../auth.php';
 
 session_starten();
+csrf_pruefen();
 
 // Wer schon angemeldet ist, braucht diese Seite nicht.
 if (ist_eingeloggt()) {
@@ -15,6 +16,12 @@ if (ist_eingeloggt()) {
 $fehler       = '';
 $benutzername = '';
 
+// Hierher leitet erfordere_login(), wenn das Konto waehrend einer laufenden
+// Session gesperrt wurde.
+if (isset($_GET['gesperrt']) && $_GET['gesperrt'] === '1') {
+    $fehler = 'Ihr Konto wurde gesperrt und Sie wurden abgemeldet. Bitte wenden Sie sich an den Systemverwalter.';
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $benutzername = isset($_POST['username']) ? trim($_POST['username']) : '';
     $passwort     = isset($_POST['password']) ? $_POST['password'] : '';
@@ -22,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($benutzername === '' || $passwort === '') {
         $fehler = 'Bitte Benutzername und Passwort eingeben.';
     } elseif (anmelden($benutzername, $passwort)) {
-        header('Location: kurse.php');
+        header('Location: belegung.php');
         exit;
     } else {
         $fehler = 'Benutzername oder Passwort ist falsch, oder das Konto ist nicht freigeschaltet.';
@@ -317,6 +324,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <p class="logo-subtitle">Fitness &amp; Informatik vereint</p>
 
     <form method="post" action="login.php">
+      <?php csrf_feld(); ?>
       <?php if ($fehler !== ''): ?>
       <div class="login-fehler"><?php echo h($fehler); ?></div>
       <?php endif; ?>
