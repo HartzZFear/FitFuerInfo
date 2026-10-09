@@ -1,3 +1,4 @@
+# VERALTET – nicht verwenden, siehe README.md (Installation von Hand)
 # ================================
 # FitFuerInfo – INIT Script
 # ================================

@@ -134,7 +134,9 @@ Die beiden Dateien liegen nach dem Klonen bereits unter
 **Kontrolle:** Links auf `fitfuerinfo` klicken. Es müssen **neun Tabellen**
 da sein: `benutzer`, `buchung`, `kurs`, `kurs_eigentuemer`, `kurs_software`,
 `raum`, `raum_bearbeiter`, `raum_software`, `software`.
-`benutzer` hat 5 Zeilen, `buchung` hat 7.
+`benutzer` hat 5 Zeilen, `buchung` hat 15. Die Buchungen werden relativ zum
+Importdatum angelegt (kommende Woche und vorletzte Woche), der Kalender ist
+also nach jedem Import gefüllt.
 
 **Testkonten** (Passwort für die ersten vier: `test1`):
 
@@ -204,7 +206,11 @@ läuft die Einrichtung eines Kontos in zwei Schritten:
 
 Passwortregel laut Aufgabenstellung: mindestens `PW_MIN_LAENGE` (Standard: 4)
 Zeichen, darunter mindestens ein Kleinbuchstabe und mindestens eine Ziffer.
-Geprüft wird das über `pruefe_passwortregeln()` in `src/web/auth.php`.
+Als Kleinbuchstabe zählen `a`–`z` sowie `ä`, `ö`, `ü`, `ß`. Geprüft wird das über
+`pruefe_passwortregeln()` in `src/web/auth.php`; alle Regexe dort laufen mit dem
+`/u`-Modifier, und die Länge wird in Zeichen gezählt, nicht in Bytes (`ä` = 1
+Zeichen). Beispiele: `mäuse1` gültig, `MÄUSE1` ungültig (kein Kleinbuchstabe),
+`abc` ungültig (zu kurz, keine Ziffer).
 
 **Zum Ausprobieren** liegt in `src/db/seed.sql` ein fünfter Testbenutzer
 bereit, der noch kein Passwort hat:
@@ -296,11 +302,13 @@ GET-Formulare (Suche, Filter, Kalender) brauchen kein Token.
 | `src/web/pages/login.php` | Anmelden | jeder mit Benutzername/Passwort |
 | `src/web/pages/passwort_setzen.php` | Freischaltcode einlösen, eigenes Passwort setzen | jeder mit gültigem Code |
 | `src/web/pages/logout.php` | Abmelden | jeder Eingeloggte |
+| `src/web/pages/profil.php` | Eigenes Profil: Name, E-Mail, Rolle, Anzahl eigener Kurse, Räume als Bearbeiter, kommende Buchungen. Formular „Passwort ändern“ (aktuelles Passwort, neues zweimal; POST mit CSRF-Token). Bei Erfolg wird ein offener Freischaltcode verworfen und die Session-ID erneuert | jeder Eingeloggte, nur für sich selbst. Name, E-Mail und Rolle ändert nur der Admin |
+| `src/web/pages/hilfe.php` | Bedienungshilfe: Rollen, Kurse, Buchungsregeln, Kalender, erstes Login/Freischaltcode, Passwortregeln. Zahlen (Buchungszeiten, Passwortlänge, Code-Gültigkeit) kommen direkt aus den Konstanten | jeder Eingeloggte |
 | `src/web/pages/kurse.php` | Kursliste, Suche, Filter „nur eigene / alle" | Lesen: jeder Eingeloggte. Buttons „bearbeiten"/„löschen" nur bei eigenen Kursen sichtbar |
 | `src/web/pages/kurs_bearbeiten.php` | Kurs anlegen (ohne `?id=`) oder bearbeiten (mit `?id=N`) | Anlegen: jeder Mitarbeiter. Bearbeiten: nur Eigentümer des Kurses oder Admin |
 | `src/web/pages/kurs_loeschen.php` | Sicherheitsabfrage + Löschen eines Kurses | nur Eigentümer des Kurses oder Admin |
 | `src/web/pages/raeume.php` | Raumliste mit Suche und Filtern (Software, Mindestanzahl Arbeitsplätze, „nur meine / alle"; alle kombinierbar) | Lesen: jeder Eingeloggte. „bearbeiten" nur bei Räumen, für die man als Bearbeiter eingetragen ist; „löschen" und der „+"-Knopf nur für den Admin |
-| `src/web/pages/raum_bearbeiten.php` | Raum anlegen (ohne `?id=`) oder bearbeiten (mit `?id=N`) | Anlegen: nur Admin. Bearbeiten: Admin und Einträge in `raum_bearbeiter`. Der Checkbox-Block „Bearbeiter" ist nur für den Admin sichtbar |
+| `src/web/pages/raum_bearbeiten.php` | Raum anlegen (ohne `?id=`) oder bearbeiten (mit `?id=N`) | Anlegen: nur Admin. Bearbeiten (Name, Arbeitsplätze, Software): Admin und Einträge in `raum_bearbeiter`. Der Checkbox-Block „Bearbeiter" ist nur für den Admin sichtbar |
 | `src/web/pages/raum_loeschen.php` | Sicherheitsabfrage + Löschen eines Raums | nur Admin |
 | `src/web/pages/belegung.php` | Belegungskalender: Monat (Raster Mo–Fr), Woche (ein Raum, Halbstunden-Slots 07:00–20:00), Tag (alle Räume nebeneinander). Filter Raum, Kurs, „nur meine"; Blättern und „Heute"; Link „Listenansicht" auf `buchungen.php` mit denselben Filtern | Lesen: jeder Eingeloggte. Klick auf eine Buchung führt nur zu `buchung_bearbeiten.php`, wenn `buchung_darf_bearbeiten()` true liefert (eigene bzw. Admin, nicht vergangen). Klick auf einen freien Slot (Woche/Tag) nur, wenn man mindestens einen Kurs buchen darf und der Slot nicht vorbei ist |
 | `src/web/pages/buchungen.php` | Belegungsliste mit Filtern (Raum, Kurs, „nur meine", ab Datum); Link „Kalenderansicht" auf `belegung.php` mit denselben Filtern | Lesen: jeder Eingeloggte. Buttons „bearbeiten"/„löschen" nur bei eigenen Buchungen. „+"-Knopf nur, wenn man mindestens einen Kurs buchen darf |
@@ -323,9 +331,10 @@ und zeigt stattdessen einen Hinweis, wie viele Buchungen betroffen sind.
 
 **Räume gehören niemandem.** Die Tabelle `raum` hat bewusst keine Spalte für
 einen Ersteller: Räume sind Betriebsmittel der Schule. Anlegen und Löschen
-darf deshalb nur der Systemverwalter. Wer die Ausstattung eines Raums pflegen
-darf – Arbeitsplätze und Softwarepakete –, steht in `raum_bearbeiter`; der
-Admin trägt das in `raum_bearbeiten.php` ein. Geprüft wird das serverseitig in
+darf deshalb nur der Systemverwalter. Wer einen Raum bearbeiten darf – Name,
+Anzahl der Arbeitsplätze und Softwarepakete –, steht in `raum_bearbeiter`; der
+Admin trägt das in `raum_bearbeiten.php` ein. Nur die Liste der Bearbeiter selbst
+kann ausschließlich der Admin ändern. Geprüft wird das serverseitig in
 `raum_darf_bearbeiten()` / `raum_darf_anlegen()` / `raum_darf_loeschen()`
 in `src/web/raum_rechte.php`. Ein Bearbeiter bekommt dadurch **keine** Rechte
 an den Buchungen des Raums (siehe Abschnitt 9).
@@ -338,6 +347,16 @@ ihm.
 
 Die Tab-Leiste oben (**Kurse | Räume | Belegung | Benutzer**) ist auf allen Seiten gleich;
 der Tab „Benutzer" erscheint nur für den Admin.
+Die Kopfzeile (Logo, Tabs, „Profile", „Log Out", darunter das Wellen-Banner mit „?")
+steht nur noch an einer Stelle: `kopfzeile($aktiverTab)` in `src/web/layout.php`.
+Die Listen-Seiten (`kurse.php`, `raeume.php`, `belegung.php`, `buchungen.php`,
+`benutzer.php`) sowie `profil.php` und `hilfe.php` rufen sie direkt nach `<body>` auf,
+z. B. `<?php kopfzeile('kurse'); ?>`; erlaubt sind `kurse`, `raeume`, `belegung`,
+`benutzer`, `profil`, `hilfe`. Die Funktion gibt auch das CSS der Kopfzeile und das
+Scroll-Skript des Banners aus; die Farbvariablen (`--teal` usw.) definiert weiterhin
+jede Seite selbst in `:root`. Ab 1024 px Breite passt alles in eine Zeile, darunter
+rutschen die Tabs in eine eigene Zeile und die Kopfzeile ist nicht mehr fixiert.
+„Profile" führt auf `profil.php`, „?" auf `hilfe.php`.
 „Räume" zeigt auf `raeume.php`, „Belegung" auf den Kalender `belegung.php`;
 die Listenansicht `buchungen.php` ist von dort über „Listenansicht" erreichbar.
 Jede Raumkarte in `raeume.php` verlinkt auf die Wochenansicht des Raums, jede
@@ -376,7 +395,9 @@ Der Admin kennt nie ein Passwort – auch nicht das erste. Ablauf:
    Code und sein selbst gewähltes Passwort ein (`code_einloesen()`). Der Code
    wird dabei entwertet.
 
-**Passwort vergessen:** Der Admin klickt in `benutzer.php` auf „Neuer
+**Passwort vergessen:** Die Login-Seite verweist dafür an den Systemverwalter
+(ein Link führt nur für „Erstes Login oder neuen Code erhalten?" auf
+`passwort_setzen.php`). Der Admin klickt in `benutzer.php` auf „Neuer
 Freischaltcode". Das alte Passwort bleibt gültig, bis der neue Code eingelöst
 ist – wer sich doch noch erinnert, ist also nicht ausgesperrt. Ein noch
 offener älterer Code wird durch den neuen ungültig.

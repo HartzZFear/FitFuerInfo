@@ -8,6 +8,7 @@
 
 require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../auth.php';
+require_once __DIR__ . '/../layout.php';
 require_once __DIR__ . '/../kurs_rechte.php';
 require_once __DIR__ . '/../buchung_logik.php';
 
@@ -117,189 +118,7 @@ function ist_eigene_buchung($buchung, $benutzerId, $istAdmin)
     min-height: 100vh;
     font-family: "Segoe UI", Roboto, Arial, sans-serif;
     background: var(--page-bg);
-    padding-top: 78px; /* Platz für die fixierte Kopfzeile */
   }
-
-  /* ---- Dekorativer Wellen-Header, identisch zu kurse.php ---- */
-  .banner-spacer { height: 110px; }
-
-  .top-banner {
-    position: fixed;
-    top: 78px;
-    left: 0;
-    right: 0;
-    height: 110px;
-    overflow: hidden;
-    z-index: 1;
-    will-change: transform, opacity;
-    transition: transform 0.05s linear, opacity 0.05s linear;
-  }
-
-  .top-banner svg {
-    width: 100%;
-    height: 100%;
-    display: block;
-    transition: transform 0.05s linear;
-  }
-
-  .top-banner::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image:
-      repeating-linear-gradient(90deg, rgba(255,255,255,0.08) 0 1px, transparent 1px 40px),
-      repeating-linear-gradient(0deg, rgba(255,255,255,0.08) 0 1px, transparent 1px 40px);
-    mix-blend-mode: overlay;
-    pointer-events: none;
-  }
-
-  .help-region {
-    position: absolute;
-    top: 4px;
-    right: 14px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    z-index: 2;
-  }
-
-  .help-icon {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.9);
-    color: var(--blue);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 14px;
-    text-decoration: none;
-  }
-
-  .lang-select {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255,255,255,0.9);
-    border-radius: 20px;
-    padding: 5px 12px;
-    font-size: 13px;
-    color: var(--text-dark);
-  }
-
-  /* ---- Kopfzeile: Logo links, Tabs mittig, Profile/Log Out rechts ---- */
-  .header-bar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    height: 78px;
-    background: var(--card-bg);
-    box-shadow: 0 4px 14px rgba(20, 40, 50, 0.12);
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    padding: 0 24px;
-    z-index: 3;
-  }
-
-  .header-logo {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
-  }
-
-  .header-logo img {
-    width: 56px;
-    height: 56px;
-    object-fit: contain;
-  }
-
-  .header-logo span {
-    font-size: 32px;
-    font-weight: 700;
-    color: var(--text-dark);
-    white-space: nowrap;
-    line-height: 1;
-  }
-
-  .header-logo .fit { color: var(--orange); }
-  .header-logo .info { color: var(--blue); }
-
-  .tab-group {
-    flex: 1;
-    display: flex;
-    gap: 16px;
-    max-width: 380px;
-    margin: 0 auto;
-  }
-
-  .tab {
-    flex: 1;
-    text-align: center;
-    padding: 10px 0;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-muted);
-    text-decoration: none;
-    cursor: pointer;
-    border: 1px solid var(--border);
-    background: #fbfcfc;
-  }
-
-  .tab:hover,
-  .tab:focus-visible {
-    border-color: var(--blue);
-    color: var(--blue);
-  }
-
-  .tab.active {
-    background: linear-gradient(90deg, var(--blue) 0%, var(--teal) 45%, var(--orange) 100%);
-    color: #ffffff;
-    border-color: transparent;
-  }
-
-  .header-actions {
-    display: flex;
-    gap: 10px;
-    flex-shrink: 0;
-  }
-
-  .btn-header {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    text-decoration: none;
-    cursor: pointer;
-    border: 1px solid var(--border);
-    white-space: nowrap;
-  }
-
-  .btn-header.profile {
-    color: var(--blue);
-    background: #f2f7fb;
-    border-color: #d7e6f2;
-  }
-
-  .btn-header.profile:hover,
-  .btn-header.profile:focus-visible { background: #e6f0f9; }
-
-  .btn-header.logout {
-    color: #ffffff;
-    background: linear-gradient(90deg, var(--orange) 0%, #d9534f 100%);
-    border: none;
-  }
-
-  .btn-header.logout:hover,
-  .btn-header.logout:focus-visible { filter: brightness(1.05); }
 
   /* ---- Hauptbereich ---- */
   .main-area {
@@ -522,49 +341,7 @@ function ist_eigene_buchung($buchung, $benutzerId, $istAdmin)
 </head>
 <body>
 
-  <header class="header-bar">
-    <div class="header-logo">
-      <img src="<?php echo BASE_URL; ?>/src/web/assets/logo.png" alt="">
-      <span><span class="fit">FitFür</span><span class="info">Info</span></span>
-    </div>
-
-    <nav class="tab-group">
-      <a href="kurse.php" class="tab">Kurse</a>
-      <a href="raeume.php" class="tab">Räume</a>
-      <a href="belegung.php" class="tab active">Belegung</a>
-      <?php if ($istAdmin): ?>
-      <a href="benutzer.php" class="tab">Benutzer</a>
-      <?php endif; ?>
-    </nav>
-
-    <div class="header-actions">
-      <a href="#" class="btn-header profile">Profile</a>
-      <a href="logout.php" class="btn-header logout">Log Out</a>
-    </div>
-  </header>
-
-  <div class="banner-spacer"></div>
-
-  <!-- Dekorativer Wellen-Streifen, identisch zu kurse.php -->
-  <div class="top-banner" aria-hidden="true" id="waveBanner">
-    <svg viewBox="0 0 1440 200" preserveAspectRatio="none">
-      <defs>
-        <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%"  stop-color="#1a8f9c"/>
-          <stop offset="45%" stop-color="#2f6fb0"/>
-          <stop offset="100%" stop-color="#e8792e"/>
-        </linearGradient>
-      </defs>
-      <path fill="url(#waveGradient)"
-            d="M0,80 C240,160 480,0 720,60 C960,120 1200,20 1440,90 L1440,0 L0,0 Z"/>
-      <path fill="url(#waveGradient)" opacity="0.55"
-            d="M0,120 C280,60 520,180 780,110 C1040,40 1260,140 1440,100 L1440,0 L0,0 Z"/>
-    </svg>
-    <div class="help-region">
-      <a href="#" class="help-icon" aria-label="Hilfe">?</a>
-      <div class="lang-select">🇩🇪 DE ▾</div>
-    </div>
-  </div>
+  <?php kopfzeile('belegung'); ?>
 
   <div class="main-area">
 
@@ -673,33 +450,5 @@ function ist_eigene_buchung($buchung, $benutzerId, $istAdmin)
 
   </div>
 
-  <script>
-    // Welle beim Scrollen sanft nach oben schieben und langsam ausblenden
-    // (gleiches Verhalten wie in kurse.php).
-    (function () {
-      var wave = document.getElementById('waveBanner');
-      var fadeDistance = 130;   // ab wie viel Scroll-px die Welle komplett weg ist
-      var parallaxFactor = 0.4; // < 1 => Welle bewegt sich langsamer als der Scroll
-      var ticking = false;
-
-      function updateWave() {
-        var scrolled = window.pageYOffset || document.documentElement.scrollTop;
-        var progress = Math.min(scrolled / fadeDistance, 1);
-
-        wave.style.transform = 'translateY(' + (-scrolled * parallaxFactor) + 'px)';
-        wave.style.opacity = String(1 - progress);
-        ticking = false;
-      }
-
-      window.addEventListener('scroll', function () {
-        if (!ticking) {
-          window.requestAnimationFrame(updateWave);
-          ticking = true;
-        }
-      }, { passive: true });
-
-      updateWave();
-    })();
-  </script>
 </body>
 </html>

@@ -82,7 +82,7 @@ if ($db !== null) {
     // --- 6. Testdaten --------------------------------------------------
     if (count($fehlend) === 0) {
         $zaehler = array();
-        foreach (array('benutzer' => 5, 'kurs' => 4, 'raum' => 3, 'buchung' => 7) as $t => $soll) {
+        foreach (array('benutzer' => 5, 'kurs' => 4, 'raum' => 3, 'buchung' => 15) as $t => $soll) {
             $anzahl = (int) $db->query('SELECT COUNT(*) FROM `' . $t . '`')->fetchColumn();
             $zaehler[] = $t . ': ' . $anzahl . '/' . $soll;
         }

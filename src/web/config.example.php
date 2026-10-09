@@ -26,7 +26,9 @@ define('DB_CHARSET', 'utf8mb4');
 define('BASE_URL', '/fitfuerinfo');
 
 // Auf true lassen, solange entwickelt wird: zeigt Fehlermeldungen an.
-// Fuer die Abgabe auf false setzen.
+// WICHTIG: Fuer Abgabe und Praesentation MUSS hier false stehen - sonst
+// sieht jeder Besucher bei einem Fehler PHP-Meldungen mit Dateipfaden und
+// Datenbankdetails.
 define('DEBUG', true);
 
 // Mindestanforderung an Passwoerter laut Aufgabenstellung:
