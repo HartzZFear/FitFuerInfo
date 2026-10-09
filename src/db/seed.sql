@@ -53,14 +53,52 @@ INSERT INTO kurs_software (kurs_id, software_id) VALUES
 INSERT INTO raum_bearbeiter (raum_id, benutzer_id) VALUES
   (1,2), (2,3);
 
+-- ------------------------------------------------------------
+-- Buchungen relativ zum Importdatum, damit der Kalender bei jeder
+-- Vorfuehrung gefuellt ist (statt fester Daten, die irgendwann alle in
+-- der Vergangenheit liegen).
+--
+-- @mo = der naechste Montag nach dem Importtag (wird auch an einem Montag
+-- importiert, ist es der Montag der FOLGENDEN Woche - so liegen alle
+-- Buchungen sicher in der Zukunft). @vw = Montag der vorletzten Woche,
+-- liegt also immer komplett in der Vergangenheit ("vergangen"-Darstellung).
+--
+-- Alle Buchungen erfuellen die fuenf Buchungsregeln aus
+-- buchung_pruefen(): Mo-Fr, 07:00-20:00, halbe Stunden, keine
+-- Ueberschneidung pro Raum und pro Kurs, Software und Plaetze passen:
+--   Linux-Grundlagen (12, VirtualBox+Ubuntu)  -> nur Raum A
+--   IT-Sicherheit Praxis (8, Kali+Wireshark)  -> nur Raum B
+--   Office fuer Einsteiger (16, Office)       -> Raum A oder C
+--   Python fuer Admins (10, VS Code)          -> Raum A oder C
+-- Gebucht hat jeweils ein Eigentuemer des Kurses (lena: 1 und 3,
+-- markus: 2, 3 und 4). Am kommenden Montag liegen 5 Buchungen, damit die
+-- Monatsansicht auch "+N weitere" zeigt.
+-- ------------------------------------------------------------
+SET @mo = DATE_ADD(CURDATE(), INTERVAL 7 - WEEKDAY(CURDATE()) DAY);
+SET @vw = DATE_SUB(@mo, INTERVAL 14 DAY);
+
 INSERT INTO buchung (raum_id, kurs_id, benutzer_id, start, ende) VALUES
-  (1, 1, 2, '2026-09-07 08:00:00', '2026-09-07 12:00:00'),
-  (1, 1, 2, '2026-09-08 08:00:00', '2026-09-08 12:00:00'),
-  (2, 2, 3, '2026-09-08 13:00:00', '2026-09-08 17:00:00'),
-  (2, 2, 3, '2026-09-09 13:00:00', '2026-09-09 17:00:00'),
-  (3, 3, 2, '2026-09-07 08:00:00', '2026-09-07 12:00:00'),
-  (3, 3, 2, '2026-09-09 08:00:00', '2026-09-09 12:00:00'),
-  (1, 4, 3, '2026-09-11 08:00:00', '2026-09-11 12:00:00');
+  -- kommende Woche: Montag
+  (1, 1, 2, TIMESTAMP(@mo, '08:00:00'), TIMESTAMP(@mo, '11:30:00')),
+  (2, 2, 3, TIMESTAMP(@mo, '08:00:00'), TIMESTAMP(@mo, '10:00:00')),
+  (3, 3, 2, TIMESTAMP(@mo, '09:00:00'), TIMESTAMP(@mo, '12:00:00')),
+  (3, 4, 3, TIMESTAMP(@mo, '13:00:00'), TIMESTAMP(@mo, '15:30:00')),
+  (1, 4, 3, TIMESTAMP(@mo, '16:00:00'), TIMESTAMP(@mo, '18:00:00')),
+  -- Dienstag
+  (1, 1, 2, TIMESTAMP(@mo + INTERVAL 1 DAY, '08:00:00'), TIMESTAMP(@mo + INTERVAL 1 DAY, '12:00:00')),
+  (2, 2, 3, TIMESTAMP(@mo + INTERVAL 1 DAY, '13:00:00'), TIMESTAMP(@mo + INTERVAL 1 DAY, '16:30:00')),
+  -- Mittwoch
+  (3, 3, 3, TIMESTAMP(@mo + INTERVAL 2 DAY, '08:30:00'), TIMESTAMP(@mo + INTERVAL 2 DAY, '11:00:00')),
+  (1, 4, 3, TIMESTAMP(@mo + INTERVAL 2 DAY, '12:00:00'), TIMESTAMP(@mo + INTERVAL 2 DAY, '14:00:00')),
+  (2, 2, 3, TIMESTAMP(@mo + INTERVAL 2 DAY, '14:30:00'), TIMESTAMP(@mo + INTERVAL 2 DAY, '17:00:00')),
+  -- Donnerstag
+  (1, 1, 2, TIMESTAMP(@mo + INTERVAL 3 DAY, '10:00:00'), TIMESTAMP(@mo + INTERVAL 3 DAY, '13:00:00')),
+  -- Freitag
+  (1, 3, 2, TIMESTAMP(@mo + INTERVAL 4 DAY, '08:00:00'), TIMESTAMP(@mo + INTERVAL 4 DAY, '10:00:00')),
+  -- vorletzte Woche (vergangen)
+  (1, 1, 2, TIMESTAMP(@vw, '08:00:00'), TIMESTAMP(@vw, '12:00:00')),
+  (2, 2, 3, TIMESTAMP(@vw + INTERVAL 1 DAY, '13:00:00'), TIMESTAMP(@vw + INTERVAL 1 DAY, '17:00:00')),
+  (3, 3, 2, TIMESTAMP(@vw + INTERVAL 3 DAY, '09:00:00'), TIMESTAMP(@vw + INTERVAL 3 DAY, '11:00:00'));
 
 -- ============================================================
 -- Nützliche Abfragen für die PHP-Umsetzung

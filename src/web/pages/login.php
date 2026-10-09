@@ -231,9 +231,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     height: 100%;
   }
 
+  /* Zwei Hinweise statt "Passwort vergessen?": Mit einem Freischaltcode
+     kommt man ueber passwort_setzen.php weiter, ohne Code nur ueber den
+     Admin - deshalb ist der zweite Hinweis bewusst kein Link. */
   .forgot-row {
     text-align: right;
     margin-bottom: 22px;
+  }
+
+  .forgot-row p {
+    margin: 0 0 6px;
+    font-size: 13px;
+    color: var(--text-dark);
+  }
+
+  .forgot-ziel { white-space: nowrap; }
+
+  .forgot-row .forgot-hinweis {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--text-muted);
   }
 
   .forgot-row a {
@@ -352,7 +370,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </div>
 
       <div class="forgot-row">
-        <a href="passwort_setzen.php">Passwort vergessen?</a>
+        <p>Erstes Login oder neuen Code erhalten? <span class="forgot-ziel">→ <a href="passwort_setzen.php">Passwort setzen</a></span></p>
+        <p class="forgot-hinweis">Passwort vergessen? Wende dich an den Systemverwalter, er erzeugt dir einen neuen Freischaltcode.</p>
       </div>
 
       <button type="submit" class="btn-login">Anmelden</button>

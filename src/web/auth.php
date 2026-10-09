@@ -187,8 +187,14 @@ function erfordere_admin()
 
 /**
  * Prueft ein Passwort gegen die Regeln aus der Aufgabenstellung:
- * mindestens PW_MIN_LAENGE Zeichen, mindestens ein Kleinbuchstabe,
- * mindestens eine Ziffer.
+ * mindestens PW_MIN_LAENGE Zeichen, mindestens ein Kleinbuchstabe
+ * (a-z sowie ä, ö, ü, ß), mindestens eine Ziffer.
+ *
+ * Alle Pruefungen laufen mit dem /u-Modifier, also auf UTF-8-Zeichen statt
+ * auf Bytes: strlen() wuerde "ä" als zwei Zeichen zaehlen, und ohne /u
+ * waere ein einzelnes Byte von "ä" kein Treffer fuer [äöüß]. Die Laenge
+ * wird per preg_match_all() gezaehlt, damit keine mbstring-Extension
+ * noetig ist.
  *
  * @param  string $pw
  * @return array leer bei OK, sonst deutsche Fehlermeldungen
@@ -197,10 +203,17 @@ function pruefe_passwortregeln($pw)
 {
     $fehler = array();
 
-    if (strlen($pw) < PW_MIN_LAENGE) {
+    // Kein gueltiges UTF-8 (z. B. manipuliertes Formular): Dann liefert
+    // jede /u-Pruefung false, die Einzelmeldungen waeren irrefuehrend.
+    if (!is_string($pw) || preg_match('//u', $pw) !== 1) {
+        $fehler[] = 'Das Passwort enthält ungültige Zeichen.';
+        return $fehler;
+    }
+
+    if (preg_match_all('/./us', $pw) < PW_MIN_LAENGE) {
         $fehler[] = 'Das Passwort muss mindestens ' . PW_MIN_LAENGE . ' Zeichen lang sein.';
     }
-    if (!preg_match('/[a-z]/', $pw)) {
+    if (!preg_match('/[a-zäöüß]/u', $pw)) {
         $fehler[] = 'Das Passwort muss mindestens einen Kleinbuchstaben enthalten.';
     }
     if (!preg_match('/[0-9]/', $pw)) {
