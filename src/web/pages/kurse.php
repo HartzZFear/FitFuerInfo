@@ -573,6 +573,9 @@ function ist_eigene_karte($kurs, $eigentuemerJeKurs, $benutzerId)
       <a href="kurse.php" class="tab active">Kurse</a>
       <a href="raeume.php" class="tab">Räume</a>
       <a href="belegung.php" class="tab">Belegung</a>
+      <?php if ($istAdmin): ?>
+      <a href="benutzer.php" class="tab">Benutzer</a>
+      <?php endif; ?>
     </nav>
 
     <div class="header-actions">
@@ -605,6 +608,8 @@ function ist_eigene_karte($kurs, $eigentuemerJeKurs, $benutzerId)
   </div>
 
   <div class="main-area">
+
+    <?php session_fehler_anzeigen(); ?>
 
     <section class="course-grid">
 

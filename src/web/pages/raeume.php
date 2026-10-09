@@ -615,6 +615,9 @@ function ist_mein_raum($raum, $bearbeiterJeRaum, $benutzerId, $istAdmin)
       <a href="kurse.php" class="tab">Kurse</a>
       <a href="raeume.php" class="tab active">Räume</a>
       <a href="belegung.php" class="tab">Belegung</a>
+      <?php if ($istAdmin): ?>
+      <a href="benutzer.php" class="tab">Benutzer</a>
+      <?php endif; ?>
     </nav>
 
     <div class="header-actions">
@@ -647,6 +650,8 @@ function ist_mein_raum($raum, $bearbeiterJeRaum, $benutzerId, $istAdmin)
   </div>
 
   <div class="main-area">
+
+    <?php session_fehler_anzeigen(); ?>
 
     <section class="raum-grid">
 

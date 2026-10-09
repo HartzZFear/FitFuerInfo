@@ -16,6 +16,7 @@ require_once __DIR__ . '/../auth.php';
 require_once __DIR__ . '/../raum_rechte.php';
 
 erfordere_login();
+csrf_pruefen();
 
 $meineId  = benutzer_id();
 $istAdmin = ist_admin();
@@ -205,7 +206,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $fehler === '') {
       <a href="kurse.php" class="tab">Kurse</a>
       <a href="raeume.php" class="tab active">Räume</a>
       <a href="belegung.php" class="tab">Belegung</a>
+      <?php if ($istAdmin): ?>
+      <a href="benutzer.php" class="tab">Benutzer</a>
+      <?php endif; ?>
     </nav>
+
+    <?php session_fehler_anzeigen(); ?>
 
     <div class="karte">
       <h2 class="karte-titel">Raum löschen</h2>
@@ -223,6 +229,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $fehler === '') {
         Das kann nicht rückgängig gemacht werden.
       </p>
       <form method="post" action="raum_loeschen.php?id=<?php echo (int) $raumId; ?>">
+        <?php csrf_feld(); ?>
         <div class="knopf-reihe">
           <button type="submit" class="knopf knopf-loeschen">Ja, endgültig löschen</button>
           <a class="link-abbrechen" href="raeume.php">Abbrechen</a>

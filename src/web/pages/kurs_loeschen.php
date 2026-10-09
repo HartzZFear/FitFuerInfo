@@ -11,6 +11,7 @@ require_once __DIR__ . '/../auth.php';
 require_once __DIR__ . '/../kurs_rechte.php';
 
 erfordere_login();
+csrf_pruefen();
 
 $meineId  = benutzer_id();
 $istAdmin = ist_admin();
@@ -150,6 +151,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $fehler === '') {
         Das kann nicht rückgängig gemacht werden.
       </p>
       <form method="post" action="kurs_loeschen.php?id=<?php echo (int) $kursId; ?>">
+        <?php csrf_feld(); ?>
         <div class="knopf-reihe">
           <button type="submit" class="knopf knopf-loeschen">Ja, endgültig löschen</button>
           <a class="link-abbrechen" href="kurse.php">Abbrechen</a>

@@ -9,6 +9,7 @@ require_once __DIR__ . '/../auth.php';
 require_once __DIR__ . '/../kurs_rechte.php';
 
 erfordere_login();
+csrf_pruefen();
 
 $meineId  = benutzer_id();
 $istAdmin = ist_admin();
@@ -283,6 +284,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <?php endif; ?>
 
       <form method="post" action="kurs_bearbeiten.php<?php echo $istBearbeiten ? '?id=' . (int) $kursId : ''; ?>">
+        <?php csrf_feld(); ?>
         <label for="titel">Titel</label>
         <input type="text" id="titel" name="titel" value="<?php echo h($titel); ?>" required>
 
