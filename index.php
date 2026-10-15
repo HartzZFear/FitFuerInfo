@@ -55,16 +55,4 @@ if (!in_array($seite, ERLAUBTE_SEITEN, true)) {
 
 cache_dynamisch();
 
-// UEBERGANG (Schritt 3): Diese Seiten sind noch nicht auf index.php
-// umgestellt und liegen weiter als eigenstaendige Dateien in pages/. Der
-// Block wird geloescht, sobald alle Seiten umgestellt sind.
-$nochNichtUmgestellt = array();
-if (in_array($seite, $nochNichtUmgestellt, true)) {
-    $uebrige = $_GET;
-    unset($uebrige['seite']);
-    header('Location: ' . BASE_URL . '/pages/' . $seite . '.php'
-        . (empty($uebrige) ? '' : '?' . http_build_query($uebrige, '', '&')));
-    exit;
-}
-
 seite_ausgeben($seite);
