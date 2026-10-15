@@ -142,52 +142,33 @@ function buchung_tooltip($buchung)
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Belegung – FitFürInfo</title>
+<link rel="stylesheet" href="/fitfuerinfo/assets/css/style.css">
 <style>
-  :root {
-    --teal: #1a8f9c;
-    --blue: #2f6fb0;
-    --orange: #e8792e;
-    --card-bg: #ffffff;
-    --page-bg: #eef3f4;
-    --text-dark: #2b3a42;
-    --text-muted: #7c8a91;
-    --border: #dfe6e8;
-    --slot-hoehe: 24px;
-  }
 
-  * { box-sizing: border-box; }
-
-  body {
-    margin: 0;
-    min-height: 100vh;
-    font-family: "Segoe UI", Roboto, Arial, sans-serif;
-    background: var(--page-bg);
-  }
-
-  /* ---- Hauptbereich ---- */
-  .main-area {
+/* ---- Hauptbereich ---- */
+/*   .main-area {
     max-width: 1600px;
     width: 92%;
     margin: 20px auto 40px;
     padding: 0 16px 16px;
-    padding-right: 292px; /* Platz für die fest positionierte Sidebar */
-  }
+    padding-right: 292px; 
+  } */
 
-  .kalender-karte {
+/*   .kalender-karte {
     background: var(--card-bg);
     border-radius: 14px;
     box-shadow: 0 12px 28px rgba(20, 40, 50, 0.1);
     padding: 18px 18px 20px;
-  }
+  } */
 
   /* ---- Werkzeugleiste: Ansicht, Blättern, Überschrift ---- */
-  .werkzeugleiste {
+/*   .werkzeugleiste {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 14px;
     margin-bottom: 16px;
-  }
+  } */
 
   /* flex-basis auto: erst rutschen die Knoepfe in die naechste Zeile,
      erst wenn der Titel allein nicht mehr passt, bricht er selbst um
@@ -245,20 +226,20 @@ function buchung_tooltip($buchung)
      Fensterbreite komplett in die Karte passt. Wird es noch schmaler,
      scrollt nur dieser Bereich waagerecht - mit sichtbarer Leiste, statt
      die rechten Spalten still abzuschneiden. */
-  .slot-scroll {
+/*   .slot-scroll {
     overflow-x: auto;
-    padding-bottom: 4px; /* Platz fuer die Scrollleiste */
-  }
+    padding-bottom: 4px;
+  } */
 
   /* Die Scrollleiste sitzt ganz unten am langen Raster. Damit niemand
      glaubt, die Woche ende am rechten Rand, blendet das Skript unten
      diesen Hinweis ein, sobald das Raster breiter als die Karte ist. */
-  .scroll-hinweis {
+/*   .scroll-hinweis {
     margin: 0 0 8px;
     font-size: 12px;
     color: var(--text-muted);
     text-align: right;
-  }
+  } */
 
   .slot-raster {
     display: grid;
@@ -365,14 +346,14 @@ function buchung_tooltip($buchung)
   }
 
   /* ---- Feste Kursfarben (Index aus kalender_kursfarbe()) ---- */
-  .farbe-0 { background: rgba(26, 143, 156, 0.16);  border-color: #1a8f9c; }
+/*   .farbe-0 { background: rgba(26, 143, 156, 0.16);  border-color: #1a8f9c; }
   .farbe-1 { background: rgba(47, 111, 176, 0.16);  border-color: #2f6fb0; }
   .farbe-2 { background: rgba(232, 121, 46, 0.18);  border-color: #e8792e; }
   .farbe-3 { background: rgba(123, 94, 167, 0.16);  border-color: #7b5ea7; }
   .farbe-4 { background: rgba(58, 154, 91, 0.16);   border-color: #3a9a5b; }
   .farbe-5 { background: rgba(200, 80, 75, 0.16);   border-color: #c8504b; }
   .farbe-6 { background: rgba(201, 154, 26, 0.20);  border-color: #c99a1a; }
-  .farbe-7 { background: rgba(90, 111, 124, 0.16);  border-color: #5a6f7c; }
+  .farbe-7 { background: rgba(90, 111, 124, 0.16);  border-color: #5a6f7c; } */
 
   /* ---- Monat ---- */
   .monat-raster {
@@ -442,39 +423,51 @@ function buchung_tooltip($buchung)
   }
 
   /* ---- Legende ---- */
-  .legende {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 18px;
-    margin-top: 16px;
-    padding-top: 14px;
-    border-top: 1px solid var(--border);
-    font-size: 12px;
-    color: var(--text-muted);
-  }
+/* .legende {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-muted);
 
   .legende-eintrag {
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    .legende-farbe {
+      display: inline-block;
+      width: 16px;
+      height: 12px;
+      border-radius: 3px;
+      border-left: 4px solid;
+      &.eigene { 
+        background: #ffffff; 
+        border-left: none; 
+        box-shadow: inset 0 0 0 2px var(--text-dark); 
+      }
+      &.verdeckt {
+        border-left-color: #c3ccd0;
+        background: repeating-linear-gradient(45deg, #f0f3f4 0 3px, #e6eaec 3px 6px);
+      }
+    }
   }
+} */
 
-  .legende-farbe {
-    display: inline-block;
-    width: 16px;
-    height: 12px;
-    border-radius: 3px;
-    border-left: 4px solid;
-  }
 
-  .legende-farbe.eigene { background: #ffffff; border-left: none; box-shadow: inset 0 0 0 2px var(--text-dark); }
+
+
+
+/*   .legende-farbe.eigene { background: #ffffff; border-left: none; box-shadow: inset 0 0 0 2px var(--text-dark); }
   .legende-farbe.verdeckt {
     border-left-color: #c3ccd0;
     background: repeating-linear-gradient(45deg, #f0f3f4 0 3px, #e6eaec 3px 6px);
   }
-
+ */
   /* ---- Sidebar mit den Filtern ---- */
-  .sidebar {
+/*   .sidebar {
     position: fixed;
     top: 208px;
     right: 24px;
@@ -484,9 +477,7 @@ function buchung_tooltip($buchung)
     box-shadow: 0 12px 28px rgba(20, 40, 50, 0.1);
     padding: 20px 20px 70px;
     z-index: 2;
-  }
-
-  .sidebar-label {
+    .sidebar-label {
     color: var(--blue);
     font-size: 12px;
     font-weight: 700;
@@ -494,8 +485,7 @@ function buchung_tooltip($buchung)
     margin: 0 0 8px;
     text-transform: uppercase;
   }
-
-  .sidebar select {
+  select {
     width: 100%;
     padding: 10px 12px;
     border: 1px solid var(--border);
@@ -506,14 +496,34 @@ function buchung_tooltip($buchung)
     background: #fbfcfc;
     outline: none;
     margin-bottom: 20px;
-  }
-
-  .sidebar select:focus {
+    &:focus {
     border-color: var(--blue);
     background: #ffffff;
   }
+  }
+  } */
 
-  .check-option {
+
+
+/*   .sidebar select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text-dark);
+    background: #fbfcfc;
+    outline: none;
+    margin-bottom: 20px;
+  } */
+
+/*   .sidebar select:focus {
+    border-color: var(--blue);
+    background: #ffffff;
+  } */
+
+/*   .check-option {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -521,21 +531,41 @@ function buchung_tooltip($buchung)
     color: var(--text-dark);
     cursor: pointer;
     margin-bottom: 18px;
-  }
-
-  .check-option input[type="checkbox"] {
+    input[type="checkbox"] {
     accent-color: var(--blue);
     width: 16px;
     height: 16px;
   }
+  } */
 
-  .sidebar-links {
+/*   .check-option input[type="checkbox"] {
+    accent-color: var(--blue);
+    width: 16px;
+    height: 16px;
+  } */
+
+/*   .sidebar-links {
     display: flex;
     flex-direction: column;
     gap: 8px;
+      .link-zuruecksetzen {
+    font-size: 13px;
+    color: var(--text-muted);
+    text-decoration: none;
+    &:hover { text-decoration: underline; }
+  }
+  
+  .link-ansicht {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--blue);
+    text-decoration: none;
+    &:hover { text-decoration: underline; }
   }
 
-  .link-zuruecksetzen {
+  } */
+
+/*   .link-zuruecksetzen {
     font-size: 13px;
     color: var(--text-muted);
     text-decoration: none;
@@ -549,7 +579,7 @@ function buchung_tooltip($buchung)
     text-decoration: none;
   }
   .link-ansicht:hover { text-decoration: underline; }
-
+ */
   .btn-add {
     position: absolute;
     bottom: 18px;
@@ -568,10 +598,11 @@ function buchung_tooltip($buchung)
     align-items: center;
     justify-content: center;
     text-decoration: none;
+    &:hover { filter: brightness(1.05); }
   }
-
+/* 
   .btn-add:hover { filter: brightness(1.05); }
-
+ */
   .filter-submit {
     position: absolute;
     width: 1px;
@@ -595,7 +626,7 @@ function buchung_tooltip($buchung)
   }
 </style>
 </head>
-<body>
+<body class="belegung">
 
   <?php kopfzeile('belegung'); ?>
 
