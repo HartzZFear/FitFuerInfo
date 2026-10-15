@@ -1,4 +1,4 @@
-// Gemeinsames JavaScript der App-Seiten (eingebunden von kopfzeile()).
+// Gemeinsames JavaScript aller Seiten (eingebunden von templates/footer.php).
 //
 // Die Handler fuer Formulare haengen am document statt an jedem einzelnen
 // Feld ("Event-Delegation"). So reicht ein Attribut im HTML, und es spielt
@@ -30,6 +30,11 @@ document.addEventListener('submit', function (ereignis) {
   var fadeDistance = 130;   // ab wie viel Scroll-px die Welle komplett weg ist
   var parallaxFactor = 0.4; // < 1 => Welle bewegt sich langsamer als der Scroll
   var ticking = false;
+
+  // Nur Seiten mit Kopfzeile haben das Banner (nicht Login, Formularseiten).
+  if (!wave) {
+    return;
+  }
 
   function updateWave() {
     var scrolled = window.pageYOffset || document.documentElement.scrollTop;

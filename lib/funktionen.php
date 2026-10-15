@@ -2,8 +2,8 @@
 /**
  * Allgemeine Helfer, die nicht zu einem Fachbereich gehoeren.
  *
- * Voraussetzung: config/config.php ist geladen (passiert ueber lib/db.php),
- * weil die Funktionen BASE_URL und ASSET_VERSION verwenden.
+ * Voraussetzung: config/config.php und config/app.php sind geladen (passiert
+ * ueber lib/db.php), weil die Funktionen BASE_URL und ASSET_VERSION verwenden.
  *
  * Bewusst PHP-5.6-Syntax, damit es auf dem Schulrechner laeuft.
  */
@@ -11,8 +11,8 @@
 /**
  * Baut die URL einer Datei in assets/ mit angehaengter Versionsnummer.
  *
- * Der Browser darf CSS und JS zwischenspeichern. Wird ASSET_VERSION in der
- * config.php erhoeht, aendert sich die URL - der Browser laedt die Datei
+ * Der Browser darf CSS und JS zwischenspeichern. Wird ASSET_VERSION in
+ * config/app.php erhoeht, aendert sich die URL - der Browser laedt die Datei
  * dann neu, statt eine veraltete Fassung aus dem Cache zu nehmen.
  *
  * @param  string $pfad Pfad unterhalb von assets/, z. B. 'css/style.css'
@@ -21,4 +21,92 @@
 function asset_url($pfad)
 {
     return BASE_URL . '/assets/' . $pfad . '?v=' . ASSET_VERSION;
+}
+
+/**
+ * Baut den Link auf eine Seite. Alle Seiten laufen ueber index.php.
+ *
+ * Beispiel: url('kurs_bearbeiten', array('id' => 5))
+ *        -> BASE_URL/index.php?seite=kurs_bearbeiten&id=5
+ *
+ * Die Rueckgabe ist nicht fuer HTML maskiert: im HTML mit h() ausgeben
+ * (macht aus & korrekt &amp;), in header('Location: ...') ohne h().
+ *
+ * @param  string $seite     Seitenname aus ERLAUBTE_SEITEN, z. B. 'kurse'
+ * @param  array  $parameter weitere GET-Parameter
+ * @return string
+ */
+function url($seite, $parameter = array())
+{
+    $url = BASE_URL . '/index.php?seite=' . urlencode($seite);
+    if (!empty($parameter)) {
+        $url .= '&' . http_build_query($parameter, '', '&');
+    }
+    return $url;
+}
+
+/**
+ * Verstecktes Feld mit dem Seitennamen fuer Formulare mit method="get".
+ *
+ * Grund: Bei GET-Formularen ersetzt der Browser den Teil nach "?" in der
+ * action durch die Formularfelder - ?seite=... aus url() ginge verloren.
+ * Als eigenes Feld wird der Seitenname mitgeschickt.
+ *
+ * @param  string $seite
+ * @return string HTML
+ */
+function seite_feld($seite)
+{
+    return '<input type="hidden" name="seite" value="' . h($seite) . '">';
+}
+
+/**
+ * Die Tabs der Navigation (Kopfzeile und Reiter der Formularseiten).
+ * Der Tab "Benutzer" erscheint nur fuer den Admin.
+ *
+ * @return array Seitenname => Beschriftung
+ */
+function navigation_tabs()
+{
+    $tabs = array(
+        'kurse'    => 'Kurse',
+        'raeume'   => 'Räume',
+        'belegung' => 'Belegung',
+    );
+    if (ist_admin()) {
+        $tabs['benutzer'] = 'Benutzer';
+    }
+    return $tabs;
+}
+
+/**
+ * Fuehrt eine Seite aus pages/ aus und gibt sie mit templates/header.php und
+ * templates/footer.php aus.
+ *
+ * Die Seite laeuft zuerst in einen Puffer (ob_start). So kann sie erst ihre
+ * Logik ausfuehren, $seitentitel usw. setzen oder per header('Location: ...')
+ * weiterleiten, bevor irgendetwas an den Browser geht.
+ *
+ * Die Variablen unten sind Vorgaben; die Seite ueberschreibt, was sie braucht.
+ * Weil Seite und Templates innerhalb dieser Funktion eingebunden werden,
+ * sehen die Templates genau diese Variablen.
+ *
+ * @param string $seite   Name der Datei in pages/ (ohne .php), vorher geprueft
+ * @param array  $hinweis Daten fuer Hinweisseiten (z. B. die Fehlermeldung)
+ */
+function seite_ausgeben($seite, $hinweis = array())
+{
+    $seitentitel   = '';
+    $aktiverTab    = '';
+    $seitenCss     = array();
+    $seitenJs      = array();
+    $ohneKopfzeile = false;
+
+    ob_start();
+    include __DIR__ . '/../pages/' . $seite . '.php';
+    $inhalt = ob_get_clean();
+
+    include __DIR__ . '/../templates/header.php';
+    echo $inhalt;
+    include __DIR__ . '/../templates/footer.php';
 }

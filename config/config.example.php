@@ -30,13 +30,3 @@ define('BASE_URL', '/fitfuerinfo');
 // sieht jeder Besucher bei einem Fehler PHP-Meldungen mit Dateipfaden und
 // Datenbankdetails.
 define('DEBUG', true);
-
-// Versionsnummer fuer CSS- und JavaScript-Dateien. Sie haengt als ?v=...
-// an jedem Link (asset_url() in lib/funktionen.php). Nach einer Aenderung an
-// einer Datei in assets/ hier um eins erhoehen - dann laedt jeder Browser
-// die neue Fassung, statt die alte aus seinem Cache zu nehmen.
-define('ASSET_VERSION', '1');
-
-// Mindestanforderung an Passwoerter laut Aufgabenstellung:
-// mindestens vier Zeichen, darunter ein Kleinbuchstabe und eine Zahl.
-define('PW_MIN_LAENGE', 4);

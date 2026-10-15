@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <h1>FitFuerInfo</h1>
   <p>Passwort setzen</p>
   <svg class="welle" viewBox="0 0 500 70" preserveAspectRatio="none">
-    <path d="M0,40 C125,80 375,0 500,40 L500,70 L0,70 Z" fill="#f2f5f7"></path>
+    <path d="M0,40 C125,80 375,0 500,40 L500,70 L0,70 Z"></path>
   </svg>
 </div>
 

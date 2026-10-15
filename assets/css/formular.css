@@ -2,8 +2,9 @@
  *
  * Eingebunden (nach style.css) von:
  *   kurs_bearbeiten, raum_bearbeiten, buchung_bearbeiten, benutzer_bearbeiten,
- *   kurs_loeschen, raum_loeschen, buchung_loeschen und den Hinweisseiten aus
- *   lib/ (zugriff_verweigert, anfrage_abgelehnt, freischaltcode).
+ *   kurs_loeschen, raum_loeschen, buchung_loeschen und den Hinweisseiten
+ *   zugriff_verweigert, anfrage_abgelehnt, freischaltcode, nicht_gefunden.
+ *   Den Seitenkopf mit Welle liefert formular_kopf() (templates/bausteine.php).
  *
  * Die Regeln gelten für alle diese Seiten. Wo eine Seite abweicht, hängt die
  * Regel an ihrer body-Klasse (z. B. .seite-kurs_loeschen).
@@ -46,7 +47,8 @@
 .seite-raum_loeschen .inhalt,
 .seite-buchung_loeschen .inhalt,
 .seite-zugriff_verweigert .inhalt,
-.seite-anfrage_abgelehnt .inhalt {
+.seite-anfrage_abgelehnt .inhalt,
+.seite-nicht_gefunden .inhalt {
   max-width: 520px;
 }
 
@@ -99,6 +101,7 @@
 
 .seite-zugriff_verweigert .karte,
 .seite-anfrage_abgelehnt .karte,
+.seite-nicht_gefunden .karte,
 .seite-freischaltcode .karte {
   text-align: center;
 }
@@ -116,7 +119,8 @@
 }
 
 .seite-zugriff_verweigert .karte-titel,
-.seite-anfrage_abgelehnt .karte-titel {
+.seite-anfrage_abgelehnt .karte-titel,
+.seite-nicht_gefunden .karte-titel {
   margin-bottom: 12px;
 }
 
@@ -132,7 +136,8 @@
 }
 
 .seite-zugriff_verweigert .karte-text,
-.seite-anfrage_abgelehnt .karte-text {
+.seite-anfrage_abgelehnt .karte-text,
+.seite-nicht_gefunden .karte-text {
   margin-bottom: 20px;
 }
 
