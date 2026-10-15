@@ -58,11 +58,7 @@ cache_dynamisch();
 // UEBERGANG (Schritt 3): Diese Seiten sind noch nicht auf index.php
 // umgestellt und liegen weiter als eigenstaendige Dateien in pages/. Der
 // Block wird geloescht, sobald alle Seiten umgestellt sind.
-$nochNichtUmgestellt = array(
-    'logout', 'passwort_setzen', 'buchung_bearbeiten', 'buchung_loeschen',
-    'kurs_bearbeiten', 'kurs_loeschen', 'raum_bearbeiten', 'raum_loeschen',
-    'benutzer_bearbeiten',
-);
+$nochNichtUmgestellt = array();
 if (in_array($seite, $nochNichtUmgestellt, true)) {
     $uebrige = $_GET;
     unset($uebrige['seite']);

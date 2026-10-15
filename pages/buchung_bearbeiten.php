@@ -1,5 +1,6 @@
+<?php if (!defined('FFI_START')) { exit; } ?>
 <?php
-// buchung_bearbeiten.php
+// buchung_bearbeiten (Aufruf: index.php?seite=buchung_bearbeiten)
 // Buchung anlegen (ohne ?id=) oder bearbeiten (mit ?id=N).
 //
 // Beim Anlegen koennen Kurs, Raum, Datum und Startzeit per GET vorbelegt
@@ -7,12 +8,6 @@
 // Belegungskalender, wenn man auf eine freie Zelle klickt.
 //
 // Bewusst PHP-5.6-Syntax, damit es auf dem Schulrechner laeuft.
-
-require_once __DIR__ . '/../lib/db.php';
-require_once __DIR__ . '/../lib/funktionen.php';
-require_once __DIR__ . '/../lib/auth.php';
-require_once __DIR__ . '/../lib/kurs_rechte.php';
-require_once __DIR__ . '/../lib/buchung_logik.php';
 
 erfordere_login();
 csrf_pruefen();
@@ -31,7 +26,7 @@ if ($istBearbeiten) {
     if (!$buchung) {
         zugriff_verweigert_seite(
             'Diese Buchung existiert nicht oder wurde bereits gelöscht.',
-            'buchungen.php',
+            'buchungen',
             'Zurück zur Belegung'
         );
     }
@@ -40,14 +35,14 @@ if ($istBearbeiten) {
     if (!buchung_darf_verwalten($buchungId, $meineId, $istAdmin)) {
         zugriff_verweigert_seite(
             'Sie haben diese Buchung nicht angelegt und können sie deshalb nicht bearbeiten.',
-            'buchungen.php',
+            'buchungen',
             'Zurück zur Belegung'
         );
     }
     if (buchung_ist_vergangen($buchung['start'])) {
         zugriff_verweigert_seite(
             'Diese Buchung liegt in der Vergangenheit und kann nicht mehr bearbeitet werden.',
-            'buchungen.php',
+            'buchungen',
             'Zurück zur Belegung'
         );
     }
@@ -102,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (!kurs_darf_verwalten($kursId, $meineId, $istAdmin)) {
         zugriff_verweigert_seite(
             'Sie sind nicht Eigentümer dieses Kurses und können dafür keine Buchung anlegen.',
-            'buchungen.php',
+            'buchungen',
             'Zurück zur Belegung'
         );
     }
@@ -181,49 +176,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$seitenTitel = $istBearbeiten ? 'Buchung bearbeiten' : 'Neue Buchung anlegen';
+$seitentitel   = $istBearbeiten ? 'Buchung bearbeiten' : 'Neue Buchung anlegen';
+$seitenCss     = array('formular.css');
+$ohneKopfzeile = true;
 ?>
-<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title><?php echo h($seitenTitel); ?> – FitFürInfo</title>
-<link rel="stylesheet" href="<?php echo h(asset_url('css/style.css')); ?>">
-<link rel="stylesheet" href="<?php echo h(asset_url('css/formular.css')); ?>">
-</head>
-<body class="seite-buchung_bearbeiten">
-
-  <div class="kopf">
-    <h1>FitFürInfo</h1>
-    <p><?php echo h($seitenTitel); ?></p>
-    <svg class="welle" viewBox="0 0 1440 200" preserveAspectRatio="none">
-      <defs>
-        <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#1a8f9c"/>
-          <stop offset="45%" stop-color="#2f6fb0"/>
-          <stop offset="100%" stop-color="#e8792e"/>
-        </linearGradient>
-      </defs>
-      <path fill="url(#waveGradient)" d="M0,80 C240,160 480,0 720,60 C960,120 1200,20 1440,90 L1440,0 L0,0 Z"/>
-    </svg>
-  </div>
+<?php formular_kopf($seitentitel); ?>
 
   <div class="inhalt">
 
-    <nav class="reiter-gruppe">
-      <a href="<?php echo h(url('kurse')); ?>" class="reiter">Kurse</a>
-      <a href="<?php echo h(url('raeume')); ?>" class="reiter">Räume</a>
-      <a href="<?php echo h(url('belegung')); ?>" class="reiter active">Belegung</a>
-      <?php if ($istAdmin): ?>
-      <a href="<?php echo h(url('benutzer')); ?>" class="reiter">Benutzer</a>
-      <?php endif; ?>
-    </nav>
+<?php formular_reiter('belegung'); ?>
 
     <?php session_fehler_anzeigen(); ?>
 
     <div class="karte">
-      <h2 class="karte-titel"><?php echo h($seitenTitel); ?></h2>
+      <h2 class="karte-titel"><?php echo h($seitentitel); ?></h2>
 
       <?php if (!empty($fehler)): ?>
       <div class="fehler">
@@ -255,7 +221,7 @@ $seitenTitel = $istBearbeiten ? 'Buchung bearbeiten' : 'Neue Buchung anlegen';
       <p><a class="link-abbrechen" href="<?php echo h(url('buchungen')); ?>">Zurück zur Belegung</a></p>
       <?php else: ?>
 
-      <form method="post" action="buchung_bearbeiten.php<?php echo $istBearbeiten ? '?id=' . (int) $buchungId : ''; ?>">
+      <form method="post" action="<?php echo h(url('buchung_bearbeiten', $istBearbeiten ? array('id' => (int) $buchungId) : array())); ?>">
         <?php csrf_feld(); ?>
         <label for="kurs_id">Kurs</label>
         <select id="kurs_id" name="kurs_id" required>
@@ -324,6 +290,3 @@ $seitenTitel = $istBearbeiten ? 'Buchung bearbeiten' : 'Neue Buchung anlegen';
       <?php endif; ?>
     </div>
   </div>
-
-</body>
-</html>

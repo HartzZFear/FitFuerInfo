@@ -110,3 +110,24 @@ function seite_ausgeben($seite, $hinweis = array())
     echo $inhalt;
     include __DIR__ . '/../templates/footer.php';
 }
+
+/**
+ * Bricht die laufende Seite ab und zeigt stattdessen eine Hinweisseite
+ * (zugriff_verweigert, anfrage_abgelehnt, freischaltcode). Wird von
+ * Funktionen in lib/ aufgerufen, die mitten in einer Seite feststellen,
+ * dass es nicht weitergehen darf.
+ *
+ * Ablauf: Was die Seite bisher ausgegeben hat, liegt noch im Puffer von
+ * seite_ausgeben() und ist nicht beim Browser. ob_end_clean() wirft es weg,
+ * dann wird die Hinweisseite ganz normal mit Kopf und Fuss ausgegeben, und
+ * exit beendet das Skript - der Rest der alten Seite laeuft nicht mehr.
+ *
+ * @param string $seite   Name der Hinweisseite in pages/
+ * @param array  $hinweis Daten fuer die Hinweisseite, z. B. die Fehlermeldung
+ */
+function seite_wechseln($seite, $hinweis = array())
+{
+    ob_end_clean();
+    seite_ausgeben($seite, $hinweis);
+    exit;
+}
