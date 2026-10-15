@@ -43,28 +43,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Anmelden – FitFürInfo</title>
 <link rel="stylesheet" href="<?php echo h(BASE_URL . '/assets/css/style.css'); ?>">
-<style>
- body {
-    margin: 0;
-    min-height: 100vh;
-    background: var(--page-bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 20px;
-}
-
-.top-banner{
-  top: 0px;
-}
-
-.help-region { display: none; }
-</style>
 </head>
-<body>
+<body class="login-seite">
 
   <!-- Dekorativer Wellen-Streifen oben, wie im Referenzbild -->
-  <div class="top-banner" aria-hidden="true">
+  <div class="login-welle" aria-hidden="true">
     <svg viewBox="0 0 1440 200" preserveAspectRatio="none">
       <defs>
         <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">

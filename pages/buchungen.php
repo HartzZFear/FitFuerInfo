@@ -111,7 +111,7 @@ function ist_eigene_buchung($buchung, $benutzerId, $istAdmin)
     --border: #dfe6e8;
   }
 
-/*   * { box-sizing: border-box; } */
+  * { box-sizing: border-box; }
 
   body {
     margin: 0;
@@ -227,14 +227,14 @@ function ist_eigene_buchung($buchung, $benutzerId, $istAdmin)
     z-index: 2;
   }
 
-/*   .sidebar-label {
+  .sidebar-label {
     color: var(--blue);
     font-size: 12px;
     font-weight: 700;
     letter-spacing: 0.4px;
     margin: 0 0 8px;
     text-transform: uppercase;
-  } */
+  }
 
   .sidebar select,
   .sidebar input[type="date"] {
