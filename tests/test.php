@@ -45,10 +45,36 @@ pruefe(
         : 'fehlt – config/config.example.php kopieren und als config/config.php speichern'
 );
 
+// --- 3b. config/app.php (im Repo) ---------------------------------------
+$appOk = file_exists(__DIR__ . '/../config/app.php');
+pruefe(
+    'config/app.php vorhanden',
+    $appOk,
+    $appOk ? 'gefunden' : 'fehlt – Datei aus dem Repo holen (git pull)'
+);
+
+// Aeltere config.php-Dateien definieren ASSET_VERSION bzw. PW_MIN_LAENGE
+// noch selbst. Dann meldet PHP "Constant ... already defined" und es gilt
+// still der alte Wert aus config.php statt dem aus config/app.php.
+if ($configOk) {
+    $configText = file_get_contents(__DIR__ . '/../config/config.php');
+    foreach (array('ASSET_VERSION', 'PW_MIN_LAENGE') as $konstante) {
+        $alteZeile = preg_match('/define\s*\(\s*.' . $konstante . './', $configText) === 1;
+        pruefe(
+            'config.php ohne ' . $konstante,
+            !$alteZeile,
+            $alteZeile
+                ? 'veraltet – die Zeile mit ' . $konstante . ' in config/config.php loeschen, '
+                    . 'der Wert steht jetzt in config/app.php'
+                : 'in Ordnung'
+        );
+    }
+}
+
 $db = null;
 
 // --- 4. Datenbankverbindung -------------------------------------------
-if ($configOk && $pdoOk) {
+if ($configOk && $appOk && $pdoOk) {
     require_once __DIR__ . '/../lib/db.php';
     try {
         $db = db();
@@ -57,15 +83,33 @@ if ($configOk && $pdoOk) {
         pruefe('Datenbankverbindung', false, $e->getMessage());
     }
 
-    // config.php ist jetzt geladen: ASSET_VERSION haengt als ?v=... an den
-    // CSS/JS-Links (asset_url()). Aeltere lokale config.php-Dateien haben sie
-    // noch nicht.
+    // config/app.php ist jetzt geladen (ueber lib/db.php).
     pruefe(
-        'ASSET_VERSION in config.php',
+        'ASSET_VERSION in config/app.php',
         defined('ASSET_VERSION'),
         defined('ASSET_VERSION')
             ? 'Version ' . ASSET_VERSION
-            : 'fehlt – Zeile mit ASSET_VERSION aus config/config.example.php uebernehmen'
+            : 'fehlt – config/app.php aus dem Repo holen (git pull)'
+    );
+
+    // Whitelist fuer index.php: zu jedem Namen muss es pages/<name>.php geben.
+    $seitenOk     = defined('ERLAUBTE_SEITEN') && is_array(ERLAUBTE_SEITEN);
+    $seitenFehlen = array();
+    if ($seitenOk) {
+        foreach (ERLAUBTE_SEITEN as $name) {
+            if (!file_exists(__DIR__ . '/../pages/' . $name . '.php')) {
+                $seitenFehlen[] = $name;
+            }
+        }
+    }
+    pruefe(
+        'ERLAUBTE_SEITEN in config/app.php',
+        $seitenOk && empty($seitenFehlen),
+        !$seitenOk
+            ? 'fehlt – config/app.php aus dem Repo holen (git pull)'
+            : (empty($seitenFehlen)
+                ? count(ERLAUBTE_SEITEN) . ' Seiten, alle Dateien in pages/ vorhanden'
+                : 'keine Datei in pages/ fuer: ' . implode(', ', $seitenFehlen))
     );
 }
 

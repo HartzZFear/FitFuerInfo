@@ -40,7 +40,7 @@ body {
 }
 
 /* =====================================================================
-   App-Seiten: Kopfzeile und Wellen-Banner (Ausgabe von kopfzeile())
+   App-Seiten: Kopfzeile und Wellen-Banner (Ausgabe von templates/header.php)
    ===================================================================== */
 
 /* Platzhalter unter der fixierten Kopfzeile (78 px) und dem fixierten

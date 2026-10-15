@@ -170,9 +170,12 @@ function benutzer_code_merken($benutzerId, $code)
 }
 
 /**
- * Zeigt den gemerkten Freischaltcode einmalig auf einer eigenen Seite an,
- * entfernt ihn aus der Session und beendet das Skript. Ist nichts gemerkt,
- * kehrt die Funktion einfach zurueck.
+ * Zeigt den gemerkten Freischaltcode einmalig auf der Hinweisseite
+ * pages/freischaltcode.php an, entfernt ihn aus der Session und beendet das
+ * Skript. Ist nichts gemerkt, kehrt die Funktion einfach zurueck.
+ *
+ * Dass der Code nicht ueber den Browser-Cache wieder auftaucht, regeln die
+ * Cache-Header aus cache_dynamisch(), die index.php fuer jede Seite setzt.
  */
 function benutzer_code_anzeigen_falls_vorhanden()
 {
@@ -187,70 +190,11 @@ function benutzer_code_anzeigen_falls_vorhanden()
 
     $schema = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
     $host   = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
-    $link   = $schema . '://' . $host . BASE_URL . '/pages/passwort_setzen.php';
 
-    $gueltigBis = date('d.m.Y, H:i', strtotime($anzeige['gueltig_bis'])) . ' Uhr';
-
-    // Der Code soll nicht ueber den Browser-Cache wieder auftauchen.
-    header('Cache-Control: no-store, no-cache, must-revalidate');
-    header('Pragma: no-cache');
-    ?>
-<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Freischaltcode – FitFürInfo</title>
-<link rel="stylesheet" href="<?php echo h(asset_url('css/style.css')); ?>">
-<link rel="stylesheet" href="<?php echo h(asset_url('css/formular.css')); ?>">
-</head>
-<body class="seite-freischaltcode">
-  <div class="kopf">
-    <h1>FitFürInfo</h1>
-    <p>Freischaltcode</p>
-    <svg class="welle" viewBox="0 0 1440 200" preserveAspectRatio="none">
-      <defs>
-        <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#1a8f9c"/>
-          <stop offset="45%" stop-color="#2f6fb0"/>
-          <stop offset="100%" stop-color="#e8792e"/>
-        </linearGradient>
-      </defs>
-      <path fill="url(#waveGradient)" d="M0,80 C240,160 480,0 720,60 C960,120 1200,20 1440,90 L1440,0 L0,0 Z"/>
-    </svg>
-  </div>
-  <div class="inhalt">
-
-    <nav class="reiter-gruppe">
-      <a href="kurse.php" class="reiter">Kurse</a>
-      <a href="raeume.php" class="reiter">Räume</a>
-      <a href="belegung.php" class="reiter">Belegung</a>
-      <a href="benutzer.php" class="reiter active">Benutzer</a>
-    </nav>
-
-    <?php session_fehler_anzeigen(); ?>
-
-    <div class="karte">
-      <h2 class="karte-titel">Code für <?php echo h($anzeige['name']); ?>:</h2>
-      <div class="code"><?php echo h($anzeige['code']); ?></div>
-      <p class="karte-text">gültig bis <?php echo h($gueltigBis); ?></p>
-
-      <p class="einloesen">
-        Einlösen unter:<br>
-        <a href="<?php echo h($link); ?>"><?php echo h($link); ?></a>
-      </p>
-
-      <div class="warnung">
-        Geben Sie den Code persönlich weiter. Er wird nur dieses eine Mal angezeigt
-        und ist danach nirgends mehr abrufbar. Ein bestehendes Passwort bleibt gültig,
-        bis der Code eingelöst wird.
-      </div>
-
-      <a class="link-zurueck" href="benutzer.php">Zurück zur Benutzerliste</a>
-    </div>
-  </div>
-</body>
-</html>
-<?php
-    exit;
+    seite_wechseln('freischaltcode', array(
+        'name'        => $anzeige['name'],
+        'code'        => $anzeige['code'],
+        'gueltig_bis' => date('d.m.Y, H:i', strtotime($anzeige['gueltig_bis'])) . ' Uhr',
+        'link'        => $schema . '://' . $host . url('passwort_setzen'),
+    ));
 }

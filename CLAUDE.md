@@ -29,9 +29,11 @@ fitfuerinfo/
 ├── CLAUDE.md, README.md
 │
 ├── config/
-│   ├── config.example.php Vorlage (im Repo)
+│   ├── app.php            projektweite Konstanten (im Repo): Seiten-Whitelist
+│   │                      ERLAUBTE_SEITEN, ASSET_VERSION, PW_MIN_LAENGE
+│   ├── config.example.php Vorlage für config.php (im Repo)
 │   └── config.php         lokale Kopie (nicht im Repo, .gitignore)
-│                          DB-Zugang, BASE_URL, DEBUG, ASSET_VERSION, erlaubte Seiten
+│                          nur rechnerspezifische Werte: DB-Zugang, BASE_URL, DEBUG
 │
 ├── lib/                   Wiederverwendbare PHP-Funktionen – KEINE Ausgabe beim Einbinden
 │   ├── db.php             db(), abfrage(), h()
@@ -45,7 +47,8 @@ fitfuerinfo/
 │
 ├── templates/             Wiederkehrende Layout-Elemente
 │   ├── header.php         <!DOCTYPE>, <head>, Kopfzeile mit Tabs, Wellen-Banner
-│   └── footer.php         Fußbereich, Script-Einbindung, </body></html>
+│   ├── footer.php         Fußbereich, Script-Einbindung, </body></html>
+│   └── bausteine.php      wiederkehrende Layout-Teile als Funktionen (Welle, Formularkopf)
 │
 ├── pages/                 Die eigentlichen Seiteninhalte – nur der Body-Inhalt
 │   ├── belegung.php
@@ -66,8 +69,8 @@ fitfuerinfo/
 ## Front-Controller (`index.php`)
 
 Ablauf, in dieser Reihenfolge:
-1. Konstante `FFI_START` definieren, `config/config.php` und benötigte `lib/`-Dateien einbinden, Session starten.
-2. Gewünschte Seite aus `$_GET['seite']` lesen und gegen eine **Whitelist** in `config.php` prüfen (`in_array(..., true)`). Ohne Angabe: angemeldet → `belegung`, nicht angemeldet → `login`. Unbekannte Werte → 404-Seite. **Niemals** einen Dateinamen ungeprüft aus der URL einbinden (Sicherheitslücke: File Inclusion).
+1. Konstante `FFI_START` definieren, `lib/`-Dateien einbinden (`lib/db.php` lädt erst `config/config.php`, dann `config/app.php`), Session starten. Fehlt `ERLAUBTE_SEITEN`, bricht `index.php` mit einer klaren Meldung ab (wie `lib/db.php` bei fehlender `config.php`).
+2. Gewünschte Seite aus `$_GET['seite']` lesen und gegen die **Whitelist** `ERLAUBTE_SEITEN` in `config/app.php` prüfen (`in_array(..., true)`). Ohne Angabe: angemeldet → `belegung`, nicht angemeldet → `login`. Unbekannte Werte → 404-Seite. **Niemals** einen Dateinamen ungeprüft aus der URL einbinden (Sicherheitslücke: File Inclusion).
 3. Cache-Header zentral setzen (`cache_dynamisch()`), da alle Seiten dynamisch sind.
 4. Seite mit Output-Buffering einbinden:
    ```php
@@ -114,7 +117,7 @@ Links, Formulare und Weiterleitungen zeigen immer auf `BASE_URL . '/index.php?se
 - Taucht derselbe Code an **zwei** Stellen auf, wird er ausgelagert: PHP-Logik → `lib/`, Layout → `templates/`, Aussehen → `assets/css/`, Browser-Verhalten → `assets/js/`.
 - Farben, Abstände, Schriften nur über die CSS-Variablen in `style.css`. Keine Farbcodes in Seiten oder Templates (Ausnahme: SVG-Verläufe im Template, mit Verweis auf die Variable im Kommentar).
 - Kein verschachteltes CSS (keine `&`-Syntax, keine Regeln in Regeln). Jede Regel steht flach mit ihrem vollständigen Selektor, z. B. `.tab.active { ... }`.
-- Konfigurationswerte (DB-Zugang, BASE_URL, Versionsnummer, Seiten-Whitelist) nur in `config/config.php`.
+- Rechnerspezifische Werte (DB-Zugang, BASE_URL, DEBUG) nur in `config/config.php`. Projektweite Konstanten (Seiten-Whitelist, Versionsnummer, Passwort-Mindestlänge) nur in `config/app.php` – sie gelten für alle gleich und kommen deshalb über Git, statt dass jeder seine lokale `config.php` nachziehen muss.
 - Kein auskommentierter Altcode. Was nicht mehr gebraucht wird, wird gelöscht – Git hat die Historie.
 
 ## Cache-Steuerung
@@ -122,7 +125,7 @@ Links, Formulare und Weiterleitungen zeigen immer auf `BASE_URL . '/index.php?se
 - Header werden **vor jeder Ausgabe** gesetzt. Durch den Front-Controller mit Output-Buffering ist das gewährleistet; trotzdem keine Leerzeichen/Zeilen vor `<?php` in `lib/`- und `config/`-Dateien und kein schließendes `?>` am Ende reiner PHP-Dateien.
 - Cache-Header werden **nur** in `index.php` über eine Funktion aus `lib/cache.php` gesetzt (`cache_dynamisch()` → `Cache-Control: no-store, no-cache, must-revalidate, private` und `Pragma: no-cache`). Bestehende einzelne `header('Cache-Control ...')`-Aufrufe in `lib/` entfallen dadurch.
 - `session_start()` sendet über `session.cache_limiter` bereits No-Cache-Header. Keine widersprüchlichen Header zusätzlich setzen.
-- CSS/JS dürfen gecacht werden. Damit Änderungen ankommen, werden sie in `templates/` mit Versionsnummer eingebunden: `BASE_URL . '/assets/css/style.css?v=' . ASSET_VERSION`. Bei Änderungen an CSS/JS `ASSET_VERSION` in `config.php` erhöhen.
+- CSS/JS dürfen gecacht werden. Damit Änderungen ankommen, werden sie in `templates/` mit Versionsnummer eingebunden: `BASE_URL . '/assets/css/style.css?v=' . ASSET_VERSION`. Bei Änderungen an CSS/JS `ASSET_VERSION` in `config/app.php` erhöhen.
 
 ## Transaktionen und Sperren – nur wo logisch nötig
 

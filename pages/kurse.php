@@ -1,13 +1,7 @@
+<?php if (!defined('FFI_START')) { exit; } ?>
 <?php
-// kurse.php
-// Reine Darstellungsseite ohne Funktionalität, im gleichen visuellen Stil wie login.php
-// (Wellen-Header, Farbpalette Türkis/Blau/Orange, weiße Cards mit Schatten).
-
-require_once __DIR__ . '/../lib/db.php';
-require_once __DIR__ . '/../lib/funktionen.php';
-require_once __DIR__ . '/../lib/auth.php';
-require_once __DIR__ . '/../templates/layout.php';
-require_once __DIR__ . '/../lib/kurs_rechte.php';
+// kurse - Kursliste mit Suche und Filter "Nur eigene / Alle".
+// Aufruf: index.php?seite=kurse
 
 erfordere_login();
 
@@ -79,7 +73,7 @@ if (!empty($kursIds)) {
 /**
  * Nur fuer die Kartenanzeige: ist der eingeloggte Benutzer Ersteller oder
  * in kurs_eigentuemer eingetragen? Die massgebliche, serverseitige Pruefung
- * fuer Bearbeiten/Loeschen selbst steht in kurs_darf_verwalten() (kurse.php).
+ * fuer Bearbeiten/Loeschen selbst steht in kurs_darf_verwalten() (lib/kurs_rechte.php).
  */
 function ist_eigene_karte($kurs, $eigentuemerJeKurs, $benutzerId)
 {
@@ -89,21 +83,11 @@ function ist_eigene_karte($kurs, $eigentuemerJeKurs, $benutzerId)
     return isset($eigentuemerJeKurs[$kurs['id']])
         && in_array((int) $benutzerId, $eigentuemerJeKurs[$kurs['id']], true);
 }
+
+$seitentitel = 'Kurse';
+$aktiverTab  = 'kurse';
+$seitenCss   = array('kurse.css');
 ?>
-<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kurse – FitFürInfo</title>
-<link rel="stylesheet" href="<?php echo h(asset_url('css/style.css')); ?>">
-<link rel="stylesheet" href="<?php echo h(asset_url('css/kurse.css')); ?>">
-</head>
-<body class="seite-kurse">
-
-
-  <?php kopfzeile('kurse'); ?>
-
   <div class="main-area">
 
     <?php session_fehler_anzeigen(); ?>
@@ -128,12 +112,12 @@ function ist_eigene_karte($kurs, $eigentuemerJeKurs, $benutzerId)
             <?php endforeach; ?>
           </div>
           <?php endif; ?>
-          <a class="link-belegung" href="belegung.php?ansicht=monat&amp;kurs_id=<?php echo (int) $kurs['id']; ?>">Termine</a>
+          <a class="link-belegung" href="<?php echo h(url('belegung', array('ansicht' => 'monat', 'kurs_id' => (int) $kurs['id']))); ?>">Termine</a>
 
           <?php if ($istAdmin || ist_eigene_karte($kurs, $eigentuemerJeKurs, $meineId)): ?>
           <div class="course-actions">
-            <a href="kurs_bearbeiten.php?id=<?php echo (int) $kurs['id']; ?>" class="btn-edit">bearbeiten</a>
-            <a href="kurs_loeschen.php?id=<?php echo (int) $kurs['id']; ?>" class="btn-delete">löschen</a>
+            <a href="<?php echo h(url('kurs_bearbeiten', array('id' => (int) $kurs['id']))); ?>" class="btn-edit">bearbeiten</a>
+            <a href="<?php echo h(url('kurs_loeschen', array('id' => (int) $kurs['id']))); ?>" class="btn-delete">löschen</a>
           </div>
           <?php endif; ?>
         </div>
@@ -144,7 +128,8 @@ function ist_eigene_karte($kurs, $eigentuemerJeKurs, $benutzerId)
     </section>
 
     <aside class="sidebar">
-      <form method="get" action="kurse.php">
+      <form method="get" action="<?php echo h(url('kurse')); ?>">
+        <?php echo seite_feld('kurse'); ?>
         <p class="sidebar-label">Suche</p>
         <input type="text" name="suche" class="search-input" placeholder="Kursname....." value="<?php echo h($suche); ?>">
 
@@ -163,10 +148,7 @@ function ist_eigene_karte($kurs, $eigentuemerJeKurs, $benutzerId)
         <button type="submit" class="filter-submit">Suchen</button>
       </form>
 
-      <a href="kurs_bearbeiten.php" class="btn-add" aria-label="Kurs hinzufügen">+</a>
+      <a href="<?php echo h(url('kurs_bearbeiten')); ?>" class="btn-add" aria-label="Kurs hinzufügen">+</a>
     </aside>
 
   </div>
-
-</body>
-</html>

@@ -157,7 +157,7 @@ function aktueller_benutzer()
 function erfordere_login()
 {
     if (!ist_eingeloggt()) {
-        header('Location: ' . BASE_URL . '/pages/login.php');
+        header('Location: ' . url('login'));
         exit;
     }
 
@@ -165,7 +165,7 @@ function erfordere_login()
 
     if ($benutzer === null || (int) $benutzer['aktiv'] !== 1) {
         abmelden();
-        header('Location: ' . BASE_URL . '/pages/login.php?gesperrt=1');
+        header('Location: ' . url('login', array('gesperrt' => 1)));
         exit;
     }
 
@@ -181,7 +181,7 @@ function erfordere_admin()
 
     if (!ist_admin()) {
         $_SESSION['fehler'] = 'Diese Seite ist nur für den Systemverwalter zugänglich.';
-        header('Location: ' . BASE_URL . '/pages/kurse.php');
+        header('Location: ' . url('kurse'));
         exit;
     }
 }
@@ -364,8 +364,9 @@ function csrf_feld()
 
 /**
  * Prueft bei einem POST-Aufruf das mitgeschickte Token gegen das der
- * Session. Fehlt es oder passt es nicht, endet die Seite mit HTTP 400 und
- * einer verstaendlichen Meldung - es wird dann nichts verarbeitet.
+ * Session. Fehlt es oder passt es nicht, wird statt der Seite die
+ * Hinweisseite "Anfrage abgelehnt" (HTTP 400) angezeigt und das Skript
+ * beendet - es wird dann nichts verarbeitet.
  *
  * Bei GET tut die Funktion nichts. Deshalb kann (und soll) jede Seite mit
  * POST-Formular sie gleich oben aufrufen, direkt nach der Anmeldepruefung
@@ -387,47 +388,9 @@ function csrf_pruefen()
         return;
     }
 
-    http_response_code(400);
-    $neuLaden = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : BASE_URL . '/';
-    ?>
-<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Anfrage abgelehnt – FitFürInfo</title>
-<link rel="stylesheet" href="<?php echo h(asset_url('css/style.css')); ?>">
-<link rel="stylesheet" href="<?php echo h(asset_url('css/formular.css')); ?>">
-</head>
-<body class="seite-anfrage_abgelehnt">
-  <div class="kopf">
-    <h1>FitFürInfo</h1>
-    <p>Kurs- und Raumverwaltung</p>
-    <svg class="welle" viewBox="0 0 1440 200" preserveAspectRatio="none">
-      <defs>
-        <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#1a8f9c"/>
-          <stop offset="45%" stop-color="#2f6fb0"/>
-          <stop offset="100%" stop-color="#e8792e"/>
-        </linearGradient>
-      </defs>
-      <path fill="url(#waveGradient)" d="M0,80 C240,160 480,0 720,60 C960,120 1200,20 1440,90 L1440,0 L0,0 Z"/>
-    </svg>
-  </div>
-  <div class="inhalt">
-    <div class="karte">
-      <h2 class="karte-titel">Anfrage abgelehnt</h2>
-      <p class="karte-text">
-        Das Formular konnte nicht verarbeitet werden, weil sein Sicherheitsschlüssel fehlt
-        oder nicht passt. Das passiert zum Beispiel, wenn die Seite sehr lange offen war
-        oder Sie sich zwischendurch ab- und wieder angemeldet haben.
-        Es wurde nichts gespeichert. Bitte die Seite neu laden und die Eingabe wiederholen.
-      </p>
-      <a class="link-zurueck" href="<?php echo h($neuLaden); ?>">Seite neu laden</a>
-    </div>
-  </div>
-</body>
-</html>
-<?php
-    exit;
+    // Kein HTML hier: Die Seite pages/anfrage_abgelehnt.php zeigt den
+    // Hinweis (mit HTTP-Status 400) und das Skript endet.
+    seite_wechseln('anfrage_abgelehnt', array(
+        'neu_laden' => isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : BASE_URL . '/',
+    ));
 }

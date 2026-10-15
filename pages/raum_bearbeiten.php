@@ -1,5 +1,6 @@
+<?php if (!defined('FFI_START')) { exit; } ?>
 <?php
-// raum_bearbeiten.php
+// raum_bearbeiten (Aufruf: index.php?seite=raum_bearbeiten)
 // Raum anlegen (ohne ?id=) oder bearbeiten (mit ?id=N).
 //
 // Anlegen darf nur der Admin. Bearbeiten duerfen der Admin und die in
@@ -12,11 +13,6 @@
 // vor dem Commit geprueft - siehe raum_konflikte_mit_buchungen().
 //
 // Bewusst PHP-5.6-Syntax, damit es auf dem Schulrechner laeuft.
-
-require_once __DIR__ . '/../lib/db.php';
-require_once __DIR__ . '/../lib/funktionen.php';
-require_once __DIR__ . '/../lib/auth.php';
-require_once __DIR__ . '/../lib/raum_rechte.php';
 
 erfordere_login();
 csrf_pruefen();
@@ -35,7 +31,7 @@ if ($istBearbeiten) {
     if (!$raum) {
         zugriff_verweigert_seite(
             'Dieser Raum existiert nicht oder wurde bereits gelöscht.',
-            'raeume.php',
+            'raeume',
             'Zurück zu den Räumen'
         );
     }
@@ -44,14 +40,14 @@ if ($istBearbeiten) {
     if (!raum_darf_bearbeiten($raumId, $meineId, $istAdmin)) {
         zugriff_verweigert_seite(
             'Sie sind für diesen Raum nicht als Bearbeiter eingetragen und können ihn deshalb nicht bearbeiten.',
-            'raeume.php',
+            'raeume',
             'Zurück zu den Räumen'
         );
     }
 } elseif (!raum_darf_anlegen($istAdmin)) {
     zugriff_verweigert_seite(
         'Neue Räume kann nur der Systemverwalter anlegen.',
-        'raeume.php',
+        'raeume',
         'Zurück zu den Räumen'
     );
 }
@@ -184,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if (empty($fehler)) {
                 $db->commit();
-                header('Location: raeume.php');
+                header('Location: ' . url('raeume'));
                 exit;
             }
 
@@ -206,49 +202,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$seitenTitel = $istBearbeiten ? 'Raum bearbeiten' : 'Neuen Raum anlegen';
+$seitentitel   = $istBearbeiten ? 'Raum bearbeiten' : 'Neuen Raum anlegen';
+$seitenCss     = array('formular.css');
+$ohneKopfzeile = true;
 ?>
-<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title><?php echo h($seitenTitel); ?> – FitFürInfo</title>
-<link rel="stylesheet" href="<?php echo h(asset_url('css/style.css')); ?>">
-<link rel="stylesheet" href="<?php echo h(asset_url('css/formular.css')); ?>">
-</head>
-<body class="seite-raum_bearbeiten">
-
-  <div class="kopf">
-    <h1>FitFürInfo</h1>
-    <p><?php echo h($seitenTitel); ?></p>
-    <svg class="welle" viewBox="0 0 1440 200" preserveAspectRatio="none">
-      <defs>
-        <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#1a8f9c"/>
-          <stop offset="45%" stop-color="#2f6fb0"/>
-          <stop offset="100%" stop-color="#e8792e"/>
-        </linearGradient>
-      </defs>
-      <path fill="url(#waveGradient)" d="M0,80 C240,160 480,0 720,60 C960,120 1200,20 1440,90 L1440,0 L0,0 Z"/>
-    </svg>
-  </div>
+<?php formular_kopf($seitentitel); ?>
 
   <div class="inhalt">
 
-    <nav class="reiter-gruppe">
-      <a href="kurse.php" class="reiter">Kurse</a>
-      <a href="raeume.php" class="reiter active">Räume</a>
-      <a href="belegung.php" class="reiter">Belegung</a>
-      <?php if ($istAdmin): ?>
-      <a href="benutzer.php" class="reiter">Benutzer</a>
-      <?php endif; ?>
-    </nav>
+<?php formular_reiter('raeume'); ?>
 
     <?php session_fehler_anzeigen(); ?>
 
     <div class="karte">
-      <h2 class="karte-titel"><?php echo h($seitenTitel); ?></h2>
+      <h2 class="karte-titel"><?php echo h($seitentitel); ?></h2>
 
       <?php if (!empty($fehler)): ?>
       <div class="fehler">
@@ -266,11 +233,11 @@ $seitenTitel = $istBearbeiten ? 'Raum bearbeiten' : 'Neuen Raum anlegen';
       <div class="hinweis">
         Es wurde nichts gespeichert. Wer die Änderung trotzdem braucht, muss zuerst die
         betroffenen Buchungen anpassen oder löschen:
-        <a href="buchungen.php?raum_id=<?php echo (int) $raumId; ?>">Belegung dieses Raums anzeigen</a>.
+        <a href="<?php echo h(url('buchungen', array('raum_id' => (int) $raumId))); ?>">Belegung dieses Raums anzeigen</a>.
       </div>
       <?php endif; ?>
 
-      <form method="post" action="raum_bearbeiten.php<?php echo $istBearbeiten ? '?id=' . (int) $raumId : ''; ?>">
+      <form method="post" action="<?php echo h(url('raum_bearbeiten', $istBearbeiten ? array('id' => (int) $raumId) : array())); ?>">
         <?php csrf_feld(); ?>
         <label for="name">Name</label>
         <input type="text" id="name" name="name" maxlength="50" value="<?php echo h($name); ?>" required>
@@ -309,7 +276,7 @@ $seitenTitel = $istBearbeiten ? 'Raum bearbeiten' : 'Neuen Raum anlegen';
 
         <div class="knopf-reihe">
           <button type="submit" class="knopf">Speichern</button>
-          <a class="link-abbrechen" href="raeume.php">Abbrechen</a>
+          <a class="link-abbrechen" href="<?php echo h(url('raeume')); ?>">Abbrechen</a>
         </div>
       </form>
 
@@ -321,6 +288,3 @@ $seitenTitel = $istBearbeiten ? 'Raum bearbeiten' : 'Neuen Raum anlegen';
       </p>
     </div>
   </div>
-
-</body>
-</html>

@@ -1,5 +1,7 @@
+<?php if (!defined('FFI_START')) { exit; } ?>
 <?php
 /**
+ * passwort_setzen (Aufruf: index.php?seite=passwort_setzen)
  * Freischaltcode einloesen und eigenes Passwort setzen.
  *
  * Der Admin legt Konten ohne Passwort an und zeigt dem Mitarbeiter nur
@@ -9,11 +11,6 @@
  * Bewusst PHP-5.6-Syntax, damit es auf dem Schulrechner laeuft.
  */
 
-require_once __DIR__ . '/../lib/db.php';
-require_once __DIR__ . '/../lib/funktionen.php';
-require_once __DIR__ . '/../lib/auth.php';
-
-session_starten();
 csrf_pruefen();
 
 $fehler       = array();
@@ -47,22 +44,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-?>
-<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="utf-8">
-<title>Passwort setzen – FitFuerInfo</title>
-<link rel="stylesheet" href="<?php echo h(asset_url('css/style.css')); ?>">
-<link rel="stylesheet" href="<?php echo h(asset_url('css/passwort_setzen.css')); ?>">
-</head>
-<body class="seite-passwort_setzen">
 
+$seitentitel   = 'Passwort setzen';
+$seitenCss     = array('passwort_setzen.css');
+$ohneKopfzeile = true;
+?>
 <div class="kopf">
   <h1>FitFuerInfo</h1>
   <p>Passwort setzen</p>
   <svg class="welle" viewBox="0 0 500 70" preserveAspectRatio="none">
-    <path d="M0,40 C125,80 375,0 500,40 L500,70 L0,70 Z" fill="#f2f5f7"></path>
+    <path d="M0,40 C125,80 375,0 500,40 L500,70 L0,70 Z"></path>
   </svg>
 </div>
 
@@ -75,12 +66,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         Das Passwort wurde gespeichert. Die Anmeldung ist jetzt möglich.
       </div>
       <div class="fuss">
-        <a href="login.php">Zur Anmeldung</a>
+        <a href="<?php echo h(url('login')); ?>">Zur Anmeldung</a>
       </div>
 
     <?php else: ?>
 
-      <form method="post" action="passwort_setzen.php" novalidate>
+      <form method="post" action="<?php echo h(url('passwort_setzen')); ?>" novalidate>
         <?php csrf_feld(); ?>
         <label for="username">Benutzername</label>
         <input type="text" id="username" name="username" placeholder="Benutzername"
@@ -115,13 +106,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </form>
 
       <div class="fuss">
-        <a href="login.php">Zur Anmeldung</a>
+        <a href="<?php echo h(url('login')); ?>">Zur Anmeldung</a>
       </div>
 
     <?php endif; ?>
 
   </div>
 </div>
-
-</body>
-</html>

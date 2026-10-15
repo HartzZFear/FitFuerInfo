@@ -1,17 +1,11 @@
+<?php if (!defined('FFI_START')) { exit; } ?>
 <?php
-// buchungen.php
+// buchungen (Aufruf: index.php?seite=buchungen)
 // Belegungsliste: welcher Kurs liegt wann in welchem Raum.
 // Gleicher visueller Stil wie kurse.php (Kopfzeile mit Tabs, Wellen-Banner,
 // Sidebar mit Filtern, "+"-Knopf unten rechts in der Sidebar).
 //
 // Bewusst PHP-5.6-Syntax, damit es auf dem Schulrechner laeuft.
-
-require_once __DIR__ . '/../lib/db.php';
-require_once __DIR__ . '/../lib/funktionen.php';
-require_once __DIR__ . '/../lib/auth.php';
-require_once __DIR__ . '/../templates/layout.php';
-require_once __DIR__ . '/../lib/kurs_rechte.php';
-require_once __DIR__ . '/../lib/buchung_logik.php';
 
 erfordere_login();
 
@@ -77,7 +71,7 @@ if ($filterKursId > 0) {
 if ($nurMeine) {
     $kalenderParameter['nur_meine'] = 1;
 }
-$urlKalender = 'belegung.php?' . http_build_query($kalenderParameter);
+$urlKalender = url('belegung', $kalenderParameter);
 
 /**
  * Nur fuer die Anzeige der Buttons: gehoert die Buchung dem eingeloggten
@@ -93,20 +87,11 @@ function ist_eigene_buchung($buchung, $benutzerId, $istAdmin)
     }
     return (int) $buchung['benutzer_id'] === (int) $benutzerId;
 }
+
+$seitentitel = 'Belegung';
+$aktiverTab  = 'belegung';
+$seitenCss   = array('belegung.css');
 ?>
-<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Belegung – FitFürInfo</title>
-<link rel="stylesheet" href="<?php echo h(asset_url('css/style.css')); ?>">
-<link rel="stylesheet" href="<?php echo h(asset_url('css/belegung.css')); ?>">
-</head>
-<body class="seite-buchungen">
-
-  <?php kopfzeile('belegung'); ?>
-
   <div class="main-area">
 
     <?php session_fehler_anzeigen(); ?>
@@ -148,10 +133,10 @@ function ist_eigene_buchung($buchung, $benutzerId, $istAdmin)
             <td>
               <div class="zeilen-aktionen">
                 <?php if ($darfVerwalten && !$istVergangen): ?>
-                <a href="buchung_bearbeiten.php?id=<?php echo (int) $zeile['id']; ?>" class="btn-edit">bearbeiten</a>
+                <a href="<?php echo h(url('buchung_bearbeiten', array('id' => (int) $zeile['id']))); ?>" class="btn-edit">bearbeiten</a>
                 <?php endif; ?>
                 <?php if ($darfVerwalten && (!$istVergangen || $istAdmin)): ?>
-                <a href="buchung_loeschen.php?id=<?php echo (int) $zeile['id']; ?>" class="btn-delete">löschen</a>
+                <a href="<?php echo h(url('buchung_loeschen', array('id' => (int) $zeile['id']))); ?>" class="btn-delete">löschen</a>
                 <?php endif; ?>
               </div>
             </td>
@@ -163,7 +148,8 @@ function ist_eigene_buchung($buchung, $benutzerId, $istAdmin)
     </section>
 
     <aside class="sidebar">
-      <form method="get" action="buchungen.php">
+      <form method="get" action="<?php echo h(url('buchungen')); ?>">
+        <?php echo seite_feld('buchungen'); ?>
         <p class="sidebar-label">Raum</p>
         <select name="raum_id" data-auto-submit>
           <option value="0">Alle Räume</option>
@@ -202,17 +188,14 @@ function ist_eigene_buchung($buchung, $benutzerId, $istAdmin)
         </div>
 
         <a class="link-ansicht" href="<?php echo h($urlKalender); ?>">Kalenderansicht</a>
-        <a class="link-zuruecksetzen" href="buchungen.php">Filter zurücksetzen</a>
+        <a class="link-zuruecksetzen" href="<?php echo h(url('buchungen')); ?>">Filter zurücksetzen</a>
 
         <button type="submit" class="filter-submit">Filtern</button>
       </form>
 
       <?php if (!empty($meineKurse)): ?>
-      <a href="buchung_bearbeiten.php" class="btn-add" aria-label="Buchung hinzufügen">+</a>
+      <a href="<?php echo h(url('buchung_bearbeiten')); ?>" class="btn-add" aria-label="Buchung hinzufügen">+</a>
       <?php endif; ?>
     </aside>
 
   </div>
-
-</body>
-</html>

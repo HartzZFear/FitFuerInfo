@@ -30,6 +30,9 @@ body {
   width: 100%;
   height: 70px;
   display: block;
+  /* gleiche Farbe wie der Seitenhintergrund (body), damit die Welle
+     nahtlos in die Seite uebergeht */
+  fill: #f2f5f7;
 }
 
 .inhalt {

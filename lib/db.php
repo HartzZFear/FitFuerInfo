@@ -2,8 +2,7 @@
 /**
  * Datenbankverbindung (PDO).
  *
- * Verwendung in jeder Seite:
- *   require_once __DIR__ . '/../lib/db.php';
+ * Wird von index.php eingebunden. Verwendung in Funktionen:
  *   $db = db();
  *
  * db() baut die Verbindung beim ersten Aufruf auf und gibt bei weiteren
@@ -22,6 +21,9 @@ if (!file_exists(__DIR__ . '/../config/config.php')) {
     );
 }
 require_once __DIR__ . '/../config/config.php';
+
+// Projektweite Konstanten (Seiten-Whitelist, ASSET_VERSION, PW_MIN_LAENGE) - im Repo.
+require_once __DIR__ . '/../config/app.php';
 
 if (defined('DEBUG') && DEBUG) {
     error_reporting(E_ALL);

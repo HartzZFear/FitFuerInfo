@@ -1,13 +1,9 @@
+<?php if (!defined('FFI_START')) { exit; } ?>
 <?php
-// kurs_bearbeiten.php
+// kurs_bearbeiten (Aufruf: index.php?seite=kurs_bearbeiten)
 // Kurs anlegen (ohne ?id=) oder bearbeiten (mit ?id=N).
 //
 // Bewusst PHP-5.6-Syntax, damit es auf dem Schulrechner laeuft.
-
-require_once __DIR__ . '/../lib/db.php';
-require_once __DIR__ . '/../lib/funktionen.php';
-require_once __DIR__ . '/../lib/auth.php';
-require_once __DIR__ . '/../lib/kurs_rechte.php';
 
 erfordere_login();
 csrf_pruefen();
@@ -117,40 +113,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        header('Location: kurse.php');
+        header('Location: ' . url('kurse'));
         exit;
     }
 }
-?>
-<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title><?php echo $istBearbeiten ? 'Kurs bearbeiten' : 'Neuen Kurs anlegen'; ?> – FitFürInfo</title>
-<link rel="stylesheet" href="<?php echo h(asset_url('css/style.css')); ?>">
-<link rel="stylesheet" href="<?php echo h(asset_url('css/formular.css')); ?>">
-</head>
-<body class="seite-kurs_bearbeiten">
 
-  <div class="kopf">
-    <h1>FitFürInfo</h1>
-    <p><?php echo $istBearbeiten ? 'Kurs bearbeiten' : 'Neuen Kurs anlegen'; ?></p>
-    <svg class="welle" viewBox="0 0 1440 200" preserveAspectRatio="none">
-      <defs>
-        <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#1a8f9c"/>
-          <stop offset="45%" stop-color="#2f6fb0"/>
-          <stop offset="100%" stop-color="#e8792e"/>
-        </linearGradient>
-      </defs>
-      <path fill="url(#waveGradient)" d="M0,80 C240,160 480,0 720,60 C960,120 1200,20 1440,90 L1440,0 L0,0 Z"/>
-    </svg>
-  </div>
+$seitentitel   = $istBearbeiten ? 'Kurs bearbeiten' : 'Neuen Kurs anlegen';
+$seitenCss     = array('formular.css');
+$ohneKopfzeile = true;
+?>
+<?php formular_kopf($seitentitel); ?>
 
   <div class="inhalt">
     <div class="karte">
-      <h2 class="karte-titel"><?php echo $istBearbeiten ? 'Kurs bearbeiten' : 'Neuen Kurs anlegen'; ?></h2>
+      <h2 class="karte-titel"><?php echo h($seitentitel); ?></h2>
 
       <?php if (!empty($fehler)): ?>
       <div class="fehler">
@@ -162,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </div>
       <?php endif; ?>
 
-      <form method="post" action="kurs_bearbeiten.php<?php echo $istBearbeiten ? '?id=' . (int) $kursId : ''; ?>">
+      <form method="post" action="<?php echo h(url('kurs_bearbeiten', $istBearbeiten ? array('id' => (int) $kursId) : array())); ?>">
         <?php csrf_feld(); ?>
         <label for="titel">Titel</label>
         <input type="text" id="titel" name="titel" value="<?php echo h($titel); ?>" required>
@@ -203,11 +179,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div class="knopf-reihe">
           <button type="submit" class="knopf">Speichern</button>
-          <a class="link-abbrechen" href="kurse.php">Abbrechen</a>
+          <a class="link-abbrechen" href="<?php echo h(url('kurse')); ?>">Abbrechen</a>
         </div>
       </form>
     </div>
   </div>
-
-</body>
-</html>

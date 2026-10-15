@@ -1,5 +1,6 @@
+<?php if (!defined('FFI_START')) { exit; } ?>
 <?php
-// profil.php
+// profil (Aufruf: index.php?seite=profil)
 // Eigenes Profil: Stammdaten, ein paar Kennzahlen und "Passwort ändern".
 // Gleicher visueller Stil wie kurse.php (Kopfzeile mit Tabs, Wellen-Banner,
 // weisse Cards mit Schatten).
@@ -10,11 +11,6 @@
 // eines anderen umstellen kann.
 //
 // Bewusst PHP-5.6-Syntax, damit es auf dem Schulrechner laeuft.
-
-require_once __DIR__ . '/../lib/db.php';
-require_once __DIR__ . '/../lib/funktionen.php';
-require_once __DIR__ . '/../lib/auth.php';
-require_once __DIR__ . '/../templates/layout.php';
 
 erfordere_login();
 csrf_pruefen();
@@ -76,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Post/Redirect/Get: Neuladen schickt das Formular nicht erneut ab.
         $_SESSION['profil_meldung'] = 'Das Passwort wurde geändert. Ab der nächsten Anmeldung gilt nur noch das neue Passwort.';
-        header('Location: profil.php');
+        header('Location: ' . url('profil'));
         exit;
     }
 }
@@ -113,20 +109,11 @@ $rollenTexte = array(
     'mitarbeiter' => 'Mitarbeiter',
 );
 $rolleText = isset($rollenTexte[$ich['rolle']]) ? $rollenTexte[$ich['rolle']] : $ich['rolle'];
+
+$seitentitel = 'Profil';
+$aktiverTab  = 'profil';
+$seitenCss   = array('profil.css');
 ?>
-<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Profil – FitFürInfo</title>
-<link rel="stylesheet" href="<?php echo h(asset_url('css/style.css')); ?>">
-<link rel="stylesheet" href="<?php echo h(asset_url('css/profil.css')); ?>">
-</head>
-<body class="seite-profil">
-
-  <?php kopfzeile('profil'); ?>
-
   <div class="main-area">
 
     <?php session_fehler_anzeigen(); ?>
@@ -154,19 +141,19 @@ $rolleText = isset($rollenTexte[$ich['rolle']]) ? $rollenTexte[$ich['rolle']] : 
           <dd><?php echo h($rolleText); ?></dd>
 
           <dt>Eigene Kurse</dt>
-          <dd><?php echo (int) $anzahlKurse; ?><?php if ($anzahlKurse > 0): ?> <a href="kurse.php?ownership=own">anzeigen</a><?php endif; ?></dd>
+          <dd><?php echo (int) $anzahlKurse; ?><?php if ($anzahlKurse > 0): ?> <a href="<?php echo h(url('kurse', array('ownership' => 'own'))); ?>">anzeigen</a><?php endif; ?></dd>
 
           <dt>Räume als Bearbeiter</dt>
-          <dd><?php echo (int) $anzahlRaeume; ?><?php if ($anzahlRaeume > 0): ?> <a href="raeume.php?zustaendig=meine">anzeigen</a><?php endif; ?></dd>
+          <dd><?php echo (int) $anzahlRaeume; ?><?php if ($anzahlRaeume > 0): ?> <a href="<?php echo h(url('raeume', array('zustaendig' => 'meine'))); ?>">anzeigen</a><?php endif; ?></dd>
 
           <dt>Kommende Buchungen</dt>
-          <dd><?php echo (int) $anzahlBuchungen; ?><?php if ($anzahlBuchungen > 0): ?> <a href="buchungen.php?wer=meine">anzeigen</a><?php endif; ?></dd>
+          <dd><?php echo (int) $anzahlBuchungen; ?><?php if ($anzahlBuchungen > 0): ?> <a href="<?php echo h(url('buchungen', array('wer' => 'meine'))); ?>">anzeigen</a><?php endif; ?></dd>
         </dl>
 
         <p class="hinweis">
           Benutzername, E-Mail und Rolle können Sie hier nicht selbst ändern.
           <?php if (ist_admin()): ?>
-          Als Admin ändern Sie diese Angaben im Tab <a href="benutzer.php">Benutzer</a>.
+          Als Admin ändern Sie diese Angaben im Tab <a href="<?php echo h(url('benutzer')); ?>">Benutzer</a>.
           <?php else: ?>
           Wenden Sie sich dafür an den Systemverwalter (Admin).
           <?php endif; ?>
@@ -186,7 +173,7 @@ $rolleText = isset($rollenTexte[$ich['rolle']]) ? $rollenTexte[$ich['rolle']] : 
         </div>
         <?php endif; ?>
 
-        <form method="post" action="profil.php" novalidate>
+        <form method="post" action="<?php echo h(url('profil')); ?>" novalidate>
           <?php csrf_feld(); ?>
 
           <label for="passwort_alt">Aktuelles Passwort</label>
@@ -209,6 +196,3 @@ $rolleText = isset($rollenTexte[$ich['rolle']]) ? $rollenTexte[$ich['rolle']] : 
 
     </div>
   </div>
-
-</body>
-</html>
