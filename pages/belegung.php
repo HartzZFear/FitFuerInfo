@@ -9,12 +9,12 @@
 //
 // Bewusst PHP-5.6-Syntax, damit es auf dem Schulrechner laeuft.
 
-require_once __DIR__ . '/../db.php';
-require_once __DIR__ . '/../auth.php';
-require_once __DIR__ . '/../layout.php';
-require_once __DIR__ . '/../kurs_rechte.php';
-require_once __DIR__ . '/../buchung_logik.php';
-require_once __DIR__ . '/../kalender_logik.php';
+require_once __DIR__ . '/../lib/db.php';
+require_once __DIR__ . '/../lib/auth.php';
+require_once __DIR__ . '/../templates/layout.php';
+require_once __DIR__ . '/../lib/kurs_rechte.php';
+require_once __DIR__ . '/../lib/buchung_logik.php';
+require_once __DIR__ . '/../lib/kalender_logik.php';
 
 erfordere_login();
 
@@ -142,7 +142,7 @@ function buchung_tooltip($buchung)
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Belegung – FitFürInfo</title>
-<link rel="stylesheet" href="/fitfuerinfo/assets/css/style.css">
+<link rel="stylesheet" href="<?php echo h(BASE_URL . '/assets/css/style.css'); ?>">
 <style>
 
 /* ---- Hauptbereich ---- */

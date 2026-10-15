@@ -3,7 +3,7 @@
  * Vorlage fuer die lokale Konfiguration.
  *
  * ANLEITUNG:
- *   Diese Datei kopieren und als config.php im selben Ordner speichern.
+ *   Diese Datei kopieren und als config.php im selben Ordner (config/) speichern.
  *   config.php steht in der .gitignore und wird NICHT committet,
  *   weil sie lokale Zugangsdaten enthaelt.
  *

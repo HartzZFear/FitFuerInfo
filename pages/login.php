@@ -1,8 +1,8 @@
 <?php
 // login.php
 
-require_once __DIR__ . '/../db.php';
-require_once __DIR__ . '/../auth.php';
+require_once __DIR__ . '/../lib/db.php';
+require_once __DIR__ . '/../lib/auth.php';
 
 session_starten();
 csrf_pruefen();
@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Anmelden – FitFürInfo</title>
-<link rel="stylesheet" href="/fitfuerinfo/assets/css/style.css">
+<link rel="stylesheet" href="<?php echo h(BASE_URL . '/assets/css/style.css'); ?>">
 <style>
  body {
     margin: 0;
@@ -87,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   <main class="login-card">
     <div class="logo">
-      <img class="logo-mark" src="<?php echo BASE_URL; ?>/src/web/assets/logo.png" alt="">
+      <img class="logo-mark" src="<?php echo BASE_URL; ?>/assets/imgs/logo.png" alt="">
       <span class="logo-text"><span class="fit">FitFür</span><span class="info">Info</span></span>
     </div>
     <p class="logo-subtitle">Fitness &amp; Informatik vereint</p>

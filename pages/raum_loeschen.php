@@ -11,9 +11,9 @@
 //
 // Bewusst PHP-5.6-Syntax, damit es auf dem Schulrechner laeuft.
 
-require_once __DIR__ . '/../db.php';
-require_once __DIR__ . '/../auth.php';
-require_once __DIR__ . '/../raum_rechte.php';
+require_once __DIR__ . '/../lib/db.php';
+require_once __DIR__ . '/../lib/auth.php';
+require_once __DIR__ . '/../lib/raum_rechte.php';
 
 erfordere_login();
 csrf_pruefen();

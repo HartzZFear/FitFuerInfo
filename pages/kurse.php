@@ -3,10 +3,10 @@
 // Reine Darstellungsseite ohne Funktionalität, im gleichen visuellen Stil wie login.php
 // (Wellen-Header, Farbpalette Türkis/Blau/Orange, weiße Cards mit Schatten).
 
-require_once __DIR__ . '/../db.php';
-require_once __DIR__ . '/../auth.php';
-require_once __DIR__ . '/../layout.php';
-require_once __DIR__ . '/../kurs_rechte.php';
+require_once __DIR__ . '/../lib/db.php';
+require_once __DIR__ . '/../lib/auth.php';
+require_once __DIR__ . '/../templates/layout.php';
+require_once __DIR__ . '/../lib/kurs_rechte.php';
 
 erfordere_login();
 

@@ -2,7 +2,7 @@
 /**
  * Selbsttest der lokalen Einrichtung.
  *
- * Aufruf im Browser: http://localhost/fitfuerinfo/src/web/tst/test.php
+ * Aufruf im Browser: <BASE_URL>/tests/test.php
  *
  * Prueft PHP-Version, Datenbankverbindung, Tabellen und Testdaten.
  * Diese Datei ist nur ein Hilfsmittel fuer die Einrichtung und
@@ -36,20 +36,20 @@ pruefe(
 );
 
 // --- 3. config.php -----------------------------------------------------
-$configOk = file_exists(__DIR__ . '/../config.php');
+$configOk = file_exists(__DIR__ . '/../config/config.php');
 pruefe(
-    'src/web/config.php vorhanden',
+    'config/config.php vorhanden',
     $configOk,
     $configOk
         ? 'gefunden'
-        : 'fehlt – src/web/config.example.php kopieren und als src/web/config.php speichern'
+        : 'fehlt – config/config.example.php kopieren und als config/config.php speichern'
 );
 
 $db = null;
 
 // --- 4. Datenbankverbindung -------------------------------------------
 if ($configOk && $pdoOk) {
-    require_once __DIR__ . '/../db.php';
+    require_once __DIR__ . '/../lib/db.php';
     try {
         $db = db();
         pruefe('Datenbankverbindung', true, 'verbunden mit ' . DB_NAME . ' auf ' . DB_HOST);

@@ -186,7 +186,7 @@ function benutzer_code_anzeigen_falls_vorhanden()
 
     $schema = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
     $host   = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
-    $link   = $schema . '://' . $host . BASE_URL . '/src/web/pages/passwort_setzen.php';
+    $link   = $schema . '://' . $host . BASE_URL . '/pages/passwort_setzen.php';
 
     $gueltigBis = date('d.m.Y, H:i', strtotime($anzeige['gueltig_bis'])) . ' Uhr';
 

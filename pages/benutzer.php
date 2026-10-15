@@ -12,10 +12,10 @@
 //
 // Bewusst PHP-5.6-Syntax, damit es auf dem Schulrechner laeuft.
 
-require_once __DIR__ . '/../db.php';
-require_once __DIR__ . '/../auth.php';
-require_once __DIR__ . '/../layout.php';
-require_once __DIR__ . '/../benutzer_logik.php';
+require_once __DIR__ . '/../lib/db.php';
+require_once __DIR__ . '/../lib/auth.php';
+require_once __DIR__ . '/../templates/layout.php';
+require_once __DIR__ . '/../lib/benutzer_logik.php';
 
 erfordere_admin();
 csrf_pruefen();

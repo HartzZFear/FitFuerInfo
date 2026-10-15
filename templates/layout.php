@@ -23,7 +23,7 @@
  * Bewusst PHP-5.6-Syntax, damit es auf dem Schulrechner laeuft.
  */
 
-require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/../lib/auth.php';
 
 /**
  * Gibt CSS, Kopfzeile, Wellen-Banner und das Scroll-Skript des Banners aus.
@@ -42,7 +42,7 @@ function kopfzeile($aktiverTab)
         $cssAusgegeben = true;
     }
 
-    $basis = BASE_URL . '/src/web/pages/';
+    $basis = BASE_URL . '/pages/';
 
     $tabs = array(
         'kurse'    => 'Kurse',
@@ -56,7 +56,7 @@ function kopfzeile($aktiverTab)
 
   <header class="header-bar">
     <div class="header-logo">
-      <img src="<?php echo h(BASE_URL . '/src/web/assets/logo.png'); ?>" alt="">
+      <img src="<?php echo h(BASE_URL . '/assets/imgs/logo.png'); ?>" alt="">
       <span><span class="fit">FitFür</span><span class="info">Info</span></span>
     </div>
 
@@ -95,7 +95,7 @@ function kopfzeile($aktiverTab)
     </div>
   </div>
 
-  <script src="<?php echo h('/fitfuerinfo/assets/js/main.js'); ?>"></script>
+  <script src="<?php echo h(BASE_URL . '/assets/js/main.js'); ?>"></script>
   <?php
 }
 
@@ -106,7 +106,7 @@ function kopfzeile($aktiverTab)
 function kopfzeile_css()
 {
     ?>
-    <link rel="stylesheet" href="/fitfuerinfo/assets/css/style.css">
+    <link rel="stylesheet" href="<?php echo h(BASE_URL . '/assets/css/style.css'); ?>">
 
 <?php
 }
