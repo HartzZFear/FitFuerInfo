@@ -3,7 +3,7 @@
  * Datenbankverbindung (PDO).
  *
  * Verwendung in jeder Seite:
- *   require_once __DIR__ . '/db.php';
+ *   require_once __DIR__ . '/../lib/db.php';
  *   $db = db();
  *
  * db() baut die Verbindung beim ersten Aufruf auf und gibt bei weiteren
@@ -14,14 +14,14 @@
  */
 
 // config.php laden. Fehlt sie, ist die Einrichtung nicht abgeschlossen.
-if (!file_exists(__DIR__ . '/config.php')) {
+if (!file_exists(__DIR__ . '/../config/config.php')) {
     die(
-        'Fehler: src/web/config.php fehlt. '
-        . 'Bitte src/web/config.example.php kopieren und als src/web/config.php speichern. '
-        . 'Details stehen in SETUP.md, Abschnitt 5.'
+        'Fehler: config/config.php fehlt. '
+        . 'Bitte config/config.example.php kopieren und als config/config.php speichern. '
+        . 'Details stehen in README.md, Installation Schritt 4.'
     );
 }
-require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/../config/config.php';
 
 if (defined('DEBUG') && DEBUG) {
     error_reporting(E_ALL);

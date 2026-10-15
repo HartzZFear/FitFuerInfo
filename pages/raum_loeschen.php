@@ -1,15 +1,19 @@
 <?php
-// buchung_loeschen.php
-// Sicherheitsabfrage vor dem Loeschen einer Buchung. Die eigentliche
+// raum_loeschen.php
+// Sicherheitsabfrage vor dem Loeschen eines Raums. Die eigentliche
 // Loeschung passiert erst per POST (Bestaetigung), nicht schon beim
 // Aufruf per GET-Link.
 //
+// Loeschen darf nur der Admin. Ein Raum mit Buchungen bleibt stehen: der
+// Fremdschluessel buchung.raum_id steht auf RESTRICT. Hier wird das vorher
+// geprueft und die Anzahl angezeigt, statt den Benutzer in einen
+// Datenbankfehler laufen zu lassen.
+//
 // Bewusst PHP-5.6-Syntax, damit es auf dem Schulrechner laeuft.
 
-require_once __DIR__ . '/../db.php';
-require_once __DIR__ . '/../auth.php';
-require_once __DIR__ . '/../kurs_rechte.php';
-require_once __DIR__ . '/../buchung_logik.php';
+require_once __DIR__ . '/../lib/db.php';
+require_once __DIR__ . '/../lib/auth.php';
+require_once __DIR__ . '/../lib/raum_rechte.php';
 
 erfordere_login();
 csrf_pruefen();
@@ -17,59 +21,58 @@ csrf_pruefen();
 $meineId  = benutzer_id();
 $istAdmin = ist_admin();
 
-$buchungId = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+$raumId = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
-if ($buchungId < 1) {
+if ($raumId < 1) {
     zugriff_verweigert_seite(
-        'Es wurde keine gültige Buchung angegeben.',
-        'buchungen.php',
-        'Zurück zur Belegung'
+        'Es wurde kein gültiger Raum angegeben.',
+        'raeume.php',
+        'Zurück zu den Räumen'
     );
 }
 
-$buchung = abfrage(
-    'SELECT b.id, b.benutzer_id, b.start, b.ende, r.name AS raum, k.titel AS kurs
-     FROM buchung b
-     JOIN raum r ON r.id = b.raum_id
-     JOIN kurs k ON k.id = b.kurs_id
-     WHERE b.id = ?',
-    array($buchungId)
-)->fetch();
+$raum = abfrage('SELECT * FROM raum WHERE id = ?', array($raumId))->fetch();
 
-if (!$buchung) {
+if (!$raum) {
     zugriff_verweigert_seite(
-        'Diese Buchung existiert nicht oder wurde bereits gelöscht.',
-        'buchungen.php',
-        'Zurück zur Belegung'
+        'Dieser Raum existiert nicht oder wurde bereits gelöscht.',
+        'raeume.php',
+        'Zurück zu den Räumen'
     );
 }
 
 // Rechtepruefung serverseitig - der Aufruf per URL muss genauso scheitern
 // wie der Klick auf einen Button, den es gar nicht gibt.
-if (!buchung_darf_verwalten($buchungId, $meineId, $istAdmin)) {
+if (!raum_darf_loeschen($istAdmin)) {
     zugriff_verweigert_seite(
-        'Sie haben diese Buchung nicht angelegt und können sie deshalb nicht löschen.',
-        'buchungen.php',
-        'Zurück zur Belegung'
+        'Räume kann nur der Systemverwalter löschen.',
+        'raeume.php',
+        'Zurück zu den Räumen'
     );
 }
-if (!buchung_darf_loeschen($buchung, $meineId, $istAdmin)) {
-    zugriff_verweigert_seite(
-        'Diese Buchung liegt in der Vergangenheit. Nur der Systemverwalter kann sie noch löschen.',
-        'buchungen.php',
-        'Zurück zur Belegung'
-    );
-}
+
+// Auch vergangene Buchungen zaehlen mit: der Fremdschluessel unterscheidet
+// nicht, und die Belegung der letzten Wochen soll nachvollziehbar bleiben.
+$anzahlBuchungen = (int) abfrage(
+    'SELECT COUNT(*) FROM buchung WHERE raum_id = ?',
+    array($raumId)
+)->fetchColumn();
 
 $fehler = '';
+if ($anzahlBuchungen > 0) {
+    $fehler = 'Der Raum kann nicht gelöscht werden, solange noch '
+        . $anzahlBuchungen . ' Buchung(en) dafür bestehen. Zuerst die Buchungen entfernen.';
+}
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $fehler === '') {
     try {
-        abfrage('DELETE FROM buchung WHERE id = ?', array($buchungId));
-        header('Location: buchungen.php');
+        // raum_software und raum_bearbeiter haengen per ON DELETE CASCADE
+        // am Raum und verschwinden automatisch mit.
+        abfrage('DELETE FROM raum WHERE id = ?', array($raumId));
+        header('Location: raeume.php');
         exit;
     } catch (PDOException $e) {
-        $fehler = 'Die Buchung konnte nicht gelöscht werden. Bitte erneut versuchen.';
+        $fehler = 'Der Raum kann nicht gelöscht werden, solange noch Buchungen dafür bestehen.';
     }
 }
 ?>
@@ -78,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Buchung löschen – FitFürInfo</title>
+<title>Raum löschen – FitFürInfo</title>
 <style>
   :root {
     --teal: #1a8f9c;
@@ -172,13 +175,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     color: #a13a2f;
     font-size: 13px;
   }
+  .link-belegung {
+    font-size: 13px;
+    color: var(--blue);
+    text-decoration: none;
+  }
+  .link-belegung:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
 
   <div class="kopf">
     <h1>FitFürInfo</h1>
-    <p>Buchung löschen</p>
+    <p>Raum löschen</p>
     <svg class="welle" viewBox="0 0 1440 200" preserveAspectRatio="none">
       <defs>
         <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -195,8 +204,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <nav class="tab-group">
       <a href="kurse.php" class="tab">Kurse</a>
-      <a href="raeume.php" class="tab">Räume</a>
-      <a href="belegung.php" class="tab active">Belegung</a>
+      <a href="raeume.php" class="tab active">Räume</a>
+      <a href="belegung.php" class="tab">Belegung</a>
       <?php if ($istAdmin): ?>
       <a href="benutzer.php" class="tab">Benutzer</a>
       <?php endif; ?>
@@ -205,23 +214,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php session_fehler_anzeigen(); ?>
 
     <div class="karte">
-      <h2 class="karte-titel">Buchung löschen</h2>
+      <h2 class="karte-titel">Raum löschen</h2>
 
       <?php if ($fehler !== ''): ?>
       <div class="fehler"><?php echo h($fehler); ?></div>
-      <p><a class="link-abbrechen" href="buchungen.php">Zurück zur Belegung</a></p>
+      <p>
+        <a class="link-belegung" href="buchungen.php?raum_id=<?php echo (int) $raumId; ?>">Belegung dieses Raums anzeigen</a>
+      </p>
+      <p><a class="link-abbrechen" href="raeume.php">Zurück zu den Räumen</a></p>
       <?php else: ?>
       <p class="karte-text">
-        Soll die Buchung von <strong><?php echo h($buchung['kurs']); ?></strong>
-        in <strong><?php echo h($buchung['raum']); ?></strong>
-        <?php echo h(buchung_zeitraum_text($buchung['start'], $buchung['ende'])); ?>
-        wirklich gelöscht werden? Das kann nicht rückgängig gemacht werden.
+        Soll der Raum <strong><?php echo h($raum['name']); ?></strong>
+        mit <?php echo (int) $raum['arbeitsplaetze']; ?> Arbeitsplätzen wirklich gelöscht werden?
+        Das kann nicht rückgängig gemacht werden.
       </p>
-      <form method="post" action="buchung_loeschen.php?id=<?php echo (int) $buchungId; ?>">
+      <form method="post" action="raum_loeschen.php?id=<?php echo (int) $raumId; ?>">
         <?php csrf_feld(); ?>
         <div class="knopf-reihe">
           <button type="submit" class="knopf knopf-loeschen">Ja, endgültig löschen</button>
-          <a class="link-abbrechen" href="buchungen.php">Abbrechen</a>
+          <a class="link-abbrechen" href="raeume.php">Abbrechen</a>
         </div>
       </form>
       <?php endif; ?>

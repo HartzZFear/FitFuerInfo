@@ -156,7 +156,7 @@ function aktueller_benutzer()
 function erfordere_login()
 {
     if (!ist_eingeloggt()) {
-        header('Location: ' . BASE_URL . '/src/web/pages/login.php');
+        header('Location: ' . BASE_URL . '/pages/login.php');
         exit;
     }
 
@@ -164,7 +164,7 @@ function erfordere_login()
 
     if ($benutzer === null || (int) $benutzer['aktiv'] !== 1) {
         abmelden();
-        header('Location: ' . BASE_URL . '/src/web/pages/login.php?gesperrt=1');
+        header('Location: ' . BASE_URL . '/pages/login.php?gesperrt=1');
         exit;
     }
 
@@ -180,7 +180,7 @@ function erfordere_admin()
 
     if (!ist_admin()) {
         $_SESSION['fehler'] = 'Diese Seite ist nur für den Systemverwalter zugänglich.';
-        header('Location: ' . BASE_URL . '/src/web/pages/kurse.php');
+        header('Location: ' . BASE_URL . '/pages/kurse.php');
         exit;
     }
 }
@@ -388,7 +388,7 @@ function csrf_pruefen()
     }
 
     http_response_code(400);
-    $neuLaden = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : BASE_URL . '/src/web/';
+    $neuLaden = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : BASE_URL . '/';
     ?>
 <!DOCTYPE html>
 <html lang="de">

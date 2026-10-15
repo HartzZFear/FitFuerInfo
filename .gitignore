@@ -1,5 +1,5 @@
 # lokale Zugangsdaten - NIEMALS committen
-*config.php
+/config/config.php
 
 # Logs und Dumps
 *.log

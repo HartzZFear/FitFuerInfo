@@ -1,4 +1,9 @@
-/* GLOBAL STYLESHEET */
+/* GLOBAL STYLESHEET
+ *
+ * Bewusst flaches CSS ohne Verschachtelung (&-Syntax): jede Regel steht mit
+ * ihrem vollstaendigen Selektor da. Das laeuft auch in aelteren Browsern und
+ * man sieht sofort, fuer welche Elemente eine Regel gilt.
+ */
 
 :root {
   /* Global Variables*/
@@ -21,214 +26,20 @@
   box-sizing: border-box;
 }
 
-/* */
-.farbe-0 {
-  background: rgba(26, 143, 156, 0.16);
-  border-color: #1a8f9c;
-}
-
-.farbe-1 {
-  background: rgba(47, 111, 176, 0.16);
-  border-color: #2f6fb0;
-}
-
-.farbe-2 {
-  background: rgba(232, 121, 46, 0.18);
-  border-color: #e8792e;
-}
-
-.farbe-3 {
-  background: rgba(123, 94, 167, 0.16);
-  border-color: #7b5ea7;
-}
-
-.farbe-4 {
-  background: rgba(58, 154, 91, 0.16);
-  border-color: #3a9a5b;
-}
-
-.farbe-5 {
-  background: rgba(200, 80, 75, 0.16);
-  border-color: #c8504b;
-}
-
-.farbe-6 {
-  background: rgba(201, 154, 26, 0.20);
-  border-color: #c99a1a;
-}
-
-.farbe-7 {
-  background: rgba(90, 111, 124, 0.16);
-  border-color: #5a6f7c;
-}
+/* =====================================================================
+   App-Seiten: Kopfzeile und Wellen-Banner (Ausgabe von kopfzeile())
+   ===================================================================== */
 
 body {
-  padding-top: 78px;
-  /* Platz für die fixierte Kopfzeile */
-
-  &.belegung {
-
-    .main-area {
-      max-width: 1600px;
-      width: 92%;
-      margin: 20px auto 40px;
-      padding: 0 16px 16px;
-      padding-right: 292px;
-      /* Platz für die fest positionierte Sidebar */
-
-      .kalender-karte {
-        background: var(--card-bg);
-        border-radius: 14px;
-        box-shadow: 0 12px 28px rgba(20, 40, 50, 0.1);
-        padding: 18px 18px 20px;
-
-        .scroll-hinweis {
-          margin: 0 0 8px;
-          font-size: 12px;
-          color: var(--text-muted);
-          text-align: right;
-        }
-
-        .slot-scroll {
-          overflow-x: auto;
-          padding-bottom: 4px;
-          /* Platz fuer die Scrollleiste */
-
-        }
-
-        .werkzeugleiste {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: center;
-          gap: 14px;
-          margin-bottom: 16px;
-        }
-
-        .legende {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px 18px;
-          margin-top: 16px;
-          padding-top: 14px;
-          border-top: 1px solid var(--border);
-          font-size: 12px;
-          color: var(--text-muted);
-
-          .legende-eintrag {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-
-            .legende-farbe {
-              display: inline-block;
-              width: 16px;
-              height: 12px;
-              border-radius: 3px;
-              border-left: 4px solid;
-
-              &.eigene {
-                background: #ffffff;
-                border-left: none;
-                box-shadow: inset 0 0 0 2px var(--text-dark);
-              }
-
-              &.verdeckt {
-                border-left-color: #c3ccd0;
-                background: repeating-linear-gradient(45deg, #f0f3f4 0 3px, #e6eaec 3px 6px);
-              }
-            }
-          }
-        }
-      }
-
-      .sidebar {
-        position: fixed;
-        top: 208px;
-        right: 24px;
-        width: 240px;
-        background: var(--card-bg);
-        border-radius: 14px;
-        box-shadow: 0 12px 28px rgba(20, 40, 50, 0.1);
-        padding: 20px 20px 70px;
-        z-index: 2;
-
-        .sidebar-label {
-          color: var(--blue);
-          font-size: 12px;
-          font-weight: 700;
-          letter-spacing: 0.4px;
-          margin: 0 0 8px;
-          text-transform: uppercase;
-        }
-
-        .check-option {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 14px;
-          color: var(--text-dark);
-          cursor: pointer;
-          margin-bottom: 18px;
-
-          input[type="checkbox"] {
-            accent-color: var(--blue);
-            width: 16px;
-            height: 16px;
-          }
-        }
-
-        .sidebar-links {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-
-          .link-zuruecksetzen {
-            font-size: 13px;
-            color: var(--text-muted);
-            text-decoration: none;
-
-            &:hover {
-              text-decoration: underline;
-            }
-          }
-
-          .link-ansicht {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--blue);
-            text-decoration: none;
-
-            &:hover {
-              text-decoration: underline;
-            }
-          }
-        }
-
-        select {
-          width: 100%;
-          padding: 10px 12px;
-          border: 1px solid var(--border);
-          border-radius: 10px;
-          font-size: 14px;
-          font-family: inherit;
-          color: var(--text-dark);
-          background: #fbfcfc;
-          outline: none;
-          margin-bottom: 20px;
-
-          &:focus {
-            border-color: var(--blue);
-            background: #ffffff;
-          }
-        }
-      }
-    }
-  }
+  padding-top: 78px; /* Platz für die fixierte Kopfzeile */
 }
 
+/* ---- Dekorativer Wellen-Header: fixiert unter der Kopfzeile, wird per JS
+   beim Scrollen sanft (parallax + fade) ausgeblendet statt abrupt zu verschwinden ---- */
+.banner-spacer {
+  height: 110px;
+}
 
-
-/* ---- Dekorativer Wellen-Header oben auf der Seite ---- */
 .top-banner {
   position: fixed;
   top: 78px;
@@ -239,81 +50,79 @@ body {
   z-index: 1;
   will-change: transform, opacity;
   transition: transform 0.05s linear, opacity 0.05s linear;
-
-  /* Verschachteltes Kind-Element (SVG) */
-  svg {
-    width: 100%;
-    height: 100%;
-    display: block;
-    transition: transform 0.05s linear;
-  }
-
-  .help-region {
-    position: fixed;
-    top: 4px;
-    right: 14px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    z-index: 2;
-
-    .lang-select {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(255, 255, 255, 0.9);
-      border-radius: 20px;
-      padding: 5px 12px;
-      font-size: 13px;
-      color: var(--text-dark);
-    }
-
-    .help-icon {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.9);
-      color: var(--blue);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      font-size: 14px;
-      text-decoration: none;
-
-      &:hover,
-      &:focus-visible {
-        background: #ffffff;
-      }
-
-      &.active {
-        background: linear-gradient(90deg, var(--blue) 0%, var(--teal) 45%, var(--orange) 100%);
-        color: #ffffff;
-        box-shadow: 0 0 0 2px #ffffff;
-      }
-    }
-
-  }
-
-  /* Verschachteltes Pseudo-Element (Schaltkreis-Muster) */
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image:
-      repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 40px),
-      repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 40px);
-    mix-blend-mode: overlay;
-    pointer-events: none;
-
-    /* Sauber aufgeteilte Hintergründe */
-    background-image:
-      repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 40px),
-      repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 40px);
-  }
 }
 
-/* <HEADER> */
+.top-banner svg,
+.login-welle svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.top-banner svg {
+  transition: transform 0.05s linear;
+}
+
+/* leichtes "Schaltkreis/Binär"-Muster über der Welle */
+.top-banner::after,
+.login-welle::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 40px),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 40px);
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+.help-region {
+  position: absolute;
+  top: 4px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  z-index: 2;
+}
+
+.help-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.help-icon:hover,
+.help-icon:focus-visible {
+  background: #ffffff;
+}
+
+.help-icon.active {
+  background: linear-gradient(90deg, var(--blue) 0%, var(--teal) 45%, var(--orange) 100%);
+  color: #ffffff;
+  box-shadow: 0 0 0 2px #ffffff;
+}
+
+.lang-select {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 13px;
+  color: var(--text-dark);
+}
+
+/* ---- Kopfzeile: Logo links, Tabs mittig, Profile/Log Out rechts ---- */
 .header-bar {
   position: fixed;
   top: 0;
@@ -328,149 +137,256 @@ body {
   gap: 20px;
   padding: 0 24px;
   z-index: 3;
+}
 
-  .header-logo {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
 
-    img {
-      width: 56px;
-      height: 56px;
-      object-fit: contain;
-    }
+.header-logo img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+}
 
-    span {
-      font-size: 32px;
-      font-weight: 700;
-      color: var(--text-dark);
-      white-space: nowrap;
-      line-height: 1;
-    }
+.header-logo span {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-dark);
+  white-space: nowrap;
+  line-height: 1;
+}
 
-    .fit {
-      color: var(--orange);
-    }
+.header-logo .fit {
+  color: var(--orange);
+}
 
-    .info {
-      color: var(--blue);
-    }
+.header-logo .info {
+  color: var(--blue);
+}
+
+.tab-group {
+  flex: 1 1 auto;
+  display: flex;
+  gap: 16px;
+  max-width: 380px;
+  margin: 0 auto;
+}
+
+/* Mit dem Admin-Tab "Benutzer" etwas mehr Platz, damit kein Text
+   am Rand klebt. */
+.tab-group.vier {
+  max-width: 440px;
+}
+
+/* flex-basis 0 = alle Tabs gleich breit; min-width verhindert, dass
+   ein Tab schmaler als seine Beschriftung wird (sonst wird sie
+   abgeschnitten). */
+.tab {
+  flex: 1 1 0;
+  min-width: max-content;
+  text-align: center;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: #fbfcfc;
+}
+
+.tab:hover,
+.tab:focus-visible {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+.tab.active {
+  background: linear-gradient(90deg, var(--blue) 0%, var(--teal) 45%, var(--orange) 100%);
+  color: #ffffff;
+  border-color: transparent;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.btn-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.btn-header.profile {
+  color: var(--blue);
+  background: #f2f7fb;
+  border-color: #d7e6f2;
+}
+
+.btn-header.profile:hover,
+.btn-header.profile:focus-visible {
+  background: #e6f0f9;
+}
+
+.btn-header.profile.active {
+  color: #ffffff;
+  background: linear-gradient(90deg, var(--blue) 0%, var(--teal) 100%);
+  border-color: transparent;
+}
+
+.btn-header.logout {
+  color: #ffffff;
+  background: linear-gradient(90deg, var(--orange) 0%, #d9534f 100%);
+  border: none;
+}
+
+.btn-header.logout:hover,
+.btn-header.logout:focus-visible {
+  filter: brightness(1.05);
+}
+
+/* ---- 1024 bis 1279 px: gleiche Zeile, etwas kompakter ---- */
+@media (max-width: 1279px) {
+  .header-bar {
+    gap: 14px;
+    padding: 0 16px;
+  }
+
+  .header-logo img {
+    width: 46px;
+    height: 46px;
+  }
+
+  .header-logo span {
+    font-size: 26px;
   }
 
   .tab-group {
-    flex: 1 1 auto;
-    display: flex;
-    gap: 16px;
-    max-width: 380px;
-    margin: 0 auto;
+    gap: 10px;
+  }
 
-    &.vier {
-      max-width: 440px;
-    }
-
-    .tab {
-      flex: 1 1 0;
-      min-width: max-content;
-      text-align: center;
-      padding: 10px 12px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-decoration: none;
-      white-space: nowrap;
-      cursor: pointer;
-      border: 1px solid var(--border);
-      background: #fbfcfc;
-
-      &:hover,
-      &:focus-visible {
-        border-color: var(--blue);
-        color: var(--blue);
-      }
-
-      &.active {
-        background: linear-gradient(90deg, var(--blue) 0%, var(--teal) 45%, var(--orange) 100%);
-        color: #ffffff;
-        border-color: transparent;
-      }
-    }
+  .tab {
+    padding: 9px 10px;
+    font-size: 13px;
   }
 
   .header-actions {
-    display: flex;
-    gap: 10px;
-    flex-shrink: 0;
+    gap: 8px;
+  }
 
-    .btn-header {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      text-decoration: none;
-      cursor: pointer;
-      border: 1px solid var(--border);
-      white-space: nowrap;
-
-      &.profile {
-        color: var(--blue);
-        background: #f2f7fb;
-        border-color: #d7e6f2;
-
-        &:hover,
-        &:focus-visible {
-          background: #e6f0f9;
-        }
-
-        &.active {
-          color: #ffffff;
-          background: linear-gradient(90deg, var(--blue) 0%, var(--teal) 100%);
-          border-color: transparent;
-        }
-      }
-
-      &.logout {
-        color: #ffffff;
-        background: linear-gradient(90deg, var(--orange) 0%, #d9534f 100%);
-        border: none;
-
-        &:hover,
-        &:focus-visible {
-          filter: brightness(1.05);
-        }
-      }
-    }
+  .btn-header {
+    padding: 8px 12px;
   }
 }
 
-.banner-spacer {
-  height: 110px;
+/* ---- Unter 1024 px: Kopfzeile darf umbrechen ----
+   Logo und Knoepfe bleiben oben, die Tabs rutschen in eine eigene Zeile.
+   Die Kopfzeile ist dann nicht mehr fixiert (ihre Hoehe haengt vom
+   Umbruch ab), das Banner folgt ihr im normalen Fluss. */
+@media (max-width: 1023px) {
+  body {
+    padding-top: 0;
+  }
+
+  .header-bar {
+    position: relative;
+    height: auto;
+    min-height: 78px;
+    flex-wrap: wrap;
+    row-gap: 10px;
+    padding: 10px 16px 12px;
+  }
+
+  .header-logo {
+    margin-right: auto;
+  }
+
+  .tab-group,
+  .tab-group.vier {
+    order: 3;
+    flex: 1 1 100%;
+    max-width: none;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .header-actions {
+    flex-wrap: wrap;
+  }
+
+  .banner-spacer {
+    display: none;
+  }
+
+  .top-banner {
+    position: relative;
+    top: 0;
+  }
+
+  /* Die Filterleiste der Listen-Seiten haengt sonst fest bei 208 px und
+     wuerde von einer umgebrochenen Kopfzeile ueberdeckt. Ab 700 px abwaerts
+     stellt jede Seite sie ohnehin selbst in den normalen Fluss. */
+  .main-area {
+    position: relative;
+  }
 }
 
+@media (min-width: 701px) and (max-width: 1023px) {
+  .sidebar {
+    position: absolute;
+    top: 0;
+    right: 16px;
+  }
+}
 
+/* =====================================================================
+   Login-Seite (<body class="login-seite">)
+   Eigene body-Klasse und eigener Wellen-Name, damit sich die Regeln nicht
+   mit "body" und ".top-banner" der App-Seiten ueberschneiden.
+   ===================================================================== */
 
+body.login-seite {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--page-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
 
+/* ---- Dekorativer Wellen-Streifen oben auf der Seite ---- */
+.login-welle {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 130px;
+  overflow: hidden;
+  z-index: 0;
+}
 
-
-
-
-
-
-
-/* .lang-select {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255,255,255,0.9);
-    border-radius: 20px;
-    padding: 5px 12px;
-    font-size: 13px;
-    color: var(--text-dark);
-} */
+/* Auf der Login-Seite liegt die Hilfe nicht im Banner, sondern direkt im
+   body - deshalb fest am Fensterrand statt absolut im Banner. */
+.login-seite .help-region {
+  position: fixed;
+}
 
 /* ---- Login-Karte ---- */
 .login-card {
@@ -484,8 +400,6 @@ body {
   box-shadow: 0 20px 45px rgba(20, 40, 50, 0.15);
   text-align: center;
 }
-
-
 
 .logo {
   display: flex;
@@ -531,8 +445,8 @@ body {
 }
 
 /* Labels bleiben für Screenreader vorhanden, werden aber optisch
-     ausgeblendet - im Feld selbst steht ja bereits das Platzhalter-Icon
-     + der Placeholder-Text, genau wie im Referenz-Design. */
+   ausgeblendet - im Feld selbst steht ja bereits das Platzhalter-Icon
+   + der Placeholder-Text, genau wie im Referenz-Design. */
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -582,8 +496,8 @@ body {
 }
 
 /* Zwei Hinweise statt "Passwort vergessen?": Mit einem Freischaltcode
-     kommt man ueber passwort_setzen.php weiter, ohne Code nur ueber den
-     Admin - deshalb ist der zweite Hinweis bewusst kein Link. */
+   kommt man ueber passwort_setzen.php weiter, ohne Code nur ueber den
+   Admin - deshalb ist der zweite Hinweis bewusst kein Link. */
 .forgot-row {
   text-align: right;
   margin-bottom: 22px;
@@ -635,9 +549,10 @@ body {
   filter: brightness(1.05);
 }
 
-.btn-login:focus-visible,
-a:focus-visible,
-input:focus-visible {
+/* Nur auf der Login-Seite: die App-Seiten haben eigene Fokus-Stile. */
+.login-seite .btn-login:focus-visible,
+.login-seite a:focus-visible,
+.login-seite input:focus-visible {
   outline: 2px solid var(--blue);
   outline-offset: 2px;
 }
@@ -659,101 +574,4 @@ input:focus-visible {
   color: #a13a2f;
   font-size: 13px;
   text-align: left;
-}
-
-
-
-
-/* RESPONSIVE BREAKPOINTS */
-@media (min-width: 701px) and (max-width: 1023px) {
-  .sidebar {
-    position: absolute;
-    top: 0;
-    right: 16px;
-  }
-}
-
-/* ---- 1024 bis 1279 px: gleiche Zeile, etwas kompakter ---- */
-@media (max-width: 1279px) {
-  .header-bar {
-    gap: 14px;
-    padding: 0 16px;
-  }
-
-  .header-logo img {
-    width: 46px;
-    height: 46px;
-  }
-
-  .header-logo span {
-    font-size: 26px;
-  }
-
-  .tab-group {
-    gap: 10px;
-  }
-
-  .tab {
-    padding: 9px 10px;
-    font-size: 13px;
-  }
-
-  .header-actions {
-    gap: 8px;
-  }
-
-  .btn-header {
-    padding: 8px 12px;
-  }
-}
-
-/* ---- Unter 1024 px: Kopfzeile darf umbrechen ----
-     Logo und Knoepfe bleiben oben, die Tabs rutschen in eine eigene Zeile.
-     Die Kopfzeile ist dann nicht mehr fixiert (ihre Hoehe haengt vom
-     Umbruch ab), das Banner folgt ihr im normalen Fluss. */
-@media (max-width: 1023px) {
-  body {
-    padding-top: 0;
-  }
-
-  .header-bar {
-    position: relative;
-    height: auto;
-    min-height: 78px;
-    flex-wrap: wrap;
-    row-gap: 10px;
-    padding: 10px 16px 12px;
-  }
-
-  .header-logo {
-    margin-right: auto;
-  }
-
-  .tab-group {
-    order: 3;
-    flex: 1 1 100%;
-    max-width: none;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .header-actions {
-    flex-wrap: wrap;
-  }
-
-  .banner-spacer {
-    display: none;
-  }
-
-  .top-banner {
-    position: relative;
-    top: 0;
-  }
-
-  /* Die Filterleiste der Listen-Seiten haengt sonst fest bei 208 px und
-       wuerde von einer umgebrochenen Kopfzeile ueberdeckt. Ab 700 px abwaerts
-       stellt jede Seite sie ohnehin selbst in den normalen Fluss. */
-  .main-area {
-    position: relative;
-  }
 }
