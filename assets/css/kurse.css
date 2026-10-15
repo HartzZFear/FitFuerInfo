@@ -1,0 +1,116 @@
+/* Kursliste (kurse.php): Raster aus Kurs-Karten.
+ * Hauptbereich, Sidebar, Suchfeld, Chips und Knöpfe stehen in style.css.
+ */
+
+.course-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.course-card {
+  background: var(--card-bg);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 12px 28px rgba(20, 40, 50, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.course-body {
+  padding: 16px 18px 18px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.course-title {
+  margin: 0 0 8px;
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.course-desc {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.4;
+  flex: 1;
+}
+
+.course-meta {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.course-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.btn-edit,
+.btn-delete {
+  flex: 1;
+  border-radius: 8px;
+  padding: 9px 0;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+}
+
+.btn-edit {
+  background: linear-gradient(90deg, var(--blue) 0%, var(--teal) 100%);
+  color: #ffffff;
+  border: none;
+}
+
+.btn-delete {
+  background: linear-gradient(90deg, var(--orange) 0%, #d9534f 100%);
+  color: #ffffff;
+  border: none;
+}
+
+a.btn-edit,
+a.btn-delete {
+  display: inline-block;
+  text-decoration: none;
+}
+
+.btn-add {
+  position: absolute;
+  bottom: 18px;
+  right: 18px;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, var(--blue) 0%, var(--teal) 45%, var(--orange) 100%);
+  color: #ffffff;
+  border: none;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(20, 40, 50, 0.25);
+}
+
+a.btn-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+@media (min-width: 1400px) {
+  .course-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .course-grid {
+    grid-template-columns: 1fr;
+  }
+}

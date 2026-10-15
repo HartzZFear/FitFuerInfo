@@ -1,0 +1,187 @@
+/* Benutzerverwaltung (benutzer.php): Meldungen, Raster aus Benutzer-Karten
+ * mit Status-Chips und Aktionsknöpfen.
+ * Hauptbereich, Sidebar, Suchfeld, Chips und "+"-Knopf stehen in style.css.
+ */
+
+.meldung,
+.fehler {
+  margin: 0 0 20px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.meldung {
+  background: #e6f4ea;
+  border: 1px solid #a8d5b5;
+  color: #205c33;
+}
+
+.fehler {
+  background: #fdeceb;
+  border: 1px solid #f0b3ae;
+  color: #a13a2f;
+}
+
+.fehler ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.fehler li + li {
+  margin-top: 4px;
+}
+
+.benutzer-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.benutzer-card {
+  background: var(--card-bg);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 12px 28px rgba(20, 40, 50, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.benutzer-body {
+  padding: 16px 18px 18px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.benutzer-titel {
+  margin: 0 0 4px;
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--text-dark);
+  word-break: break-word;
+}
+
+.benutzer-email {
+  margin: 0 0 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+  word-break: break-all;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 10px;
+}
+
+.chip.rolle-admin {
+  color: var(--blue);
+  background: rgba(47, 111, 176, 0.1);
+  border-color: rgba(47, 111, 176, 0.25);
+}
+
+.chip.status-gesperrt {
+  color: #a13a2f;
+  background: #fdeceb;
+  border-color: #f0b3ae;
+}
+
+.chip.status-wartet {
+  color: #8a4b16;
+  background: #fff4e8;
+  border-color: #f3c79e;
+}
+
+.benutzer-zahlen {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  flex: 1;
+}
+
+.code-hinweis {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: #8a4b16;
+}
+
+.benutzer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.benutzer-actions form {
+  flex: 1;
+  display: flex;
+  margin: 0;
+}
+
+/* Alle Aktionsknöpfe einer Karte gleich breit; Farbe von .btn-edit
+   steht in style.css */
+.btn-edit,
+.btn-code,
+.btn-sperren,
+.btn-entsperren {
+  flex: 1;
+  border-radius: 8px;
+  padding: 9px 6px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  color: #ffffff;
+  border: none;
+  white-space: nowrap;
+}
+
+.btn-entsperren {
+  background: linear-gradient(90deg, var(--teal) 0%, var(--blue) 100%);
+}
+
+.btn-sperren {
+  background: linear-gradient(90deg, var(--orange) 0%, #d9534f 100%);
+}
+
+.btn-code {
+  color: var(--blue);
+  background: #f2f7fb;
+  border: 1px solid #d7e6f2;
+}
+
+.btn-entsperren:hover,
+.btn-sperren:hover {
+  filter: brightness(1.05);
+}
+
+.btn-code:hover {
+  background: #e6f0f9;
+}
+
+.sidebar-hinweis {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+@media (min-width: 1400px) {
+  .benutzer-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .benutzer-grid {
+    grid-template-columns: 1fr;
+  }
+}

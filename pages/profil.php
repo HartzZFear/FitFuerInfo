@@ -12,6 +12,7 @@
 // Bewusst PHP-5.6-Syntax, damit es auf dem Schulrechner laeuft.
 
 require_once __DIR__ . '/../lib/db.php';
+require_once __DIR__ . '/../lib/funktionen.php';
 require_once __DIR__ . '/../lib/auth.php';
 require_once __DIR__ . '/../templates/layout.php';
 
@@ -119,164 +120,10 @@ $rolleText = isset($rollenTexte[$ich['rolle']]) ? $rollenTexte[$ich['rolle']] : 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Profil – FitFürInfo</title>
-<style>
-  :root {
-    --teal: #1a8f9c;
-    --blue: #2f6fb0;
-    --orange: #e8792e;
-    --card-bg: #ffffff;
-    --page-bg: #eef3f4;
-    --text-dark: #2b3a42;
-    --text-muted: #7c8a91;
-    --border: #dfe6e8;
-  }
-
-  * { box-sizing: border-box; }
-
-  body {
-    margin: 0;
-    min-height: 100vh;
-    font-family: "Segoe UI", Roboto, Arial, sans-serif;
-    background: var(--page-bg);
-  }
-
-  /* ---- Hauptbereich: zwei Cards nebeneinander, schmal untereinander ---- */
-  .main-area {
-    max-width: 1100px;
-    width: 92%;
-    margin: 20px auto 40px;
-    padding: 0 16px 16px;
-  }
-
-  .profil-raster {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    align-items: start;
-  }
-
-  .karte {
-    background: var(--card-bg);
-    border-radius: 14px;
-    box-shadow: 0 12px 28px rgba(20, 40, 50, 0.1);
-    padding: 22px 24px 26px;
-  }
-
-  .karte-titel {
-    margin: 0 0 16px;
-    font-size: 19px;
-    font-weight: 700;
-    color: var(--text-dark);
-  }
-
-  .daten {
-    margin: 0;
-    display: grid;
-    grid-template-columns: max-content 1fr;
-    gap: 10px 18px;
-    font-size: 14px;
-  }
-
-  .daten dt {
-    color: var(--text-muted);
-    font-weight: 600;
-  }
-
-  .daten dd {
-    margin: 0;
-    color: var(--text-dark);
-    overflow-wrap: anywhere;
-  }
-
-  .daten dd a {
-    color: var(--blue);
-    text-decoration: none;
-    font-size: 12px;
-    margin-left: 6px;
-  }
-  .daten dd a:hover { text-decoration: underline; }
-
-  .leer { color: var(--text-muted); font-style: italic; }
-
-  .hinweis {
-    margin: 18px 0 0;
-    padding: 10px 12px;
-    border-radius: 8px;
-    font-size: 12.5px;
-    line-height: 1.45;
-    background: #eef6f7;
-    border: 1px solid #cfe6e9;
-    color: #3a6b72;
-  }
-
-  .karte label {
-    display: block;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.4px;
-    text-transform: uppercase;
-    color: var(--blue);
-    margin: 16px 0 6px;
-  }
-
-  .karte label:first-of-type { margin-top: 0; }
-
-  .karte input[type="password"] {
-    width: 100%;
-    padding: 11px 14px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    font-size: 14px;
-    color: var(--text-dark);
-    background: #fbfcfc;
-    outline: none;
-  }
-
-  .karte input[type="password"]:focus {
-    border-color: var(--blue);
-    background: #ffffff;
-  }
-
-  .knopf {
-    margin-top: 20px;
-    padding: 11px 24px;
-    border: none;
-    border-radius: 8px;
-    background: linear-gradient(90deg, var(--blue) 0%, var(--teal) 100%);
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-  }
-  .knopf:hover { filter: brightness(1.05); }
-
-  .meldung {
-    margin: 0 0 16px;
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-size: 13px;
-    background: #fdeceb;
-    border: 1px solid #f0b3ae;
-    color: #a13a2f;
-  }
-  .meldung ul { margin: 0; padding-left: 18px; }
-
-  .meldung-erfolg {
-    margin: 0 0 20px;
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-size: 13px;
-    background: #e6f4ea;
-    border: 1px solid #a8d5b5;
-    color: #205c33;
-  }
-
-  @media (max-width: 900px) {
-    .profil-raster { grid-template-columns: 1fr; }
-  }
-</style>
+<link rel="stylesheet" href="<?php echo h(asset_url('css/style.css')); ?>">
+<link rel="stylesheet" href="<?php echo h(asset_url('css/profil.css')); ?>">
 </head>
-<body>
+<body class="seite-profil">
 
   <?php kopfzeile('profil'); ?>
 
