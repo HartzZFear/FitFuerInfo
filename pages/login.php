@@ -2,6 +2,7 @@
 // login.php
 
 require_once __DIR__ . '/../lib/db.php';
+require_once __DIR__ . '/../lib/funktionen.php';
 require_once __DIR__ . '/../lib/auth.php';
 
 session_starten();
@@ -42,9 +43,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Anmelden – FitFürInfo</title>
-<link rel="stylesheet" href="<?php echo h(BASE_URL . '/assets/css/style.css'); ?>">
+<link rel="stylesheet" href="<?php echo h(asset_url('css/style.css')); ?>">
 </head>
-<body class="login-seite">
+<body class="seite-login">
 
   <!-- Dekorativer Wellen-Streifen oben, wie im Referenzbild -->
   <div class="login-welle" aria-hidden="true">

@@ -324,9 +324,8 @@ function session_fehler_anzeigen()
     $meldung = $_SESSION['fehler'];
     unset($_SESSION['fehler']);
 
-    echo '<div class="session-fehler" role="alert" style="margin: 0 0 20px; padding: 10px 14px;'
-        . ' border-radius: 8px; background: #fdeceb; border: 1px solid #f0b3ae; color: #a13a2f;'
-        . ' font-size: 13px;">' . h($meldung) . '</div>';
+    // Aussehen: .session-fehler in assets/css/style.css
+    echo '<div class="session-fehler" role="alert">' . h($meldung) . '</div>';
 }
 
 /**
