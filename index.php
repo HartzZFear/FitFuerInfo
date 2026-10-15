@@ -59,10 +59,9 @@ cache_dynamisch();
 // umgestellt und liegen weiter als eigenstaendige Dateien in pages/. Der
 // Block wird geloescht, sobald alle Seiten umgestellt sind.
 $nochNichtUmgestellt = array(
-    'logout', 'passwort_setzen', 'belegung', 'buchungen',
-    'buchung_bearbeiten', 'buchung_loeschen', 'kurs_bearbeiten',
-    'kurs_loeschen', 'raeume', 'raum_bearbeiten', 'raum_loeschen',
-    'benutzer', 'benutzer_bearbeiten', 'profil', 'hilfe',
+    'logout', 'passwort_setzen', 'buchung_bearbeiten', 'buchung_loeschen',
+    'kurs_bearbeiten', 'kurs_loeschen', 'raum_bearbeiten', 'raum_loeschen',
+    'benutzer_bearbeiten',
 );
 if (in_array($seite, $nochNichtUmgestellt, true)) {
     $uebrige = $_GET;

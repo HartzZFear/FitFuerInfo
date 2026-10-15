@@ -126,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     $_SESSION['benutzer_meldung'] = 'Die Änderungen an ' . $name . ' wurden gespeichert.';
                     $_SESSION['benutzer_fehler']  = array();
-                    header('Location: benutzer.php');
+                    header('Location: ' . url('benutzer'));
                     exit;
                 }
 
@@ -142,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 // Einmalige Anzeige uebernimmt benutzer.php.
                 benutzer_code_merken($neueId, $code);
-                header('Location: benutzer.php');
+                header('Location: ' . url('benutzer'));
                 exit;
             }
 
@@ -196,10 +196,10 @@ $istIch      = $istBearbeiten && (int) $zielId === (int) $meineId;
 
     <nav class="reiter-gruppe">
       <a href="<?php echo h(url('kurse')); ?>" class="reiter">Kurse</a>
-      <a href="raeume.php" class="reiter">Räume</a>
-      <a href="belegung.php" class="reiter">Belegung</a>
+      <a href="<?php echo h(url('raeume')); ?>" class="reiter">Räume</a>
+      <a href="<?php echo h(url('belegung')); ?>" class="reiter">Belegung</a>
       <?php if ($istAdmin): ?>
-      <a href="benutzer.php" class="reiter active">Benutzer</a>
+      <a href="<?php echo h(url('benutzer')); ?>" class="reiter active">Benutzer</a>
       <?php endif; ?>
     </nav>
 
@@ -256,7 +256,7 @@ $istIch      = $istBearbeiten && (int) $zielId === (int) $meineId;
 
         <div class="knopf-reihe">
           <button type="submit" class="knopf">Speichern</button>
-          <a class="link-abbrechen" href="benutzer.php">Abbrechen</a>
+          <a class="link-abbrechen" href="<?php echo h(url('benutzer')); ?>">Abbrechen</a>
         </div>
       </form>
 

@@ -1,5 +1,6 @@
+<?php if (!defined('FFI_START')) { exit; } ?>
 <?php
-// benutzer.php
+// benutzer (Aufruf: index.php?seite=benutzer)
 // Benutzerliste fuer den Systemverwalter. Gleicher visueller Stil wie
 // raeume.php (Kopfzeile mit Tabs, Wellen-Banner, Kartenraster, Sidebar mit
 // Suche und Filter).
@@ -11,12 +12,6 @@
 // angezeigt (benutzer_code_anzeigen_falls_vorhanden()).
 //
 // Bewusst PHP-5.6-Syntax, damit es auf dem Schulrechner laeuft.
-
-require_once __DIR__ . '/../lib/db.php';
-require_once __DIR__ . '/../lib/funktionen.php';
-require_once __DIR__ . '/../lib/auth.php';
-require_once __DIR__ . '/../templates/layout.php';
-require_once __DIR__ . '/../lib/benutzer_logik.php';
 
 erfordere_admin();
 csrf_pruefen();
@@ -40,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $fehler[] = 'Diesen Benutzer gibt es nicht.';
         } else {
             benutzer_code_merken($zielId, $code);
-            header('Location: benutzer.php');
+            header('Location: ' . url('benutzer'));
             exit;
         }
     } elseif ($aktion === 'sperren' || $aktion === 'entsperren') {
@@ -75,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Neuladen der Seite die Aktion nicht wiederholt.
     $_SESSION['benutzer_meldung'] = $meldung;
     $_SESSION['benutzer_fehler']  = $fehler;
-    header('Location: benutzer.php');
+    header('Location: ' . url('benutzer'));
     exit;
 }
 
@@ -184,20 +179,11 @@ function anzahl_text($anzahl, $einzahl, $mehrzahl)
 {
     return (int) $anzahl . ' ' . ((int) $anzahl === 1 ? $einzahl : $mehrzahl);
 }
+
+$seitentitel = 'Benutzer';
+$aktiverTab  = 'benutzer';
+$seitenCss   = array('benutzer.css');
 ?>
-<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Benutzer – FitFürInfo</title>
-<link rel="stylesheet" href="<?php echo h(asset_url('css/style.css')); ?>">
-<link rel="stylesheet" href="<?php echo h(asset_url('css/benutzer.css')); ?>">
-</head>
-<body class="seite-benutzer">
-
-  <?php kopfzeile('benutzer'); ?>
-
   <div class="main-area">
 
     <?php session_fehler_anzeigen(); ?>
@@ -260,10 +246,10 @@ function anzahl_text($anzahl, $einzahl, $mehrzahl)
           <?php endif; ?>
 
           <div class="benutzer-actions">
-            <a href="benutzer_bearbeiten.php?id=<?php echo $id; ?>" class="btn-edit">bearbeiten</a>
+            <a href="<?php echo h(url('benutzer_bearbeiten', array('id' => $id))); ?>" class="btn-edit">bearbeiten</a>
 
             <?php if ($status === 'gesperrt'): ?>
-            <form method="post" action="benutzer.php"
+            <form method="post" action="<?php echo h(url('benutzer')); ?>"
                   data-frage="<?php echo h($benutzer['name'] . ' wieder entsperren?'); ?>">
               <?php csrf_feld(); ?>
               <input type="hidden" name="aktion" value="entsperren">
@@ -273,7 +259,7 @@ function anzahl_text($anzahl, $einzahl, $mehrzahl)
             <?php elseif ($id !== (int) $meineId): ?>
             <?php /* Sich selbst sperren geht nicht (benutzer_darf_aendern()) -
                      deshalb gibt es den Knopf auf der eigenen Karte gar nicht. */ ?>
-            <form method="post" action="benutzer.php"
+            <form method="post" action="<?php echo h(url('benutzer')); ?>"
                   data-frage="<?php echo h($benutzer['name'] . ' wirklich sperren? Eine laufende Sitzung endet beim nächsten Klick.'); ?>">
               <?php csrf_feld(); ?>
               <input type="hidden" name="aktion" value="sperren">
@@ -284,7 +270,7 @@ function anzahl_text($anzahl, $einzahl, $mehrzahl)
           </div>
 
           <div class="benutzer-actions">
-            <form method="post" action="benutzer.php"
+            <form method="post" action="<?php echo h(url('benutzer')); ?>"
                   data-frage="<?php echo h('Neuen Freischaltcode für ' . $benutzer['name'] . ' erzeugen? Ein noch offener Code wird damit ungültig; ein bestehendes Passwort gilt weiter, bis der neue Code eingelöst wird.'); ?>">
               <?php csrf_feld(); ?>
               <input type="hidden" name="aktion" value="code">
@@ -300,7 +286,8 @@ function anzahl_text($anzahl, $einzahl, $mehrzahl)
     </section>
 
     <aside class="sidebar">
-      <form method="get" action="benutzer.php">
+      <form method="get" action="<?php echo h(url('benutzer')); ?>">
+        <?php echo seite_feld('benutzer'); ?>
         <p class="sidebar-label">Suche</p>
         <input type="text" name="suche" class="search-input" placeholder="Name oder E-Mail....." value="<?php echo h($suche); ?>">
 
@@ -326,10 +313,7 @@ function anzahl_text($anzahl, $einzahl, $mehrzahl)
         <button type="submit" class="filter-submit">Suchen</button>
       </form>
 
-      <a href="benutzer_bearbeiten.php" class="btn-add" aria-label="Benutzer hinzufügen">+</a>
+      <a href="<?php echo h(url('benutzer_bearbeiten')); ?>" class="btn-add" aria-label="Benutzer hinzufügen">+</a>
     </aside>
 
   </div>
-
-</body>
-</html>

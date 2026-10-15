@@ -1,5 +1,6 @@
+<?php if (!defined('FFI_START')) { exit; } ?>
 <?php
-// raeume.php
+// raeume (Aufruf: index.php?seite=raeume)
 // Raumliste: welcher Raum hat wie viele Arbeitsplaetze und welche Software.
 // Gleicher visueller Stil wie kurse.php (Kopfzeile mit Tabs, Wellen-Banner,
 // Kartenraster, Sidebar mit Suche und Filter).
@@ -11,12 +12,6 @@
 // bzw. raum_loeschen.php noch einmal.
 //
 // Bewusst PHP-5.6-Syntax, damit es auf dem Schulrechner laeuft.
-
-require_once __DIR__ . '/../lib/db.php';
-require_once __DIR__ . '/../lib/funktionen.php';
-require_once __DIR__ . '/../lib/auth.php';
-require_once __DIR__ . '/../templates/layout.php';
-require_once __DIR__ . '/../lib/raum_rechte.php';
 
 erfordere_login();
 
@@ -148,20 +143,11 @@ function ist_mein_raum($raum, $bearbeiterJeRaum, $benutzerId, $istAdmin)
     return isset($bearbeiterJeRaum[$raum['id']])
         && in_array((int) $benutzerId, $bearbeiterJeRaum[$raum['id']], true);
 }
+
+$seitentitel = 'Räume';
+$aktiverTab  = 'raeume';
+$seitenCss   = array('raeume.css');
 ?>
-<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Räume – FitFürInfo</title>
-<link rel="stylesheet" href="<?php echo h(asset_url('css/style.css')); ?>">
-<link rel="stylesheet" href="<?php echo h(asset_url('css/raeume.css')); ?>">
-</head>
-<body class="seite-raeume">
-
-  <?php kopfzeile('raeume'); ?>
-
   <div class="main-area">
 
     <?php session_fehler_anzeigen(); ?>
@@ -193,7 +179,7 @@ function ist_mein_raum($raum, $bearbeiterJeRaum, $benutzerId, $istAdmin)
           </div>
           <?php endif; ?>
 
-          <a class="link-belegung" href="belegung.php?ansicht=woche&amp;raum_id=<?php echo (int) $raum['id']; ?>">
+          <a class="link-belegung" href="<?php echo h(url('belegung', array('ansicht' => 'woche', 'raum_id' => (int) $raum['id']))); ?>">
             <?php
               $anzahl = isset($buchungenJeRaum[$raum['id']]) ? $buchungenJeRaum[$raum['id']] : 0;
               echo $anzahl === 1 ? '1 kommende Buchung' : (int) $anzahl . ' kommende Buchungen';
@@ -203,9 +189,9 @@ function ist_mein_raum($raum, $bearbeiterJeRaum, $benutzerId, $istAdmin)
 
           <?php if (ist_mein_raum($raum, $bearbeiterJeRaum, $meineId, $istAdmin)): ?>
           <div class="raum-actions">
-            <a href="raum_bearbeiten.php?id=<?php echo (int) $raum['id']; ?>" class="btn-edit">bearbeiten</a>
+            <a href="<?php echo h(url('raum_bearbeiten', array('id' => (int) $raum['id']))); ?>" class="btn-edit">bearbeiten</a>
             <?php if (raum_darf_loeschen($istAdmin)): ?>
-            <a href="raum_loeschen.php?id=<?php echo (int) $raum['id']; ?>" class="btn-delete">löschen</a>
+            <a href="<?php echo h(url('raum_loeschen', array('id' => (int) $raum['id']))); ?>" class="btn-delete">löschen</a>
             <?php endif; ?>
           </div>
           <?php endif; ?>
@@ -217,7 +203,8 @@ function ist_mein_raum($raum, $bearbeiterJeRaum, $benutzerId, $istAdmin)
     </section>
 
     <aside class="sidebar">
-      <form method="get" action="raeume.php">
+      <form method="get" action="<?php echo h(url('raeume')); ?>">
+        <?php echo seite_feld('raeume'); ?>
         <p class="sidebar-label">Suche</p>
         <input type="text" name="suche" class="search-input" placeholder="Raumname....." value="<?php echo h($suche); ?>">
 
@@ -252,11 +239,8 @@ function ist_mein_raum($raum, $bearbeiterJeRaum, $benutzerId, $istAdmin)
       </form>
 
       <?php if (raum_darf_anlegen($istAdmin)): ?>
-      <a href="raum_bearbeiten.php" class="btn-add" aria-label="Raum hinzufügen">+</a>
+      <a href="<?php echo h(url('raum_bearbeiten')); ?>" class="btn-add" aria-label="Raum hinzufügen">+</a>
       <?php endif; ?>
     </aside>
 
   </div>
-
-</body>
-</html>

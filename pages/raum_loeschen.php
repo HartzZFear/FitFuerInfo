@@ -70,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $fehler === '') {
         // raum_software und raum_bearbeiter haengen per ON DELETE CASCADE
         // am Raum und verschwinden automatisch mit.
         abfrage('DELETE FROM raum WHERE id = ?', array($raumId));
-        header('Location: raeume.php');
+        header('Location: ' . url('raeume'));
         exit;
     } catch (PDOException $e) {
         $fehler = 'Der Raum kann nicht gelöscht werden, solange noch Buchungen dafür bestehen.';
@@ -107,10 +107,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $fehler === '') {
 
     <nav class="reiter-gruppe">
       <a href="<?php echo h(url('kurse')); ?>" class="reiter">Kurse</a>
-      <a href="raeume.php" class="reiter active">Räume</a>
-      <a href="belegung.php" class="reiter">Belegung</a>
+      <a href="<?php echo h(url('raeume')); ?>" class="reiter active">Räume</a>
+      <a href="<?php echo h(url('belegung')); ?>" class="reiter">Belegung</a>
       <?php if ($istAdmin): ?>
-      <a href="benutzer.php" class="reiter">Benutzer</a>
+      <a href="<?php echo h(url('benutzer')); ?>" class="reiter">Benutzer</a>
       <?php endif; ?>
     </nav>
 
@@ -122,9 +122,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $fehler === '') {
       <?php if ($fehler !== ''): ?>
       <div class="fehler"><?php echo h($fehler); ?></div>
       <p>
-        <a class="link-belegung" href="buchungen.php?raum_id=<?php echo (int) $raumId; ?>">Belegung dieses Raums anzeigen</a>
+        <a class="link-belegung" href="<?php echo h(url('buchungen', array('raum_id' => (int) $raumId))); ?>">Belegung dieses Raums anzeigen</a>
       </p>
-      <p><a class="link-abbrechen" href="raeume.php">Zurück zu den Räumen</a></p>
+      <p><a class="link-abbrechen" href="<?php echo h(url('raeume')); ?>">Zurück zu den Räumen</a></p>
       <?php else: ?>
       <p class="karte-text">
         Soll der Raum <strong><?php echo h($raum['name']); ?></strong>
@@ -135,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $fehler === '') {
         <?php csrf_feld(); ?>
         <div class="knopf-reihe">
           <button type="submit" class="knopf knopf-loeschen">Ja, endgültig löschen</button>
-          <a class="link-abbrechen" href="raeume.php">Abbrechen</a>
+          <a class="link-abbrechen" href="<?php echo h(url('raeume')); ?>">Abbrechen</a>
         </div>
       </form>
       <?php endif; ?>

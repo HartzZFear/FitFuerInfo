@@ -223,9 +223,9 @@ function benutzer_code_anzeigen_falls_vorhanden()
 
     <nav class="reiter-gruppe">
       <a href="<?php echo h(url('kurse')); ?>" class="reiter">Kurse</a>
-      <a href="raeume.php" class="reiter">Räume</a>
-      <a href="belegung.php" class="reiter">Belegung</a>
-      <a href="benutzer.php" class="reiter active">Benutzer</a>
+      <a href="<?php echo h(url('raeume')); ?>" class="reiter">Räume</a>
+      <a href="<?php echo h(url('belegung')); ?>" class="reiter">Belegung</a>
+      <a href="<?php echo h(url('benutzer')); ?>" class="reiter active">Benutzer</a>
     </nav>
 
     <?php session_fehler_anzeigen(); ?>
@@ -246,7 +246,7 @@ function benutzer_code_anzeigen_falls_vorhanden()
         bis der Code eingelöst wird.
       </div>
 
-      <a class="link-zurueck" href="benutzer.php">Zurück zur Benutzerliste</a>
+      <a class="link-zurueck" href="<?php echo h(url('benutzer')); ?>">Zurück zur Benutzerliste</a>
     </div>
   </div>
 </body>

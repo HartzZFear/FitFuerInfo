@@ -1,5 +1,6 @@
+<?php if (!defined('FFI_START')) { exit; } ?>
 <?php
-// hilfe.php
+// hilfe (Aufruf: index.php?seite=hilfe)
 // Kurze Bedienungshilfe fuer alle angemeldeten Benutzer. Gleicher visueller
 // Stil wie kurse.php (Kopfzeile mit Tabs, Wellen-Banner, weisse Cards).
 //
@@ -10,28 +11,12 @@
 //
 // Bewusst PHP-5.6-Syntax, damit es auf dem Schulrechner laeuft.
 
-require_once __DIR__ . '/../lib/db.php';
-require_once __DIR__ . '/../lib/funktionen.php';
-require_once __DIR__ . '/../lib/auth.php';
-require_once __DIR__ . '/../templates/layout.php';
-require_once __DIR__ . '/../lib/buchung_logik.php';
-require_once __DIR__ . '/../lib/benutzer_logik.php';
-
 erfordere_login();
+
+$seitentitel = 'Hilfe';
+$aktiverTab  = 'hilfe';
+$seitenCss   = array('hilfe.css');
 ?>
-<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hilfe – FitFürInfo</title>
-<link rel="stylesheet" href="<?php echo h(asset_url('css/style.css')); ?>">
-<link rel="stylesheet" href="<?php echo h(asset_url('css/hilfe.css')); ?>">
-</head>
-<body class="seite-hilfe">
-
-  <?php kopfzeile('hilfe'); ?>
-
   <div class="main-area">
 
     <?php session_fehler_anzeigen(); ?>
@@ -79,7 +64,7 @@ erfordere_login();
           </tr>
           <tr>
             <td>Benutzer</td>
-            <td>nur das eigene Passwort im <a href="profil.php">Profil</a></td>
+            <td>nur das eigene Passwort im <a href="<?php echo h(url('profil')); ?>">Profil</a></td>
             <td>Benutzer anlegen, bearbeiten, sperren/entsperren, Freischaltcodes erzeugen (Tab „Benutzer“)</td>
           </tr>
         </tbody>
@@ -120,7 +105,7 @@ erfordere_login();
       <p>
         Eine Buchung belegt <strong>einen Raum für einen Kurs</strong> an einem Tag von einer
         Start- bis zu einer Endzeit. Anlegen lässt sie sich über <strong>+</strong> im Tab
-        <a href="belegung.php">Belegung</a> oder durch Klick auf einen freien Platz im Kalender.
+        <a href="<?php echo h(url('belegung')); ?>">Belegung</a> oder durch Klick auf einen freien Platz im Kalender.
         Gespeichert wird nur, wenn alle diese Regeln erfüllt sind:
       </p>
       <ol>
@@ -147,7 +132,7 @@ erfordere_login();
 
     <section class="karte" id="kalender">
       <h2><span class="nr">4</span>Kalender bedienen</h2>
-      <p>Der Tab <a href="belegung.php">Belegung</a> zeigt den Kalender. Oben schalten Sie die Ansicht um:</p>
+      <p>Der Tab <a href="<?php echo h(url('belegung')); ?>">Belegung</a> zeigt den Kalender. Oben schalten Sie die Ansicht um:</p>
       <ul>
         <li><strong>Monat:</strong> Montag bis Freitag des ganzen Monats. Pro Tag stehen bis zu drei
           Buchungen; gibt es mehr, erscheint „+N weitere“. Klick auf einen Tag öffnet die Tagesansicht.</li>
@@ -189,7 +174,7 @@ erfordere_login();
       </p>
       <ol>
         <li>Auf der Anmeldeseite bei „Erstes Login oder neuen Code erhalten?“ auf
-          <a href="passwort_setzen.php">Passwort setzen</a> klicken.</li>
+          <a href="<?php echo h(url('passwort_setzen')); ?>">Passwort setzen</a> klicken.</li>
         <li>Benutzername und Freischaltcode eingeben, das neue Passwort zweimal eintragen, speichern.</li>
         <li>Danach ganz normal mit Benutzername und neuem Passwort anmelden.</li>
       </ol>
@@ -199,7 +184,7 @@ erfordere_login();
         Passwort weiter.
       </p>
       <p class="hinweis">
-        Wer sein Passwort noch kennt, ändert es einfach im <a href="profil.php">Profil</a> („Profile“ oben
+        Wer sein Passwort noch kennt, ändert es einfach im <a href="<?php echo h(url('profil')); ?>">Profil</a> („Profile“ oben
         rechts). Dafür ist das aktuelle Passwort nötig. Ein noch offener Freischaltcode wird dabei ungültig.
       </p>
     </section>
@@ -220,6 +205,3 @@ erfordere_login();
     </section>
 
   </div>
-
-</body>
-</html>

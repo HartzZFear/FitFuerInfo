@@ -1,5 +1,6 @@
+<?php if (!defined('FFI_START')) { exit; } ?>
 <?php
-// belegung.php
+// belegung (Aufruf: index.php?seite=belegung)
 // Belegungskalender in drei Ansichten: Monat, Woche (pro Raum), Tag (alle
 // Raeume). Gleicher visueller Stil wie kurse.php und buchungen.php
 // (Kopfzeile mit Tabs, Wellen-Banner, Sidebar mit Filtern).
@@ -8,14 +9,6 @@
 // kalender_logik.php - diese Seite gibt nur aus.
 //
 // Bewusst PHP-5.6-Syntax, damit es auf dem Schulrechner laeuft.
-
-require_once __DIR__ . '/../lib/db.php';
-require_once __DIR__ . '/../lib/funktionen.php';
-require_once __DIR__ . '/../lib/auth.php';
-require_once __DIR__ . '/../templates/layout.php';
-require_once __DIR__ . '/../lib/kurs_rechte.php';
-require_once __DIR__ . '/../lib/buchung_logik.php';
-require_once __DIR__ . '/../lib/kalender_logik.php';
 
 erfordere_login();
 
@@ -108,7 +101,7 @@ if ($param['kurs_id'] > 0) {
 if ($param['nur_meine']) {
     $listenParameter['wer'] = 'meine';
 }
-$urlListe = 'buchungen.php?' . http_build_query($listenParameter);
+$urlListe = url('buchungen', $listenParameter);
 
 /**
  * Link zum Anlegen einer Buchung in einem freien Slot. Ist ein Kurs
@@ -125,7 +118,7 @@ function buchen_url($raumId, $datum, $zeit, $param, $meineKursIds)
         $query['kurs_id'] = $param['kurs_id'];
     }
 
-    return 'buchung_bearbeiten.php?' . http_build_query($query);
+    return url('buchung_bearbeiten', $query);
 }
 
 /**
@@ -136,20 +129,12 @@ function buchung_tooltip($buchung)
     return $buchung['kurs'] . ' · ' . substr($buchung['start'], 11, 5) . '–' . substr($buchung['ende'], 11, 5)
         . ' · ' . $buchung['raum'] . ' · gebucht von ' . $buchung['gebucht_von'];
 }
+
+$seitentitel = 'Belegung';
+$aktiverTab  = 'belegung';
+$seitenCss   = array('belegung.css');
+$seitenJs    = array('belegung.js');
 ?>
-<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Belegung – FitFürInfo</title>
-<link rel="stylesheet" href="<?php echo h(asset_url('css/style.css')); ?>">
-<link rel="stylesheet" href="<?php echo h(asset_url('css/belegung.css')); ?>">
-</head>
-<body class="seite-belegung">
-
-  <?php kopfzeile('belegung'); ?>
-
   <div class="main-area">
 
     <?php session_fehler_anzeigen(); ?>
@@ -305,7 +290,7 @@ function buchung_tooltip($buchung)
               $tooltip = buchung_tooltip($buchung) . ($darfBearbeiten ? ' – klicken zum Bearbeiten' : '');
           ?>
           <?php if ($darfBearbeiten): ?>
-          <a href="buchung_bearbeiten.php?id=<?php echo (int) $buchung['id']; ?>"
+          <a href="<?php echo h(url('buchung_bearbeiten', array('id' => (int) $buchung['id']))); ?>"
              class="<?php echo $klassen; ?>" style="<?php echo $position; ?>;" title="<?php echo h($tooltip); ?>">
           <?php else: ?>
           <div class="<?php echo $klassen; ?>" style="<?php echo $position; ?>;" title="<?php echo h($tooltip); ?>">
@@ -348,7 +333,8 @@ function buchung_tooltip($buchung)
     </section>
 
     <aside class="sidebar">
-      <form method="get" action="belegung.php">
+      <form method="get" action="<?php echo h(url('belegung')); ?>">
+        <?php echo seite_feld('belegung'); ?>
         <input type="hidden" name="ansicht" value="<?php echo h($ansicht); ?>">
         <input type="hidden" name="datum" value="<?php echo h($datum->format('Y-m-d')); ?>">
 
@@ -391,12 +377,8 @@ function buchung_tooltip($buchung)
       </form>
 
       <?php if ($darfBuchen): ?>
-      <a href="buchung_bearbeiten.php" class="btn-add" aria-label="Buchung hinzufügen">+</a>
+      <a href="<?php echo h(url('buchung_bearbeiten')); ?>" class="btn-add" aria-label="Buchung hinzufügen">+</a>
       <?php endif; ?>
     </aside>
 
   </div>
-
-  <script src="<?php echo h(asset_url('js/belegung.js')); ?>"></script>
-</body>
-</html>

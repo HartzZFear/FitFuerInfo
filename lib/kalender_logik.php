@@ -187,7 +187,7 @@ function kalender_parameter($get, $raumIds, $kursIds)
 }
 
 /**
- * Baut die URL fuer belegung.php aus den aktuellen Parametern und den
+ * Baut die URL der Seite belegung aus den aktuellen Parametern und den
  * gewuenschten Aenderungen. So bleiben die Filter beim Blaettern und beim
  * Umschalten der Ansicht automatisch erhalten.
  *
@@ -195,7 +195,7 @@ function kalender_parameter($get, $raumIds, $kursIds)
  *
  * @param  array $param       Ergebnis von kalender_parameter()
  * @param  array $aenderungen z. B. array('ansicht' => 'tag')
- * @return string z. B. 'belegung.php?ansicht=tag&datum=2026-09-07'
+ * @return string url('belegung', ...), z. B. BASE_URL/index.php?seite=belegung&ansicht=tag&datum=2026-09-07
  */
 function kalender_url($param, $aenderungen = array())
 {
@@ -217,7 +217,7 @@ function kalender_url($param, $aenderungen = array())
         $query['nur_meine'] = 1;
     }
 
-    return 'belegung.php?' . http_build_query($query);
+    return url('belegung', $query);
 }
 
 /**

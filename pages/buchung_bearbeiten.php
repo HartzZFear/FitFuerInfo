@@ -151,7 +151,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
 
                 $db->commit();
-                header('Location: buchungen.php');
+                header('Location: ' . url('buchungen'));
                 exit;
             }
 
@@ -213,10 +213,10 @@ $seitenTitel = $istBearbeiten ? 'Buchung bearbeiten' : 'Neue Buchung anlegen';
 
     <nav class="reiter-gruppe">
       <a href="<?php echo h(url('kurse')); ?>" class="reiter">Kurse</a>
-      <a href="raeume.php" class="reiter">Räume</a>
-      <a href="belegung.php" class="reiter active">Belegung</a>
+      <a href="<?php echo h(url('raeume')); ?>" class="reiter">Räume</a>
+      <a href="<?php echo h(url('belegung')); ?>" class="reiter active">Belegung</a>
       <?php if ($istAdmin): ?>
-      <a href="benutzer.php" class="reiter">Benutzer</a>
+      <a href="<?php echo h(url('benutzer')); ?>" class="reiter">Benutzer</a>
       <?php endif; ?>
     </nav>
 
@@ -252,7 +252,7 @@ $seitenTitel = $istBearbeiten ? 'Buchung bearbeiten' : 'Neue Buchung anlegen';
       <p class="karte-text">
         Sie sind für keinen Kurs als Eigentümer eingetragen und können deshalb keine Buchung anlegen.
       </p>
-      <p><a class="link-abbrechen" href="buchungen.php">Zurück zur Belegung</a></p>
+      <p><a class="link-abbrechen" href="<?php echo h(url('buchungen')); ?>">Zurück zur Belegung</a></p>
       <?php else: ?>
 
       <form method="post" action="buchung_bearbeiten.php<?php echo $istBearbeiten ? '?id=' . (int) $buchungId : ''; ?>">
@@ -310,7 +310,7 @@ $seitenTitel = $istBearbeiten ? 'Buchung bearbeiten' : 'Neue Buchung anlegen';
 
         <div class="knopf-reihe">
           <button type="submit" class="knopf">Speichern</button>
-          <a class="link-abbrechen" href="buchungen.php">Abbrechen</a>
+          <a class="link-abbrechen" href="<?php echo h(url('buchungen')); ?>">Abbrechen</a>
         </div>
       </form>
 

@@ -184,7 +184,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if (empty($fehler)) {
                 $db->commit();
-                header('Location: raeume.php');
+                header('Location: ' . url('raeume'));
                 exit;
             }
 
@@ -238,10 +238,10 @@ $seitenTitel = $istBearbeiten ? 'Raum bearbeiten' : 'Neuen Raum anlegen';
 
     <nav class="reiter-gruppe">
       <a href="<?php echo h(url('kurse')); ?>" class="reiter">Kurse</a>
-      <a href="raeume.php" class="reiter active">Räume</a>
-      <a href="belegung.php" class="reiter">Belegung</a>
+      <a href="<?php echo h(url('raeume')); ?>" class="reiter active">Räume</a>
+      <a href="<?php echo h(url('belegung')); ?>" class="reiter">Belegung</a>
       <?php if ($istAdmin): ?>
-      <a href="benutzer.php" class="reiter">Benutzer</a>
+      <a href="<?php echo h(url('benutzer')); ?>" class="reiter">Benutzer</a>
       <?php endif; ?>
     </nav>
 
@@ -266,7 +266,7 @@ $seitenTitel = $istBearbeiten ? 'Raum bearbeiten' : 'Neuen Raum anlegen';
       <div class="hinweis">
         Es wurde nichts gespeichert. Wer die Änderung trotzdem braucht, muss zuerst die
         betroffenen Buchungen anpassen oder löschen:
-        <a href="buchungen.php?raum_id=<?php echo (int) $raumId; ?>">Belegung dieses Raums anzeigen</a>.
+        <a href="<?php echo h(url('buchungen', array('raum_id' => (int) $raumId))); ?>">Belegung dieses Raums anzeigen</a>.
       </div>
       <?php endif; ?>
 
@@ -309,7 +309,7 @@ $seitenTitel = $istBearbeiten ? 'Raum bearbeiten' : 'Neuen Raum anlegen';
 
         <div class="knopf-reihe">
           <button type="submit" class="knopf">Speichern</button>
-          <a class="link-abbrechen" href="raeume.php">Abbrechen</a>
+          <a class="link-abbrechen" href="<?php echo h(url('raeume')); ?>">Abbrechen</a>
         </div>
       </form>
 

@@ -67,7 +67,7 @@ $fehler = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         abfrage('DELETE FROM buchung WHERE id = ?', array($buchungId));
-        header('Location: buchungen.php');
+        header('Location: ' . url('buchungen'));
         exit;
     } catch (PDOException $e) {
         $fehler = 'Die Buchung konnte nicht gelöscht werden. Bitte erneut versuchen.';
@@ -104,10 +104,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <nav class="reiter-gruppe">
       <a href="<?php echo h(url('kurse')); ?>" class="reiter">Kurse</a>
-      <a href="raeume.php" class="reiter">Räume</a>
-      <a href="belegung.php" class="reiter active">Belegung</a>
+      <a href="<?php echo h(url('raeume')); ?>" class="reiter">Räume</a>
+      <a href="<?php echo h(url('belegung')); ?>" class="reiter active">Belegung</a>
       <?php if ($istAdmin): ?>
-      <a href="benutzer.php" class="reiter">Benutzer</a>
+      <a href="<?php echo h(url('benutzer')); ?>" class="reiter">Benutzer</a>
       <?php endif; ?>
     </nav>
 
@@ -118,7 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       <?php if ($fehler !== ''): ?>
       <div class="fehler"><?php echo h($fehler); ?></div>
-      <p><a class="link-abbrechen" href="buchungen.php">Zurück zur Belegung</a></p>
+      <p><a class="link-abbrechen" href="<?php echo h(url('buchungen')); ?>">Zurück zur Belegung</a></p>
       <?php else: ?>
       <p class="karte-text">
         Soll die Buchung von <strong><?php echo h($buchung['kurs']); ?></strong>
@@ -130,7 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php csrf_feld(); ?>
         <div class="knopf-reihe">
           <button type="submit" class="knopf knopf-loeschen">Ja, endgültig löschen</button>
-          <a class="link-abbrechen" href="buchungen.php">Abbrechen</a>
+          <a class="link-abbrechen" href="<?php echo h(url('buchungen')); ?>">Abbrechen</a>
         </div>
       </form>
       <?php endif; ?>
