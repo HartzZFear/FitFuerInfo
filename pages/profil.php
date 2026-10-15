@@ -154,7 +154,7 @@ $rolleText = isset($rollenTexte[$ich['rolle']]) ? $rollenTexte[$ich['rolle']] : 
           <dd><?php echo h($rolleText); ?></dd>
 
           <dt>Eigene Kurse</dt>
-          <dd><?php echo (int) $anzahlKurse; ?><?php if ($anzahlKurse > 0): ?> <a href="kurse.php?ownership=own">anzeigen</a><?php endif; ?></dd>
+          <dd><?php echo (int) $anzahlKurse; ?><?php if ($anzahlKurse > 0): ?> <a href="<?php echo h(url('kurse', array('ownership' => 'own'))); ?>">anzeigen</a><?php endif; ?></dd>
 
           <dt>Räume als Bearbeiter</dt>
           <dd><?php echo (int) $anzahlRaeume; ?><?php if ($anzahlRaeume > 0): ?> <a href="raeume.php?zustaendig=meine">anzeigen</a><?php endif; ?></dd>

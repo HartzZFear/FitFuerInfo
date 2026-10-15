@@ -1,16 +1,14 @@
+<?php if (!defined('FFI_START')) { exit; } ?>
 <?php
-// login.php
+// login - Anmeldeseite (ohne Kopfzeile, eigene Welle).
+// Aufruf: index.php?seite=login, oder index.php ohne Angabe, solange
+// niemand angemeldet ist.
 
-require_once __DIR__ . '/../lib/db.php';
-require_once __DIR__ . '/../lib/funktionen.php';
-require_once __DIR__ . '/../lib/auth.php';
-
-session_starten();
 csrf_pruefen();
 
 // Wer schon angemeldet ist, braucht diese Seite nicht.
 if (ist_eingeloggt()) {
-    header('Location: kurse.php');
+    header('Location: ' . url('kurse'));
     exit;
 }
 
@@ -30,38 +28,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($benutzername === '' || $passwort === '') {
         $fehler = 'Bitte Benutzername und Passwort eingeben.';
     } elseif (anmelden($benutzername, $passwort)) {
-        header('Location: belegung.php');
+        header('Location: ' . url('belegung'));
         exit;
     } else {
         $fehler = 'Benutzername oder Passwort ist falsch, oder das Konto ist nicht freigeschaltet.';
     }
 }
-?>
-<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Anmelden – FitFürInfo</title>
-<link rel="stylesheet" href="<?php echo h(asset_url('css/style.css')); ?>">
-</head>
-<body class="seite-login">
 
+$seitentitel   = 'Anmelden';
+$ohneKopfzeile = true;
+?>
   <!-- Dekorativer Wellen-Streifen oben, wie im Referenzbild -->
   <div class="login-welle" aria-hidden="true">
-    <svg viewBox="0 0 1440 200" preserveAspectRatio="none">
-      <defs>
-        <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%"  stop-color="#1a8f9c"/>
-          <stop offset="45%" stop-color="#2f6fb0"/>
-          <stop offset="100%" stop-color="#e8792e"/>
-        </linearGradient>
-      </defs>
-      <path fill="url(#waveGradient)"
-            d="M0,80 C240,160 480,0 720,60 C960,120 1200,20 1440,90 L1440,0 L0,0 Z"/>
-      <path fill="url(#waveGradient)" opacity="0.55"
-            d="M0,120 C280,60 520,180 780,110 C1040,40 1260,140 1440,100 L1440,0 L0,0 Z"/>
-    </svg>
+<?php welle_svg(); ?>
   </div>
 
   <div class="help-region">
@@ -71,12 +50,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   <main class="login-card">
     <div class="logo">
-      <img class="logo-mark" src="<?php echo BASE_URL; ?>/assets/imgs/logo.png" alt="">
+      <img class="logo-mark" src="<?php echo h(BASE_URL . '/assets/imgs/logo.png'); ?>" alt="">
       <span class="logo-text"><span class="fit">FitFür</span><span class="info">Info</span></span>
     </div>
     <p class="logo-subtitle">Fitness &amp; Informatik vereint</p>
 
-    <form method="post" action="login.php">
+    <form method="post" action="<?php echo h(url('login')); ?>">
       <?php csrf_feld(); ?>
       <?php if ($fehler !== ''): ?>
       <div class="login-fehler"><?php echo h($fehler); ?></div>
@@ -105,13 +84,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </div>
 
       <div class="forgot-row">
-        <p>Erstes Login oder neuen Code erhalten? <span class="forgot-ziel">→ <a href="passwort_setzen.php">Passwort setzen</a></span></p>
+        <p>Erstes Login oder neuen Code erhalten? <span class="forgot-ziel">→ <a href="<?php echo h(url('passwort_setzen')); ?>">Passwort setzen</a></span></p>
         <p class="forgot-hinweis">Passwort vergessen? Wende dich an den Systemverwalter, er erzeugt dir einen neuen Freischaltcode.</p>
       </div>
 
       <button type="submit" class="btn-login">Anmelden</button>
     </form>
   </main>
-
-</body>
-</html>

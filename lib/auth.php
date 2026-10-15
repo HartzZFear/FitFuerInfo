@@ -157,7 +157,7 @@ function aktueller_benutzer()
 function erfordere_login()
 {
     if (!ist_eingeloggt()) {
-        header('Location: ' . BASE_URL . '/pages/login.php');
+        header('Location: ' . url('login'));
         exit;
     }
 
@@ -165,7 +165,7 @@ function erfordere_login()
 
     if ($benutzer === null || (int) $benutzer['aktiv'] !== 1) {
         abmelden();
-        header('Location: ' . BASE_URL . '/pages/login.php?gesperrt=1');
+        header('Location: ' . url('login', array('gesperrt' => 1)));
         exit;
     }
 
@@ -181,7 +181,7 @@ function erfordere_admin()
 
     if (!ist_admin()) {
         $_SESSION['fehler'] = 'Diese Seite ist nur für den Systemverwalter zugänglich.';
-        header('Location: ' . BASE_URL . '/pages/kurse.php');
+        header('Location: ' . url('kurse'));
         exit;
     }
 }

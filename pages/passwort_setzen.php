@@ -75,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         Das Passwort wurde gespeichert. Die Anmeldung ist jetzt möglich.
       </div>
       <div class="fuss">
-        <a href="login.php">Zur Anmeldung</a>
+        <a href="<?php echo h(url('login')); ?>">Zur Anmeldung</a>
       </div>
 
     <?php else: ?>
@@ -115,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </form>
 
       <div class="fuss">
-        <a href="login.php">Zur Anmeldung</a>
+        <a href="<?php echo h(url('login')); ?>">Zur Anmeldung</a>
       </div>
 
     <?php endif; ?>

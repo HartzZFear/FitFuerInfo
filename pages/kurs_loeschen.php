@@ -43,7 +43,7 @@ if ($anzahlBuchungen > 0) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $fehler === '') {
     try {
         abfrage('DELETE FROM kurs WHERE id = ?', array($kursId));
-        header('Location: kurse.php');
+        header('Location: ' . url('kurse'));
         exit;
     } catch (PDOException $e) {
         $fehler = 'Der Kurs kann nicht gelöscht werden, solange noch Buchungen dafür bestehen.';
@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $fehler === '') {
 
       <?php if ($fehler !== ''): ?>
       <div class="fehler"><?php echo h($fehler); ?></div>
-      <p><a class="link-abbrechen" href="kurse.php">Zurück zu den Kursen</a></p>
+      <p><a class="link-abbrechen" href="<?php echo h(url('kurse')); ?>">Zurück zu den Kursen</a></p>
       <?php else: ?>
       <p class="karte-text">
         Soll der Kurs <strong><?php echo h($kurs['titel']); ?></strong> wirklich gelöscht werden?
@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $fehler === '') {
         <?php csrf_feld(); ?>
         <div class="knopf-reihe">
           <button type="submit" class="knopf knopf-loeschen">Ja, endgültig löschen</button>
-          <a class="link-abbrechen" href="kurse.php">Abbrechen</a>
+          <a class="link-abbrechen" href="<?php echo h(url('kurse')); ?>">Abbrechen</a>
         </div>
       </form>
       <?php endif; ?>

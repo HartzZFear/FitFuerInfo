@@ -33,8 +33,6 @@ require_once __DIR__ . '/../lib/funktionen.php';
  */
 function kopfzeile($aktiverTab)
 {
-    $basis = BASE_URL . '/pages/';
-
     $tabs = array(
         'kurse'    => 'Kurse',
         'raeume'   => 'Räume',
@@ -53,13 +51,13 @@ function kopfzeile($aktiverTab)
 
     <nav class="tab-group<?php echo count($tabs) > 3 ? ' vier' : ''; ?>">
       <?php foreach ($tabs as $seite => $beschriftung): ?>
-      <a href="<?php echo h($basis . $seite . '.php'); ?>" class="tab<?php echo $aktiverTab === $seite ? ' active' : ''; ?>"<?php echo $aktiverTab === $seite ? ' aria-current="page"' : ''; ?>><?php echo h($beschriftung); ?></a>
+      <a href="<?php echo h(url($seite)); ?>" class="tab<?php echo $aktiverTab === $seite ? ' active' : ''; ?>"<?php echo $aktiverTab === $seite ? ' aria-current="page"' : ''; ?>><?php echo h($beschriftung); ?></a>
       <?php endforeach; ?>
     </nav>
 
     <div class="header-actions">
-      <a href="<?php echo h($basis . 'profil.php'); ?>" class="btn-header profile<?php echo $aktiverTab === 'profil' ? ' active' : ''; ?>"<?php echo $aktiverTab === 'profil' ? ' aria-current="page"' : ''; ?>>Profile</a>
-      <a href="<?php echo h($basis . 'logout.php'); ?>" class="btn-header logout">Log Out</a>
+      <a href="<?php echo h(url('profil')); ?>" class="btn-header profile<?php echo $aktiverTab === 'profil' ? ' active' : ''; ?>"<?php echo $aktiverTab === 'profil' ? ' aria-current="page"' : ''; ?>>Profile</a>
+      <a href="<?php echo h(url('logout')); ?>" class="btn-header logout">Log Out</a>
     </div>
   </header>
 
@@ -81,7 +79,7 @@ function kopfzeile($aktiverTab)
             d="M0,120 C280,60 520,180 780,110 C1040,40 1260,140 1440,100 L1440,0 L0,0 Z"/>
     </svg>
     <div class="help-region">
-      <a href="<?php echo h($basis . 'hilfe.php'); ?>" class="help-icon<?php echo $aktiverTab === 'hilfe' ? ' active' : ''; ?>" aria-label="Hilfe" title="Hilfe"<?php echo $aktiverTab === 'hilfe' ? ' aria-current="page"' : ''; ?>>?</a>
+      <a href="<?php echo h(url('hilfe')); ?>" class="help-icon<?php echo $aktiverTab === 'hilfe' ? ' active' : ''; ?>" aria-label="Hilfe" title="Hilfe"<?php echo $aktiverTab === 'hilfe' ? ' aria-current="page"' : ''; ?>>?</a>
       <div class="lang-select" aria-hidden="true">🇩🇪 DE ▾</div>
     </div>
   </div>

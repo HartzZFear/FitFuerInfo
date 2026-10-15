@@ -66,11 +66,15 @@ function kurs_darf_verwalten($kursId, $benutzerId, $istAdmin)
  * bei der Kursliste.
  *
  * @param string $nachricht
- * @param string $zurueckUrl  Ziel des Zurueck-Links (Dateiname im selben Ordner)
+ * @param string $zurueckUrl  Ziel des Zurueck-Links (Dateiname im selben Ordner,
+ *                            ohne Angabe die Kursliste)
  * @param string $zurueckText Beschriftung des Zurueck-Links
  */
-function zugriff_verweigert_seite($nachricht, $zurueckUrl = 'kurse.php', $zurueckText = 'Zurück zu den Kursen')
+function zugriff_verweigert_seite($nachricht, $zurueckUrl = null, $zurueckText = 'Zurück zu den Kursen')
 {
+    if ($zurueckUrl === null) {
+        $zurueckUrl = url('kurse');
+    }
     ?>
 <!DOCTYPE html>
 <html lang="de">

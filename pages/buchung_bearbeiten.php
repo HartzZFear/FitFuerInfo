@@ -212,7 +212,7 @@ $seitenTitel = $istBearbeiten ? 'Buchung bearbeiten' : 'Neue Buchung anlegen';
   <div class="inhalt">
 
     <nav class="reiter-gruppe">
-      <a href="kurse.php" class="reiter">Kurse</a>
+      <a href="<?php echo h(url('kurse')); ?>" class="reiter">Kurse</a>
       <a href="raeume.php" class="reiter">Räume</a>
       <a href="belegung.php" class="reiter active">Belegung</a>
       <?php if ($istAdmin): ?>

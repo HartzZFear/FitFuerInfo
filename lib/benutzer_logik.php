@@ -222,7 +222,7 @@ function benutzer_code_anzeigen_falls_vorhanden()
   <div class="inhalt">
 
     <nav class="reiter-gruppe">
-      <a href="kurse.php" class="reiter">Kurse</a>
+      <a href="<?php echo h(url('kurse')); ?>" class="reiter">Kurse</a>
       <a href="raeume.php" class="reiter">Räume</a>
       <a href="belegung.php" class="reiter">Belegung</a>
       <a href="benutzer.php" class="reiter active">Benutzer</a>

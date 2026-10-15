@@ -59,8 +59,8 @@ cache_dynamisch();
 // umgestellt und liegen weiter als eigenstaendige Dateien in pages/. Der
 // Block wird geloescht, sobald alle Seiten umgestellt sind.
 $nochNichtUmgestellt = array(
-    'login', 'logout', 'passwort_setzen', 'belegung', 'buchungen',
-    'buchung_bearbeiten', 'buchung_loeschen', 'kurse', 'kurs_bearbeiten',
+    'logout', 'passwort_setzen', 'belegung', 'buchungen',
+    'buchung_bearbeiten', 'buchung_loeschen', 'kurs_bearbeiten',
     'kurs_loeschen', 'raeume', 'raum_bearbeiten', 'raum_loeschen',
     'benutzer', 'benutzer_bearbeiten', 'profil', 'hilfe',
 );

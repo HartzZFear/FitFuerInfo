@@ -117,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        header('Location: kurse.php');
+        header('Location: ' . url('kurse'));
         exit;
     }
 }
@@ -203,7 +203,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div class="knopf-reihe">
           <button type="submit" class="knopf">Speichern</button>
-          <a class="link-abbrechen" href="kurse.php">Abbrechen</a>
+          <a class="link-abbrechen" href="<?php echo h(url('kurse')); ?>">Abbrechen</a>
         </div>
       </form>
     </div>

@@ -96,7 +96,7 @@ erfordere_login();
     <section class="karte" id="kurse">
       <h2><span class="nr">2</span>Kurse anlegen und Eigentümer</h2>
       <ol>
-        <li>Im Tab <a href="kurse.php">Kurse</a> rechts in der Seitenleiste auf <strong>+</strong> klicken.</li>
+        <li>Im Tab <a href="<?php echo h(url('kurse')); ?>">Kurse</a> rechts in der Seitenleiste auf <strong>+</strong> klicken.</li>
         <li><strong>Titel</strong> und <strong>maximale Teilnehmerzahl</strong> (ganze Zahl, mindestens 1)
           eintragen. Die Beschreibung ist freiwillig.</li>
         <li>Die <strong>Software</strong> ankreuzen, die der Kurs braucht. Gebucht werden kann der Kurs

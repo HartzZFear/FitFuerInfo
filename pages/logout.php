@@ -10,5 +10,5 @@ require_once __DIR__ . '/../lib/auth.php';
 
 abmelden();
 
-header('Location: login.php');
+header('Location: ' . url('login'));
 exit;
