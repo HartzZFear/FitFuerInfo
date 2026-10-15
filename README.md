@@ -22,7 +22,7 @@ Download: `sourceforge.net/projects/xampp/files/XAMPP Windows/5.6.36/`
    cd C:\xampp\htdocs
    git clone https://github.com/HartzZFear/FitFuerInfo.git fitfuerinfo
    ```
-   Kontrolle: Es muss die Datei `<XAMPP>\htdocs\fitfuerinfo\src\web\index.php` geben.
+   Kontrolle: Es muss die Datei `<XAMPP>\htdocs\fitfuerinfo\index.php` geben.
    (Beim ZIP aufpassen, dass kein doppelter Ordner wie `fitfuerinfo\FitFuerInfo-main\src`
    entsteht.)
 2. **Server starten.** XAMPP Control Panel öffnen, bei **Apache** und **MySQL** auf
@@ -33,12 +33,12 @@ Download: `sourceforge.net/projects/xampp/files/XAMPP Windows/5.6.36/`
    - Links auf **fitfuerinfo** klicken, dann wieder **Importieren** →
      `src\db\seed.sql` → **OK**. Das lädt die Testdaten.
    - Zeichencodierung beim Import auf **utf-8** lassen (Standard).
-4. **Konfiguration anlegen.** Im Ordner `src\web` die Datei `config.example.php`
+4. **Konfiguration anlegen.** Im Ordner `config` die Datei `config.example.php`
    kopieren und die Kopie `config.php` nennen. Darin prüfen:
    - `BASE_URL` steht auf `'/fitfuerinfo'`
    - `DEBUG` für Abgabe und Präsentation auf `false` setzen
    - Datenbank-Benutzer `root` ohne Passwort passt bei einer frischen XAMPP-Installation.
-5. **Aufrufen:** `http://localhost/fitfuerinfo/src/web/` – es erscheint die Anmeldeseite.
+5. **Aufrufen:** `http://localhost/fitfuerinfo/` – es erscheint die Anmeldeseite.
 
 ## Testzugänge
 
@@ -56,7 +56,7 @@ importiert `schema.sql` und `seed.sql` einfach noch einmal.
 
 ## Selbsttest
 
-`http://localhost/fitfuerinfo/src/web/tst/test.php` prüft PHP-Version, Datenbanktreiber,
+`http://localhost/fitfuerinfo/tests/test.php` prüft PHP-Version, Datenbanktreiber,
 `config.php`, Datenbankverbindung, Tabellen, Testdaten und Passwortprüfung. Stehen alle
 Zeilen auf OK, ist die Installation fertig. Bei FEHLER steht daneben, was zu tun ist.
 
@@ -64,9 +64,9 @@ Zeilen auf OK, ist die Installation fertig. Bei FEHLER steht daneben, was zu tun
 
 | Problem | Ursache / Lösung |
 |---------|------------------|
-| **404 Not Found** | Projekt liegt im falschen Ordner oder die URL stimmt nicht. Es muss `<XAMPP>\htdocs\fitfuerinfo\src\web\index.php` geben und die Adresse `http://localhost/fitfuerinfo/src/web/` lauten. |
-| **„Fehler: src/web/config.php fehlt“** | Schritt 4 vergessen: `config.example.php` nach `config.php` kopieren. |
-| **Apache startet nicht** | Port 80 ist belegt (z. B. Skype, IIS, VMware). In `<XAMPP>\apache\conf\httpd.conf` `Listen 80` in `Listen 8080` ändern; dann `http://localhost:8080/fitfuerinfo/src/web/` aufrufen. |
+| **404 Not Found** | Projekt liegt im falschen Ordner oder die URL stimmt nicht. Es muss `<XAMPP>\htdocs\fitfuerinfo\index.php` geben und die Adresse `http://localhost/fitfuerinfo/` lauten. |
+| **„Fehler: config/config.php fehlt“** | Schritt 4 vergessen: `config/config.example.php` nach `config/config.php` kopieren. |
+| **Apache startet nicht** | Port 80 ist belegt (z. B. Skype, IIS, VMware). In `<XAMPP>\apache\conf\httpd.conf` `Listen 80` in `Listen 8080` ändern; dann `http://localhost:8080/fitfuerinfo/` aufrufen. |
 | **„Datenbankverbindung fehlgeschlagen“** | MySQL läuft nicht (Control Panel) oder `schema.sql` wurde nicht importiert. |
 | **Umlaute kaputt** (z. B. „Ã¼“ statt „ü“) | `seed.sql` wurde nicht als UTF-8 importiert. Beim Import Zeichencodierung **utf-8** wählen, dann `schema.sql` und `seed.sql` erneut importieren. |
 | **Anmeldung klappt nicht** | Passwort ist `test1`; `sabine` ist absichtlich gesperrt. |

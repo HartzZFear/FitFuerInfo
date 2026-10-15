@@ -13,7 +13,7 @@ SET NAMES utf8mb4;
 -- (Hash von password_hash('test1', PASSWORD_DEFAULT))
 --
 -- Der fünfte Testbenutzer "neuling" hat noch KEIN Passwort. Er dient zum
--- Ausprobieren von src/web/pages/passwort_setzen.php mit dem Freischaltcode
+-- Ausprobieren von pages/passwort_setzen.php mit dem Freischaltcode
 -- "START123" (gültig bis 2027-12-31).
 -- ============================================================
 
