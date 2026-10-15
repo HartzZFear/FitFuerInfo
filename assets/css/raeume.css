@@ -51,13 +51,6 @@
   margin-top: 16px;
 }
 
-/* Beide Knöpfe teilen sich die Kartenbreite (Rest in style.css) */
-.btn-edit,
-.btn-delete {
-  flex: 1;
-  padding: 9px 0;
-}
-
 @media (min-width: 1400px) {
   .raum-grid {
     grid-template-columns: repeat(4, 1fr);

@@ -445,6 +445,15 @@ body {
   filter: brightness(1.05);
 }
 
+/* Auf den Kurs- und Raumkarten teilen sich beide Knöpfe die Kartenbreite */
+.seite-kurse .btn-edit,
+.seite-kurse .btn-delete,
+.seite-raeume .btn-edit,
+.seite-raeume .btn-delete {
+  flex: 1;
+  padding: 9px 0;
+}
+
 /* ---- Karten-Bausteine von Kursen, Räumen und Benutzern ---- */
 .software-chips {
   display: flex;

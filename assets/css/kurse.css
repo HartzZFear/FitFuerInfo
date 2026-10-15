@@ -51,58 +51,6 @@
   margin-top: 16px;
 }
 
-.btn-edit,
-.btn-delete {
-  flex: 1;
-  border-radius: 8px;
-  padding: 9px 0;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  text-align: center;
-}
-
-.btn-edit {
-  background: linear-gradient(90deg, var(--blue) 0%, var(--teal) 100%);
-  color: #ffffff;
-  border: none;
-}
-
-.btn-delete {
-  background: linear-gradient(90deg, var(--orange) 0%, #d9534f 100%);
-  color: #ffffff;
-  border: none;
-}
-
-a.btn-edit,
-a.btn-delete {
-  display: inline-block;
-  text-decoration: none;
-}
-
-.btn-add {
-  position: absolute;
-  bottom: 18px;
-  right: 18px;
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  background: linear-gradient(90deg, var(--blue) 0%, var(--teal) 45%, var(--orange) 100%);
-  color: #ffffff;
-  border: none;
-  font-size: 22px;
-  line-height: 1;
-  cursor: pointer;
-  box-shadow: 0 8px 18px rgba(20, 40, 50, 0.25);
-}
-
-a.btn-add {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-}
-
 @media (min-width: 1400px) {
   .course-grid {
     grid-template-columns: repeat(4, 1fr);
