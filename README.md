@@ -38,7 +38,26 @@ Download: `sourceforge.net/projects/xampp/files/XAMPP Windows/5.6.36/`
    - `BASE_URL` steht auf `'/fitfuerinfo'`
    - `DEBUG` für Abgabe und Präsentation auf `false` setzen
    - Datenbank-Benutzer `root` ohne Passwort passt bei einer frischen XAMPP-Installation.
+
+   In `config.php` stehen nur die Werte, die von Rechner zu Rechner verschieden sind.
+   Was für alle gleich ist (erlaubte Seiten, Versionsnummer für CSS/JS,
+   Passwort-Mindestlänge), steht in `config/app.php` und kommt mit dem Repo.
 5. **Aufrufen:** `http://localhost/fitfuerinfo/` – es erscheint die Anmeldeseite.
+
+## Adressen der Seiten
+
+Alle Seiten laufen über `index.php`, die Seite steht im Parameter `seite`:
+
+```
+http://localhost/fitfuerinfo/index.php?seite=kurse
+http://localhost/fitfuerinfo/index.php?seite=kurs_bearbeiten&id=3
+http://localhost/fitfuerinfo/index.php?seite=passwort_setzen
+```
+
+Ohne `seite` zeigt `index.php` die Belegung (angemeldet) bzw. die Anmeldung. Erlaubt sind
+nur die Seiten aus der Liste `ERLAUBTE_SEITEN` in `config/app.php`; jeder andere Name führt
+zur Seite „Seite nicht gefunden“. Die Dateien in `pages/` direkt aufzurufen
+(`.../pages/kurse.php`) zeigt bewusst nur eine leere Seite.
 
 ## Testzugänge
 
@@ -57,7 +76,8 @@ importiert `schema.sql` und `seed.sql` einfach noch einmal.
 ## Selbsttest
 
 `http://localhost/fitfuerinfo/tests/test.php` prüft PHP-Version, Datenbanktreiber,
-`config.php`, Datenbankverbindung, Tabellen, Testdaten und Passwortprüfung. Stehen alle
+`config.php` und `config/app.php` (inkl. Liste der erlaubten Seiten), Datenbankverbindung,
+Tabellen, Testdaten und Passwortprüfung. Stehen alle
 Zeilen auf OK, ist die Installation fertig. Bei FEHLER steht daneben, was zu tun ist.
 
 ## Häufige Fehler
@@ -66,6 +86,8 @@ Zeilen auf OK, ist die Installation fertig. Bei FEHLER steht daneben, was zu tun
 |---------|------------------|
 | **404 Not Found** | Projekt liegt im falschen Ordner oder die URL stimmt nicht. Es muss `<XAMPP>\htdocs\fitfuerinfo\index.php` geben und die Adresse `http://localhost/fitfuerinfo/` lauten. |
 | **„Fehler: config/config.php fehlt“** | Schritt 4 vergessen: `config/config.example.php` nach `config/config.php` kopieren. |
+| **„Notice: Constant ASSET_VERSION already defined“** (oder `PW_MIN_LAENGE`) | Ältere `config.php`: die Zeilen mit `ASSET_VERSION` und `PW_MIN_LAENGE` dort löschen, sie stehen jetzt in `config/app.php`. `tests/test.php` zeigt, welche Zeile stört. |
+| **Leere weiße Seite** | Eine Datei aus `pages/` wurde direkt aufgerufen (alter Link oder Lesezeichen). Stattdessen `http://localhost/fitfuerinfo/index.php?seite=<name>` verwenden. |
 | **Apache startet nicht** | Port 80 ist belegt (z. B. Skype, IIS, VMware). In `<XAMPP>\apache\conf\httpd.conf` `Listen 80` in `Listen 8080` ändern; dann `http://localhost:8080/fitfuerinfo/` aufrufen. |
 | **„Datenbankverbindung fehlgeschlagen“** | MySQL läuft nicht (Control Panel) oder `schema.sql` wurde nicht importiert. |
 | **Umlaute kaputt** (z. B. „Ã¼“ statt „ü“) | `seed.sql` wurde nicht als UTF-8 importiert. Beim Import Zeichencodierung **utf-8** wählen, dann `schema.sql` und `seed.sql` erneut importieren. |
