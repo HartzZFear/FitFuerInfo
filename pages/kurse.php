@@ -4,6 +4,7 @@
 // (Wellen-Header, Farbpalette Türkis/Blau/Orange, weiße Cards mit Schatten).
 
 require_once __DIR__ . '/../lib/db.php';
+require_once __DIR__ . '/../lib/funktionen.php';
 require_once __DIR__ . '/../lib/auth.php';
 require_once __DIR__ . '/../templates/layout.php';
 require_once __DIR__ . '/../lib/kurs_rechte.php';
@@ -95,284 +96,10 @@ function ist_eigene_karte($kurs, $eigentuemerJeKurs, $benutzerId)
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kurse – FitFürInfo</title>
-<style>
-  :root {
-    --teal: #1a8f9c;
-    --blue: #2f6fb0;
-    --orange: #e8792e;
-    --card-bg: #ffffff;
-    --page-bg: #eef3f4;
-    --text-dark: #2b3a42;
-    --text-muted: #7c8a91;
-    --border: #dfe6e8;
-  }
-
-  * { box-sizing: border-box; }
-
-  body {
-    margin: 0;
-    min-height: 100vh;
-    font-family: "Segoe UI", Roboto, Arial, sans-serif;
-    background: var(--page-bg);
-  }
-
-  /* ---- Hauptbereich ---- */
-  .main-area {
-    max-width: 1600px;
-    width: 92%;
-    margin: 20px auto 40px;
-    padding: 0 16px 16px;
-    padding-right: 292px; /* Platz für die fest positionierte Sidebar */
-  }
-
-  .course-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-  }
-
-  .course-card {
-    background: var(--card-bg);
-    border-radius: 14px;
-    overflow: hidden;
-    box-shadow: 0 12px 28px rgba(20, 40, 50, 0.1);
-    display: flex;
-    flex-direction: column;
-  }
-
-  .course-body {
-    padding: 16px 18px 18px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .course-title {
-    margin: 0 0 8px;
-    font-size: 19px;
-    font-weight: 700;
-    color: var(--text-dark);
-  }
-
-  .course-desc {
-    margin: 0;
-    font-size: 13px;
-    color: var(--text-muted);
-    line-height: 1.4;
-    flex: 1;
-  }
-
-  .course-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 16px;
-  }
-
-  .btn-edit,
-  .btn-delete {
-    flex: 1;
-    border-radius: 8px;
-    padding: 9px 0;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    text-align: center;
-  }
-
-  .btn-edit {
-    background: linear-gradient(90deg, var(--blue) 0%, var(--teal) 100%);
-    color: #ffffff;
-    border: none;
-  }
-
-  .btn-edit:hover {
-    filter: brightness(1.05);
-  }
-
-  .btn-delete {
-    background: linear-gradient(90deg, var(--orange) 0%, #d9534f 100%);
-    color: #ffffff;
-    border: none;
-  }
-
-  .btn-delete:hover {
-    filter: brightness(1.05);
-  }
-
-  /* ---- Sidebar im Card-Look der Login-Seite: fest am rechten Bildschirmrand ---- */
-  .sidebar {
-    position: fixed;
-    top: 208px;
-    right: 24px;
-    width: 240px;
-    background: var(--card-bg);
-    border-radius: 14px;
-    box-shadow: 0 12px 28px rgba(20, 40, 50, 0.1);
-    padding: 20px 20px 70px;
-    z-index: 2;
-  }
-
-  .sidebar-label {
-    color: var(--blue);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.4px;
-    margin: 0 0 8px;
-    text-transform: uppercase;
-  }
-
-  .search-input {
-    width: 100%;
-    padding: 12px 14px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    font-size: 14px;
-    color: var(--text-dark);
-    background: #fbfcfc;
-    outline: none;
-    margin-bottom: 26px;
-  }
-
-  .search-input::placeholder {
-    color: #a7b2b6;
-  }
-
-  .search-input:focus {
-    border-color: var(--blue);
-    background: #ffffff;
-  }
-
-  .radio-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .radio-option {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    color: var(--text-dark);
-    cursor: pointer;
-  }
-
-  .radio-option input[type="radio"] {
-    accent-color: var(--blue);
-    width: 16px;
-    height: 16px;
-  }
-
-  .btn-add {
-    position: absolute;
-    bottom: 18px;
-    right: 18px;
-    width: 46px;
-    height: 46px;
-    border-radius: 50%;
-    background: linear-gradient(90deg, var(--blue) 0%, var(--teal) 45%, var(--orange) 100%);
-    color: #ffffff;
-    border: none;
-    font-size: 22px;
-    line-height: 1;
-    cursor: pointer;
-    box-shadow: 0 8px 18px rgba(20, 40, 50, 0.25);
-  }
-
-  .btn-add:hover {
-    filter: brightness(1.05);
-  }
-
-  @media (min-width: 1400px) {
-    .course-grid {
-      grid-template-columns: repeat(4, 1fr);
-    }
-  }
-
-  @media (max-width: 700px) {
-    .main-area {
-      padding-right: 16px;
-    }
-    .course-grid {
-      grid-template-columns: 1fr;
-    }
-    .sidebar {
-      position: static;
-      width: 100%;
-      order: -1;
-      margin-bottom: 20px;
-    }
-  }
-
-  /* ---- Ergänzungen für die Datenanbindung der Kursverwaltung ---- */
-  .course-meta {
-    margin: 0 0 8px;
-    font-size: 12px;
-    color: var(--text-muted);
-  }
-
-  .software-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin: 10px 0 0;
-  }
-
-  .chip {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--teal);
-    background: rgba(26, 143, 156, 0.1);
-    border: 1px solid rgba(26, 143, 156, 0.25);
-  }
-
-  .link-belegung {
-    display: inline-block;
-    margin-top: 12px;
-    font-size: 12px;
-    color: var(--blue);
-    text-decoration: none;
-  }
-  .link-belegung:hover { text-decoration: underline; }
-
-  .empty-state {
-    grid-column: 1 / -1;
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 14px;
-    padding: 40px 20px;
-  }
-
-  a.btn-edit,
-  a.btn-delete {
-    display: inline-block;
-    text-decoration: none;
-  }
-
-  a.btn-add {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-  }
-
-  .filter-submit {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
-</style>
+<link rel="stylesheet" href="<?php echo h(asset_url('css/style.css')); ?>">
+<link rel="stylesheet" href="<?php echo h(asset_url('css/kurse.css')); ?>">
 </head>
-<body>
+<body class="seite-kurse">
 
 
   <?php kopfzeile('kurse'); ?>
@@ -424,11 +151,11 @@ function ist_eigene_karte($kurs, $eigentuemerJeKurs, $benutzerId)
         <p class="sidebar-label">Eigentümerschaft</p>
         <div class="radio-group">
           <label class="radio-option">
-            <input type="radio" name="ownership" value="own" onchange="this.form.submit()" <?php echo $nurEigene ? 'checked' : ''; ?>>
+            <input type="radio" name="ownership" value="own" data-auto-submit <?php echo $nurEigene ? 'checked' : ''; ?>>
             Nur eigene
           </label>
           <label class="radio-option">
-            <input type="radio" name="ownership" value="all" onchange="this.form.submit()" <?php echo $nurEigene ? '' : 'checked'; ?>>
+            <input type="radio" name="ownership" value="all" data-auto-submit <?php echo $nurEigene ? '' : 'checked'; ?>>
             Alle
           </label>
         </div>

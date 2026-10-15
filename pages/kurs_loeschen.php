@@ -7,6 +7,7 @@
 // Bewusst PHP-5.6-Syntax, damit es auf dem Schulrechner laeuft.
 
 require_once __DIR__ . '/../lib/db.php';
+require_once __DIR__ . '/../lib/funktionen.php';
 require_once __DIR__ . '/../lib/auth.php';
 require_once __DIR__ . '/../lib/kurs_rechte.php';
 
@@ -55,73 +56,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $fehler === '') {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kurs löschen – FitFürInfo</title>
-<style>
-  :root {
-    --teal: #1a8f9c;
-    --blue: #2f6fb0;
-    --orange: #e8792e;
-    --card-bg: #ffffff;
-    --page-bg: #eef3f4;
-    --text-dark: #2b3a42;
-    --text-muted: #7c8a91;
-    --border: #dfe6e8;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    min-height: 100vh;
-    font-family: "Segoe UI", Roboto, Arial, sans-serif;
-    background: var(--page-bg);
-  }
-  .kopf {
-    position: relative;
-    background: linear-gradient(135deg, var(--teal), var(--blue));
-    color: #fff;
-    padding: 40px 20px 70px;
-    text-align: center;
-  }
-  .kopf h1 { margin: 0 0 4px; font-size: 24px; font-weight: 700; }
-  .kopf p { margin: 0; opacity: .9; font-size: 14px; }
-  .kopf .welle { position: absolute; left: 0; bottom: -1px; width: 100%; height: 60px; display: block; }
-  .inhalt { max-width: 520px; margin: 24px auto 40px; padding: 0 16px; }
-  .karte {
-    background: var(--card-bg);
-    border-radius: 14px;
-    box-shadow: 0 12px 28px rgba(20, 40, 50, .12);
-    padding: 28px 28px 32px;
-  }
-  .karte-titel { margin: 0 0 16px; font-size: 20px; color: var(--text-dark); }
-  .karte-text { margin: 0 0 22px; font-size: 14px; color: var(--text-muted); line-height: 1.5; }
-  .knopf-reihe { display: flex; align-items: center; gap: 16px; }
-  .knopf {
-    padding: 11px 24px;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 700;
-    color: #ffffff;
-    cursor: pointer;
-  }
-  .knopf-loeschen { background: linear-gradient(90deg, var(--orange) 0%, #d9534f 100%); }
-  .knopf-loeschen:hover { filter: brightness(1.05); }
-  .link-abbrechen {
-    font-size: 14px;
-    color: var(--text-muted);
-    text-decoration: none;
-  }
-  .link-abbrechen:hover { text-decoration: underline; }
-  .fehler {
-    margin: 0 0 20px;
-    padding: 10px 14px;
-    border-radius: 8px;
-    background: #fdeceb;
-    border: 1px solid #f0b3ae;
-    color: #a13a2f;
-    font-size: 13px;
-  }
-</style>
+<link rel="stylesheet" href="<?php echo h(asset_url('css/style.css')); ?>">
+<link rel="stylesheet" href="<?php echo h(asset_url('css/formular.css')); ?>">
 </head>
-<body>
+<body class="seite-kurs_loeschen">
 
   <div class="kopf">
     <h1>FitFürInfo</h1>

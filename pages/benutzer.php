@@ -13,6 +13,7 @@
 // Bewusst PHP-5.6-Syntax, damit es auf dem Schulrechner laeuft.
 
 require_once __DIR__ . '/../lib/db.php';
+require_once __DIR__ . '/../lib/funktionen.php';
 require_once __DIR__ . '/../lib/auth.php';
 require_once __DIR__ . '/../templates/layout.php';
 require_once __DIR__ . '/../lib/benutzer_logik.php';
@@ -190,320 +191,10 @@ function anzahl_text($anzahl, $einzahl, $mehrzahl)
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Benutzer – FitFürInfo</title>
-<style>
-  :root {
-    --teal: #1a8f9c;
-    --blue: #2f6fb0;
-    --orange: #e8792e;
-    --card-bg: #ffffff;
-    --page-bg: #eef3f4;
-    --text-dark: #2b3a42;
-    --text-muted: #7c8a91;
-    --border: #dfe6e8;
-  }
-
-  * { box-sizing: border-box; }
-
-  body {
-    margin: 0;
-    min-height: 100vh;
-    font-family: "Segoe UI", Roboto, Arial, sans-serif;
-    background: var(--page-bg);
-  }
-
-  /* ---- Hauptbereich ---- */
-  .main-area {
-    max-width: 1600px;
-    width: 92%;
-    margin: 20px auto 40px;
-    padding: 0 16px 16px;
-    padding-right: 292px; /* Platz für die fest positionierte Sidebar */
-  }
-
-  .meldung,
-  .fehler {
-    margin: 0 0 20px;
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-size: 13px;
-  }
-
-  .meldung {
-    background: #e6f4ea;
-    border: 1px solid #a8d5b5;
-    color: #205c33;
-  }
-
-  .fehler {
-    background: #fdeceb;
-    border: 1px solid #f0b3ae;
-    color: #a13a2f;
-  }
-
-  .fehler ul { margin: 0; padding-left: 18px; }
-  .fehler li + li { margin-top: 4px; }
-
-  .benutzer-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-  }
-
-  .benutzer-card {
-    background: var(--card-bg);
-    border-radius: 14px;
-    overflow: hidden;
-    box-shadow: 0 12px 28px rgba(20, 40, 50, 0.1);
-    display: flex;
-    flex-direction: column;
-  }
-
-  .benutzer-body {
-    padding: 16px 18px 18px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .benutzer-titel {
-    margin: 0 0 4px;
-    font-size: 19px;
-    font-weight: 700;
-    color: var(--text-dark);
-    word-break: break-word;
-  }
-
-  .benutzer-email {
-    margin: 0 0 10px;
-    font-size: 12px;
-    color: var(--text-muted);
-    word-break: break-all;
-  }
-
-  .chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin: 0 0 10px;
-  }
-
-  .chip {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--teal);
-    background: rgba(26, 143, 156, 0.1);
-    border: 1px solid rgba(26, 143, 156, 0.25);
-  }
-
-  .chip.rolle-admin {
-    color: var(--blue);
-    background: rgba(47, 111, 176, 0.1);
-    border-color: rgba(47, 111, 176, 0.25);
-  }
-
-  .chip.status-gesperrt {
-    color: #a13a2f;
-    background: #fdeceb;
-    border-color: #f0b3ae;
-  }
-
-  .chip.status-wartet {
-    color: #8a4b16;
-    background: #fff4e8;
-    border-color: #f3c79e;
-  }
-
-  .benutzer-zahlen {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    font-size: 12px;
-    color: var(--text-muted);
-    line-height: 1.6;
-    flex: 1;
-  }
-
-  .code-hinweis {
-    margin: 8px 0 0;
-    font-size: 12px;
-    color: #8a4b16;
-  }
-
-  .benutzer-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 16px;
-  }
-
-  .benutzer-actions form {
-    flex: 1;
-    display: flex;
-    margin: 0;
-  }
-
-  .btn-edit,
-  .btn-code,
-  .btn-sperren,
-  .btn-entsperren {
-    flex: 1;
-    border-radius: 8px;
-    padding: 9px 6px;
-    font-size: 13px;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    color: #ffffff;
-    border: none;
-    white-space: nowrap;
-  }
-
-  .btn-edit { background: linear-gradient(90deg, var(--blue) 0%, var(--teal) 100%); }
-  .btn-entsperren { background: linear-gradient(90deg, var(--teal) 0%, var(--blue) 100%); }
-  .btn-sperren { background: linear-gradient(90deg, var(--orange) 0%, #d9534f 100%); }
-
-  .btn-code {
-    color: var(--blue);
-    background: #f2f7fb;
-    border: 1px solid #d7e6f2;
-  }
-
-  .btn-edit:hover,
-  .btn-entsperren:hover,
-  .btn-sperren:hover { filter: brightness(1.05); }
-  .btn-code:hover { background: #e6f0f9; }
-
-  .empty-state {
-    grid-column: 1 / -1;
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 14px;
-    padding: 40px 20px;
-  }
-
-  /* ---- Sidebar im Card-Look der Login-Seite ---- */
-  .sidebar {
-    position: fixed;
-    top: 208px;
-    right: 24px;
-    width: 240px;
-    background: var(--card-bg);
-    border-radius: 14px;
-    box-shadow: 0 12px 28px rgba(20, 40, 50, 0.1);
-    padding: 20px 20px 70px;
-    z-index: 2;
-  }
-
-  .sidebar-label {
-    color: var(--blue);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.4px;
-    margin: 0 0 8px;
-    text-transform: uppercase;
-  }
-
-  .search-input {
-    width: 100%;
-    padding: 12px 14px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    font-size: 14px;
-    color: var(--text-dark);
-    background: #fbfcfc;
-    outline: none;
-    margin-bottom: 26px;
-  }
-
-  .search-input::placeholder { color: #a7b2b6; }
-
-  .search-input:focus {
-    border-color: var(--blue);
-    background: #ffffff;
-  }
-
-  .sidebar select {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    font-size: 14px;
-    font-family: inherit;
-    color: var(--text-dark);
-    background: #fbfcfc;
-    outline: none;
-    margin-bottom: 26px;
-  }
-
-  .sidebar select:focus {
-    border-color: var(--blue);
-    background: #ffffff;
-  }
-
-  .sidebar-hinweis {
-    margin: 0;
-    font-size: 12px;
-    color: var(--text-muted);
-    line-height: 1.5;
-  }
-
-  .btn-add {
-    position: absolute;
-    bottom: 18px;
-    right: 18px;
-    width: 46px;
-    height: 46px;
-    border-radius: 50%;
-    background: linear-gradient(90deg, var(--blue) 0%, var(--teal) 45%, var(--orange) 100%);
-    color: #ffffff;
-    border: none;
-    font-size: 22px;
-    line-height: 1;
-    cursor: pointer;
-    box-shadow: 0 8px 18px rgba(20, 40, 50, 0.25);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-  }
-
-  .btn-add:hover { filter: brightness(1.05); }
-
-  .filter-submit {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
-
-  @media (min-width: 1400px) {
-    .benutzer-grid { grid-template-columns: repeat(4, 1fr); }
-  }
-
-  @media (max-width: 700px) {
-    .main-area { padding-right: 16px; }
-    .benutzer-grid { grid-template-columns: 1fr; }
-    .sidebar {
-      position: static;
-      width: 100%;
-      order: -1;
-      margin-bottom: 20px;
-    }
-  }
-</style>
+<link rel="stylesheet" href="<?php echo h(asset_url('css/style.css')); ?>">
+<link rel="stylesheet" href="<?php echo h(asset_url('css/benutzer.css')); ?>">
 </head>
-<body>
+<body class="seite-benutzer">
 
   <?php kopfzeile('benutzer'); ?>
 
@@ -573,8 +264,7 @@ function anzahl_text($anzahl, $einzahl, $mehrzahl)
 
             <?php if ($status === 'gesperrt'): ?>
             <form method="post" action="benutzer.php"
-                  data-frage="<?php echo h($benutzer['name'] . ' wieder entsperren?'); ?>"
-                  onsubmit="return confirm(this.getAttribute('data-frage'));">
+                  data-frage="<?php echo h($benutzer['name'] . ' wieder entsperren?'); ?>">
               <?php csrf_feld(); ?>
               <input type="hidden" name="aktion" value="entsperren">
               <input type="hidden" name="id" value="<?php echo $id; ?>">
@@ -584,8 +274,7 @@ function anzahl_text($anzahl, $einzahl, $mehrzahl)
             <?php /* Sich selbst sperren geht nicht (benutzer_darf_aendern()) -
                      deshalb gibt es den Knopf auf der eigenen Karte gar nicht. */ ?>
             <form method="post" action="benutzer.php"
-                  data-frage="<?php echo h($benutzer['name'] . ' wirklich sperren? Eine laufende Sitzung endet beim nächsten Klick.'); ?>"
-                  onsubmit="return confirm(this.getAttribute('data-frage'));">
+                  data-frage="<?php echo h($benutzer['name'] . ' wirklich sperren? Eine laufende Sitzung endet beim nächsten Klick.'); ?>">
               <?php csrf_feld(); ?>
               <input type="hidden" name="aktion" value="sperren">
               <input type="hidden" name="id" value="<?php echo $id; ?>">
@@ -596,8 +285,7 @@ function anzahl_text($anzahl, $einzahl, $mehrzahl)
 
           <div class="benutzer-actions">
             <form method="post" action="benutzer.php"
-                  data-frage="<?php echo h('Neuen Freischaltcode für ' . $benutzer['name'] . ' erzeugen? Ein noch offener Code wird damit ungültig; ein bestehendes Passwort gilt weiter, bis der neue Code eingelöst wird.'); ?>"
-                  onsubmit="return confirm(this.getAttribute('data-frage'));">
+                  data-frage="<?php echo h('Neuen Freischaltcode für ' . $benutzer['name'] . ' erzeugen? Ein noch offener Code wird damit ungültig; ein bestehendes Passwort gilt weiter, bis der neue Code eingelöst wird.'); ?>">
               <?php csrf_feld(); ?>
               <input type="hidden" name="aktion" value="code">
               <input type="hidden" name="id" value="<?php echo $id; ?>">
@@ -617,14 +305,14 @@ function anzahl_text($anzahl, $einzahl, $mehrzahl)
         <input type="text" name="suche" class="search-input" placeholder="Name oder E-Mail....." value="<?php echo h($suche); ?>">
 
         <p class="sidebar-label">Rolle</p>
-        <select name="rolle" onchange="this.form.submit()">
+        <select name="rolle" data-auto-submit>
           <option value="">Alle</option>
           <option value="admin" <?php echo $filterRolle === 'admin' ? 'selected' : ''; ?>>Admin</option>
           <option value="mitarbeiter" <?php echo $filterRolle === 'mitarbeiter' ? 'selected' : ''; ?>>Mitarbeiter</option>
         </select>
 
         <p class="sidebar-label">Status</p>
-        <select name="status" onchange="this.form.submit()">
+        <select name="status" data-auto-submit>
           <option value="">Alle</option>
           <?php foreach ($statusTexte as $wert => $text): ?>
           <option value="<?php echo h($wert); ?>" <?php echo $filterStatus === $wert ? 'selected' : ''; ?>><?php echo h($text); ?></option>

@@ -11,6 +11,7 @@
 // Bewusst PHP-5.6-Syntax, damit es auf dem Schulrechner laeuft.
 
 require_once __DIR__ . '/../lib/db.php';
+require_once __DIR__ . '/../lib/funktionen.php';
 require_once __DIR__ . '/../lib/auth.php';
 require_once __DIR__ . '/../templates/layout.php';
 require_once __DIR__ . '/../lib/buchung_logik.php';
@@ -24,147 +25,10 @@ erfordere_login();
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hilfe – FitFürInfo</title>
-<style>
-  :root {
-    --teal: #1a8f9c;
-    --blue: #2f6fb0;
-    --orange: #e8792e;
-    --card-bg: #ffffff;
-    --page-bg: #eef3f4;
-    --text-dark: #2b3a42;
-    --text-muted: #7c8a91;
-    --border: #dfe6e8;
-  }
-
-  * { box-sizing: border-box; }
-
-  body {
-    margin: 0;
-    min-height: 100vh;
-    font-family: "Segoe UI", Roboto, Arial, sans-serif;
-    background: var(--page-bg);
-    color: var(--text-dark);
-  }
-
-  .main-area {
-    max-width: 960px;
-    width: 92%;
-    margin: 20px auto 40px;
-    padding: 0 16px 16px;
-  }
-
-  /* ---- Inhaltsverzeichnis ---- */
-  .inhalt-liste {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin: 0 0 20px;
-    padding: 0;
-    list-style: none;
-  }
-
-  .inhalt-liste a {
-    display: inline-block;
-    padding: 7px 14px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--blue);
-    background: #f2f7fb;
-    border: 1px solid #d7e6f2;
-    text-decoration: none;
-  }
-  .inhalt-liste a:hover { background: #e6f0f9; }
-
-  .karte {
-    background: var(--card-bg);
-    border-radius: 14px;
-    box-shadow: 0 12px 28px rgba(20, 40, 50, 0.1);
-    padding: 22px 26px 24px;
-    margin-bottom: 20px;
-    scroll-margin-top: 96px; /* Sprungziel nicht unter der fixierten Kopfzeile */
-  }
-
-  .karte h2 {
-    margin: 0 0 12px;
-    font-size: 19px;
-    font-weight: 700;
-  }
-
-  .karte h2 .nr {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 26px;
-    height: 26px;
-    margin-right: 8px;
-    border-radius: 50%;
-    font-size: 13px;
-    color: #ffffff;
-    background: linear-gradient(90deg, var(--blue) 0%, var(--teal) 100%);
-    vertical-align: 2px;
-  }
-
-  .karte h3 {
-    margin: 18px 0 6px;
-    font-size: 14px;
-    color: var(--blue);
-  }
-
-  .karte p,
-  .karte li {
-    font-size: 14px;
-    line-height: 1.55;
-  }
-
-  .karte p { margin: 0 0 10px; }
-  .karte ul,
-  .karte ol { margin: 0 0 10px; padding-left: 22px; }
-  .karte li { margin-bottom: 4px; }
-
-  .rechte {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13.5px;
-    margin: 4px 0 10px;
-  }
-
-  .rechte th,
-  .rechte td {
-    text-align: left;
-    vertical-align: top;
-    padding: 8px 10px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .rechte th {
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    color: var(--blue);
-  }
-
-  .rechte td:first-child { font-weight: 600; white-space: nowrap; }
-
-  .hinweis {
-    margin: 12px 0 0;
-    padding: 10px 12px;
-    border-radius: 8px;
-    font-size: 13px;
-    line-height: 1.45;
-    background: #eef6f7;
-    border: 1px solid #cfe6e9;
-    color: #3a6b72;
-  }
-
-  .karte a { color: var(--blue); }
-
-  @media (max-width: 600px) {
-    .rechte td:first-child { white-space: normal; }
-  }
-</style>
+<link rel="stylesheet" href="<?php echo h(asset_url('css/style.css')); ?>">
+<link rel="stylesheet" href="<?php echo h(asset_url('css/hilfe.css')); ?>">
 </head>
-<body>
+<body class="seite-hilfe">
 
   <?php kopfzeile('hilfe'); ?>
 

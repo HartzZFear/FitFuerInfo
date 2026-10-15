@@ -10,6 +10,7 @@
 // Bewusst PHP-5.6-Syntax, damit es auf dem Schulrechner laeuft.
 
 require_once __DIR__ . '/../lib/db.php';
+require_once __DIR__ . '/../lib/funktionen.php';
 require_once __DIR__ . '/../lib/auth.php';
 require_once __DIR__ . '/../templates/layout.php';
 require_once __DIR__ . '/../lib/kurs_rechte.php';
@@ -142,460 +143,10 @@ function buchung_tooltip($buchung)
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Belegung – FitFürInfo</title>
-<style>
-  :root {
-    --teal: #1a8f9c;
-    --blue: #2f6fb0;
-    --orange: #e8792e;
-    --card-bg: #ffffff;
-    --page-bg: #eef3f4;
-    --text-dark: #2b3a42;
-    --text-muted: #7c8a91;
-    --border: #dfe6e8;
-    --slot-hoehe: 24px;
-  }
-
-  * { box-sizing: border-box; }
-
-  body {
-    margin: 0;
-    min-height: 100vh;
-    font-family: "Segoe UI", Roboto, Arial, sans-serif;
-    background: var(--page-bg);
-  }
-
-  /* ---- Hauptbereich ---- */
-  .main-area {
-    max-width: 1600px;
-    width: 92%;
-    margin: 20px auto 40px;
-    padding: 0 16px 16px;
-    padding-right: 292px; /* Platz für die fest positionierte Sidebar */
-  }
-
-  .kalender-karte {
-    background: var(--card-bg);
-    border-radius: 14px;
-    box-shadow: 0 12px 28px rgba(20, 40, 50, 0.1);
-    padding: 18px 18px 20px;
-  }
-
-  /* ---- Werkzeugleiste: Ansicht, Blättern, Überschrift ---- */
-  .werkzeugleiste {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 16px;
-  }
-
-  /* flex-basis auto: erst rutschen die Knoepfe in die naechste Zeile,
-     erst wenn der Titel allein nicht mehr passt, bricht er selbst um
-     (statt aus der Karte hinauszuragen). */
-  .kalender-titel {
-    flex: 1 1 auto;
-    min-width: 0;
-    margin: 0;
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--text-dark);
-  }
-
-  .umschalter,
-  .blaettern {
-    display: flex;
-    gap: 6px;
-  }
-
-  .knopf {
-    display: inline-block;
-    padding: 7px 14px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-muted);
-    text-decoration: none;
-    border: 1px solid var(--border);
-    background: #fbfcfc;
-    white-space: nowrap;
-  }
-
-  .knopf:hover,
-  .knopf:focus-visible {
-    border-color: var(--blue);
-    color: var(--blue);
-  }
-
-  .knopf.active {
-    background: linear-gradient(90deg, var(--blue) 0%, var(--teal) 100%);
-    color: #ffffff;
-    border-color: transparent;
-  }
-
-  .empty-state {
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 14px;
-    padding: 40px 20px;
-  }
-
-  /* ---- Woche / Tag: Raster aus Halbstunden-Slots (CSS Grid) ----
-     Die Spalten sind flexibel (minmax(..., 1fr), inline gesetzt). Die
-     Mindestbreite ist so gewaehlt, dass die Woche (5 Tage) ab 1024 px
-     Fensterbreite komplett in die Karte passt. Wird es noch schmaler,
-     scrollt nur dieser Bereich waagerecht - mit sichtbarer Leiste, statt
-     die rechten Spalten still abzuschneiden. */
-  .slot-scroll {
-    overflow-x: auto;
-    padding-bottom: 4px; /* Platz fuer die Scrollleiste */
-  }
-
-  /* Die Scrollleiste sitzt ganz unten am langen Raster. Damit niemand
-     glaubt, die Woche ende am rechten Rand, blendet das Skript unten
-     diesen Hinweis ein, sobald das Raster breiter als die Karte ist. */
-  .scroll-hinweis {
-    margin: 0 0 8px;
-    font-size: 12px;
-    color: var(--text-muted);
-    text-align: right;
-  }
-
-  .slot-raster {
-    display: grid;
-    /* grid-template-columns setzt die Seite inline (Anzahl Spalten) */
-    grid-template-rows: auto repeat(<?php echo count($slots); ?>, var(--slot-hoehe));
-    font-size: 12px;
-    color: var(--text-dark);
-  }
-
-  .kopf-zelle {
-    padding: 8px 6px;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.4px;
-    text-transform: uppercase;
-    color: var(--blue);
-    text-align: center;
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .slot-raster .kopf-zelle { grid-row: 1; }
-
-  .kopf-zelle a { color: inherit; text-decoration: none; }
-  .kopf-zelle a:hover { text-decoration: underline; }
-  .kopf-zelle.heute { color: var(--orange); }
-
-  .zeit-zelle {
-    padding-right: 8px;
-    font-size: 11px;
-    color: var(--text-muted);
-    text-align: right;
-    line-height: 1;
-    transform: translateY(-5px); /* Uhrzeit sitzt auf der Linie */
-  }
-
-  .zeit-zelle.volle-stunde { font-weight: 700; color: var(--text-dark); }
-
-  .slot {
-    display: block;
-    border-top: 1px solid #f0f4f5;
-    border-left: 1px solid #f0f4f5;
-  }
-
-  .slot.volle-stunde { border-top-color: var(--border); }
-  .slot.vergangen { background: #f7f9f9; }
-
-  a.slot {
-    color: transparent;
-    text-decoration: none;
-    font-size: 16px;
-    font-weight: 700;
-    text-align: center;
-    line-height: var(--slot-hoehe);
-  }
-
-  a.slot:hover,
-  a.slot:focus-visible {
-    color: var(--blue);
-    background: #eef5fb;
-    outline: none;
-  }
-
-  .block {
-    display: block;
-    margin: 1px 3px;
-    padding: 4px 8px;
-    border-radius: 6px;
-    border-left: 4px solid;
-    overflow: hidden;
-    text-decoration: none;
-    color: var(--text-dark);
-    line-height: 1.35;
-    position: relative;
-    z-index: 1;
-  }
-
-  /* Schmale Spalten: lange Kurstitel enden mit "...", der vollstaendige
-     Text steht im Tooltip (title). */
-  .block strong,
-  .block span {
-    display: block;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .block strong { font-size: 12px; }
-  .block span { font-size: 11px; color: #4d5d65; }
-
-  a.block:hover,
-  a.block:focus-visible { filter: brightness(0.95); }
-
-  .block.vergangen { opacity: 0.55; }
-
-  /* Eigene Buchung: zusätzlich ein deutlicher dunkler Rahmen */
-  .block.eigene { box-shadow: inset 0 0 0 2px var(--text-dark); }
-
-  /* Durch Kurs-/"nur meine"-Filter ausgeblendet, belegt den Slot aber trotzdem */
-  .block.verdeckt {
-    border-left-color: #c3ccd0;
-    background: repeating-linear-gradient(45deg, #f0f3f4 0 6px, #e6eaec 6px 12px);
-  }
-
-  /* ---- Feste Kursfarben (Index aus kalender_kursfarbe()) ---- */
-  .farbe-0 { background: rgba(26, 143, 156, 0.16);  border-color: #1a8f9c; }
-  .farbe-1 { background: rgba(47, 111, 176, 0.16);  border-color: #2f6fb0; }
-  .farbe-2 { background: rgba(232, 121, 46, 0.18);  border-color: #e8792e; }
-  .farbe-3 { background: rgba(123, 94, 167, 0.16);  border-color: #7b5ea7; }
-  .farbe-4 { background: rgba(58, 154, 91, 0.16);   border-color: #3a9a5b; }
-  .farbe-5 { background: rgba(200, 80, 75, 0.16);   border-color: #c8504b; }
-  .farbe-6 { background: rgba(201, 154, 26, 0.20);  border-color: #c99a1a; }
-  .farbe-7 { background: rgba(90, 111, 124, 0.16);  border-color: #5a6f7c; }
-
-  /* ---- Monat ---- */
-  .monat-raster {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    border-top: 1px solid var(--border);
-    border-left: 1px solid var(--border);
-  }
-
-  .monat-raster .kopf-zelle {
-    border-right: 1px solid var(--border);
-  }
-
-  .monat-tag {
-    display: block;
-    min-height: 104px;
-    padding: 6px 8px 8px;
-    border-right: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    color: var(--text-dark);
-    text-decoration: none;
-    overflow: hidden;
-  }
-
-  .monat-tag:hover,
-  .monat-tag:focus-visible { background: #f5f9fb; outline: none; }
-
-  .monat-tag.anderer-monat { background: #f9fbfb; }
-  .monat-tag.anderer-monat .tag-nummer { color: #b5c0c4; }
-
-  .tag-nummer {
-    display: inline-block;
-    min-width: 24px;
-    margin-bottom: 4px;
-    padding: 2px 6px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 700;
-    text-align: center;
-  }
-
-  .monat-tag.heute .tag-nummer {
-    background: linear-gradient(90deg, var(--blue) 0%, var(--teal) 100%);
-    color: #ffffff;
-  }
-
-  .eintrag {
-    display: block;
-    margin-top: 3px;
-    padding: 2px 6px;
-    border-radius: 4px;
-    border-left: 3px solid;
-    font-size: 11px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .eintrag.eigene { box-shadow: inset 0 0 0 1px var(--text-dark); font-weight: 600; }
-
-  .weitere {
-    display: block;
-    margin-top: 4px;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--blue);
-  }
-
-  /* ---- Legende ---- */
-  .legende {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 18px;
-    margin-top: 16px;
-    padding-top: 14px;
-    border-top: 1px solid var(--border);
-    font-size: 12px;
-    color: var(--text-muted);
-  }
-
-  .legende-eintrag {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .legende-farbe {
-    display: inline-block;
-    width: 16px;
-    height: 12px;
-    border-radius: 3px;
-    border-left: 4px solid;
-  }
-
-  .legende-farbe.eigene { background: #ffffff; border-left: none; box-shadow: inset 0 0 0 2px var(--text-dark); }
-  .legende-farbe.verdeckt {
-    border-left-color: #c3ccd0;
-    background: repeating-linear-gradient(45deg, #f0f3f4 0 3px, #e6eaec 3px 6px);
-  }
-
-  /* ---- Sidebar mit den Filtern ---- */
-  .sidebar {
-    position: fixed;
-    top: 208px;
-    right: 24px;
-    width: 240px;
-    background: var(--card-bg);
-    border-radius: 14px;
-    box-shadow: 0 12px 28px rgba(20, 40, 50, 0.1);
-    padding: 20px 20px 70px;
-    z-index: 2;
-  }
-
-  .sidebar-label {
-    color: var(--blue);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.4px;
-    margin: 0 0 8px;
-    text-transform: uppercase;
-  }
-
-  .sidebar select {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    font-size: 14px;
-    font-family: inherit;
-    color: var(--text-dark);
-    background: #fbfcfc;
-    outline: none;
-    margin-bottom: 20px;
-  }
-
-  .sidebar select:focus {
-    border-color: var(--blue);
-    background: #ffffff;
-  }
-
-  .check-option {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    color: var(--text-dark);
-    cursor: pointer;
-    margin-bottom: 18px;
-  }
-
-  .check-option input[type="checkbox"] {
-    accent-color: var(--blue);
-    width: 16px;
-    height: 16px;
-  }
-
-  .sidebar-links {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .link-zuruecksetzen {
-    font-size: 13px;
-    color: var(--text-muted);
-    text-decoration: none;
-  }
-  .link-zuruecksetzen:hover { text-decoration: underline; }
-
-  .link-ansicht {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--blue);
-    text-decoration: none;
-  }
-  .link-ansicht:hover { text-decoration: underline; }
-
-  .btn-add {
-    position: absolute;
-    bottom: 18px;
-    right: 18px;
-    width: 46px;
-    height: 46px;
-    border-radius: 50%;
-    background: linear-gradient(90deg, var(--blue) 0%, var(--teal) 45%, var(--orange) 100%);
-    color: #ffffff;
-    border: none;
-    font-size: 22px;
-    line-height: 1;
-    cursor: pointer;
-    box-shadow: 0 8px 18px rgba(20, 40, 50, 0.25);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-  }
-
-  .btn-add:hover { filter: brightness(1.05); }
-
-  .filter-submit {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
-
-  @media (max-width: 700px) {
-    .main-area { padding-right: 16px; }
-    .sidebar {
-      position: static;
-      width: 100%;
-      margin-bottom: 20px;
-    }
-    .kalender-titel { flex-basis: 100%; }
-  }
-</style>
+<link rel="stylesheet" href="<?php echo h(asset_url('css/style.css')); ?>">
+<link rel="stylesheet" href="<?php echo h(asset_url('css/belegung.css')); ?>">
 </head>
-<body>
+<body class="seite-belegung">
 
   <?php kopfzeile('belegung'); ?>
 
@@ -673,7 +224,7 @@ function buchung_tooltip($buchung)
       <p class="scroll-hinweis" id="scrollHinweis" hidden>Weitere Spalten rechts – waagerecht scrollen →</p>
       <div class="slot-scroll" id="slotScroll">
         <div class="slot-raster"
-             style="grid-template-columns: 48px repeat(<?php echo count($spalten); ?>, minmax(<?php echo $ansicht === 'tag' ? 110 : 84; ?>px, 1fr));">
+             style="grid-template-columns: 48px repeat(<?php echo count($spalten); ?>, minmax(<?php echo $ansicht === 'tag' ? 110 : 84; ?>px, 1fr)); grid-template-rows: auto repeat(<?php echo count($slots); ?>, var(--slot-hoehe));">
 
           <div class="kopf-zelle"></div>
           <?php foreach ($spalten as $s => $spalte): ?>
@@ -802,7 +353,7 @@ function buchung_tooltip($buchung)
         <input type="hidden" name="datum" value="<?php echo h($datum->format('Y-m-d')); ?>">
 
         <p class="sidebar-label">Raum</p>
-        <select name="raum_id" onchange="this.form.submit()">
+        <select name="raum_id" data-auto-submit>
           <?php if ($ansicht !== 'woche'): ?>
           <option value="0">Alle Räume</option>
           <?php endif; ?>
@@ -815,7 +366,7 @@ function buchung_tooltip($buchung)
         </select>
 
         <p class="sidebar-label">Kurs</p>
-        <select name="kurs_id" onchange="this.form.submit()">
+        <select name="kurs_id" data-auto-submit>
           <option value="0">Alle Kurse</option>
           <?php foreach ($alleKurse as $kursOption): ?>
           <option value="<?php echo (int) $kursOption['id']; ?>"
@@ -826,7 +377,7 @@ function buchung_tooltip($buchung)
         </select>
 
         <label class="check-option">
-          <input type="checkbox" name="nur_meine" value="1" onchange="this.form.submit()" <?php echo $param['nur_meine'] ? 'checked' : ''; ?>>
+          <input type="checkbox" name="nur_meine" value="1" data-auto-submit <?php echo $param['nur_meine'] ? 'checked' : ''; ?>>
           Nur meine Buchungen
         </label>
 
@@ -846,23 +397,6 @@ function buchung_tooltip($buchung)
 
   </div>
 
-  <script>
-    // Hinweis "waagerecht scrollen" nur zeigen, wenn das Raster wirklich
-    // breiter als sein Bereich ist (bei schmalen Fenstern).
-    (function () {
-      var bereich = document.getElementById('slotScroll');
-      var hinweis = document.getElementById('scrollHinweis');
-      if (!bereich || !hinweis) {
-        return;
-      }
-
-      function pruefen() {
-        hinweis.hidden = bereich.scrollWidth <= bereich.clientWidth + 1;
-      }
-
-      window.addEventListener('resize', pruefen);
-      pruefen();
-    })();
-  </script>
+  <script src="<?php echo h(asset_url('js/belegung.js')); ?>"></script>
 </body>
 </html>

@@ -1,3 +1,3 @@
-        <script src="<?php echo h(BASE_URL . '/assets/js/main.js'); ?>"></script>
+        <script src="<?php echo h(asset_url('js/main.js')); ?>"></script>
     </body>
 </html>

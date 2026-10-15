@@ -11,8 +11,8 @@
  * auf. Erlaubte Werte fuer $aktiverTab: kurse, raeume, belegung, benutzer,
  * profil, hilfe. Der Tab "Benutzer" erscheint nur fuer den Admin.
  *
- * Die Farbvariablen (--teal, --blue, ...) definiert weiterhin jede Seite
- * selbst in :root, weil ihr eigenes CSS sie ebenfalls braucht.
+ * Das CSS der Kopfzeile steht in assets/css/style.css. Jede Seite bindet
+ * style.css selbst im <head> ein (vor ihrem eigenen CSS).
  *
  * Breite: Ab 1024 px passt alles in eine Zeile (ab 1280 px in der
  * urspruenglichen Groesse, darunter etwas kompakter). Unter 1024 px darf
@@ -24,24 +24,15 @@
  */
 
 require_once __DIR__ . '/../lib/auth.php';
+require_once __DIR__ . '/../lib/funktionen.php';
 
 /**
- * Gibt CSS, Kopfzeile, Wellen-Banner und das Scroll-Skript des Banners aus.
- * Das CSS wird pro Seitenaufruf nur einmal ausgegeben, auch wenn die
- * Funktion versehentlich zweimal aufgerufen wird.
+ * Gibt Kopfzeile, Wellen-Banner und das gemeinsame Skript (main.js) aus.
  *
  * @param string $aktiverTab
  */
-
 function kopfzeile($aktiverTab)
 {
-    static $cssAusgegeben = false;
-
-    if (!$cssAusgegeben) {
-        kopfzeile_css();
-        $cssAusgegeben = true;
-    }
-
     $basis = BASE_URL . '/pages/';
 
     $tabs = array(
@@ -95,18 +86,6 @@ function kopfzeile($aktiverTab)
     </div>
   </div>
 
-  <script src="<?php echo h(BASE_URL . '/assets/js/main.js'); ?>"></script>
+  <script src="<?php echo h(asset_url('js/main.js')); ?>"></script>
   <?php
-}
-
-/**
- * Das CSS der Kopfzeile. Steht hinter dem CSS der Seite und gewinnt damit
- * bei gleicher Spezifitaet.
- */
-function kopfzeile_css()
-{
-    ?>
-    <link rel="stylesheet" href="<?php echo h(BASE_URL . '/assets/css/style.css'); ?>">
-
-<?php
 }

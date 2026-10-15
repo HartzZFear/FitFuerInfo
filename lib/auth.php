@@ -11,6 +11,7 @@
  */
 
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/funktionen.php';
 
 /**
  * Startet die Session, falls noch keine laeuft.
@@ -324,9 +325,8 @@ function session_fehler_anzeigen()
     $meldung = $_SESSION['fehler'];
     unset($_SESSION['fehler']);
 
-    echo '<div class="session-fehler" role="alert" style="margin: 0 0 20px; padding: 10px 14px;'
-        . ' border-radius: 8px; background: #fdeceb; border: 1px solid #f0b3ae; color: #a13a2f;'
-        . ' font-size: 13px;">' . h($meldung) . '</div>';
+    // Aussehen: .session-fehler in assets/css/style.css
+    echo '<div class="session-fehler" role="alert">' . h($meldung) . '</div>';
 }
 
 /**
@@ -396,57 +396,10 @@ function csrf_pruefen()
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Anfrage abgelehnt – FitFürInfo</title>
-<style>
-  :root {
-    --teal: #1a8f9c;
-    --blue: #2f6fb0;
-    --orange: #e8792e;
-    --card-bg: #ffffff;
-    --page-bg: #eef3f4;
-    --text-dark: #2b3a42;
-    --text-muted: #7c8a91;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    min-height: 100vh;
-    font-family: "Segoe UI", Roboto, Arial, sans-serif;
-    background: var(--page-bg);
-  }
-  .kopf {
-    position: relative;
-    background: linear-gradient(135deg, var(--teal), var(--blue));
-    color: #fff;
-    padding: 40px 20px 70px;
-    text-align: center;
-  }
-  .kopf h1 { margin: 0 0 4px; font-size: 24px; font-weight: 700; }
-  .kopf p { margin: 0; opacity: .9; font-size: 14px; }
-  .kopf .welle { position: absolute; left: 0; bottom: -1px; width: 100%; height: 60px; display: block; }
-  .inhalt { max-width: 520px; margin: 24px auto 40px; padding: 0 16px; }
-  .karte {
-    background: var(--card-bg);
-    border-radius: 14px;
-    box-shadow: 0 12px 28px rgba(20, 40, 50, .12);
-    padding: 28px 28px 32px;
-    text-align: center;
-  }
-  .karte-titel { margin: 0 0 12px; font-size: 20px; color: var(--text-dark); }
-  .karte-text { margin: 0 0 20px; font-size: 14px; color: var(--text-muted); line-height: 1.5; }
-  .link-zurueck {
-    display: inline-block;
-    padding: 10px 20px;
-    border-radius: 8px;
-    background: linear-gradient(90deg, var(--blue) 0%, var(--teal) 100%);
-    color: #fff;
-    font-size: 14px;
-    font-weight: 700;
-    text-decoration: none;
-  }
-  .link-zurueck:hover { filter: brightness(1.05); }
-</style>
+<link rel="stylesheet" href="<?php echo h(asset_url('css/style.css')); ?>">
+<link rel="stylesheet" href="<?php echo h(asset_url('css/formular.css')); ?>">
 </head>
-<body>
+<body class="seite-anfrage_abgelehnt">
   <div class="kopf">
     <h1>FitFürInfo</h1>
     <p>Kurs- und Raumverwaltung</p>
