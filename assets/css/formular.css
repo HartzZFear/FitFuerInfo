@@ -1,0 +1,403 @@
+/* Formular- und Hinweisseiten: Seitenkopf mit Welle, eine Karte in der Mitte.
+ *
+ * Eingebunden (nach style.css) von:
+ *   kurs_bearbeiten, raum_bearbeiten, buchung_bearbeiten, benutzer_bearbeiten,
+ *   kurs_loeschen, raum_loeschen, buchung_loeschen und den Hinweisseiten aus
+ *   lib/ (zugriff_verweigert, anfrage_abgelehnt, freischaltcode).
+ *
+ * Die Regeln gelten für alle diese Seiten. Wo eine Seite abweicht, hängt die
+ * Regel an ihrer body-Klasse (z. B. .seite-kurs_loeschen).
+ * Die Element-Selektoren (label, input, select, ...) stehen bewusst nur hier
+ * und nicht in style.css, damit sie die Filter der Listenseiten nicht treffen.
+ */
+
+/* ---- Seitenkopf mit Welle (.kopf p steht in style.css) ---- */
+.kopf {
+  position: relative;
+  background: linear-gradient(135deg, var(--teal), var(--blue));
+  color: #fff;
+  padding: 40px 20px 70px;
+  text-align: center;
+}
+
+.kopf h1 {
+  margin: 0 0 4px;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.kopf .welle {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 100%;
+  height: 60px;
+  display: block;
+}
+
+/* ---- Inhaltsspalte: Formulare breit, Rückfragen und Hinweise schmaler ---- */
+.inhalt {
+  max-width: 640px;
+  margin: 24px auto 40px;
+  padding: 0 16px;
+}
+
+.seite-kurs_loeschen .inhalt,
+.seite-raum_loeschen .inhalt,
+.seite-buchung_loeschen .inhalt,
+.seite-zugriff_verweigert .inhalt,
+.seite-anfrage_abgelehnt .inhalt {
+  max-width: 520px;
+}
+
+.seite-freischaltcode .inhalt {
+  max-width: 560px;
+}
+
+/* ---- Reiter: gleiche Optik wie die Tabs der Kopfzeile, aber eigene
+   Klassen, damit sich die Regeln nicht überschneiden ---- */
+.reiter-gruppe {
+  display: flex;
+  gap: 16px;
+  max-width: 380px;
+  margin: 0 auto 20px;
+}
+
+.reiter {
+  flex: 1;
+  text-align: center;
+  padding: 10px 0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: #fbfcfc;
+}
+
+.reiter:hover,
+.reiter:focus-visible {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+.reiter.active {
+  background: linear-gradient(90deg, var(--blue) 0%, var(--teal) 45%, var(--orange) 100%);
+  color: #ffffff;
+  border-color: transparent;
+}
+
+/* ---- Karte ---- */
+.karte {
+  background: var(--card-bg);
+  border-radius: 14px;
+  box-shadow: 0 12px 28px rgba(20, 40, 50, .12);
+  padding: 28px 28px 32px;
+}
+
+.seite-zugriff_verweigert .karte,
+.seite-anfrage_abgelehnt .karte,
+.seite-freischaltcode .karte {
+  text-align: center;
+}
+
+.karte-titel {
+  margin: 0 0 18px;
+  font-size: 20px;
+  color: var(--text-dark);
+}
+
+.seite-kurs_loeschen .karte-titel,
+.seite-raum_loeschen .karte-titel,
+.seite-buchung_loeschen .karte-titel {
+  margin-bottom: 16px;
+}
+
+.seite-zugriff_verweigert .karte-titel,
+.seite-anfrage_abgelehnt .karte-titel {
+  margin-bottom: 12px;
+}
+
+.seite-freischaltcode .karte-titel {
+  margin-bottom: 6px;
+}
+
+.karte-text {
+  margin: 0 0 22px;
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.seite-zugriff_verweigert .karte-text,
+.seite-anfrage_abgelehnt .karte-text {
+  margin-bottom: 20px;
+}
+
+.seite-freischaltcode .karte-text {
+  margin-bottom: 14px;
+}
+
+/* ---- Formularfelder (jede Seite hat nur die Feldtypen, die sie braucht) ---- */
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 16px 0 6px;
+}
+
+label:first-of-type {
+  margin-top: 0;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="date"],
+select,
+textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text-dark);
+  background: #fbfcfc;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--blue);
+  background: #ffffff;
+}
+
+.seite-kurs_bearbeiten textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+.seite-benutzer_bearbeiten .optional {
+  font-weight: normal;
+  color: var(--text-muted);
+}
+
+.seite-buchung_bearbeiten .zeit-reihe {
+  display: flex;
+  gap: 16px;
+}
+
+.seite-buchung_bearbeiten .zeit-reihe > div {
+  flex: 1;
+}
+
+fieldset {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin: 18px 0 0;
+}
+
+legend {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dark);
+  padding: 0 6px;
+}
+
+.checkbox-liste {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: normal;
+  color: var(--text-dark);
+  margin: 0;
+}
+
+/* Benutzer: einzelne Checkbox "aktiv" unter den Feldern statt einer Liste */
+.seite-benutzer_bearbeiten .checkbox-item {
+  gap: 8px;
+  font-size: 14px;
+  margin: 18px 0 0;
+}
+
+.checkbox-item input {
+  width: auto;
+}
+
+.seite-benutzer_bearbeiten .checkbox-item input {
+  accent-color: var(--blue);
+}
+
+/* ---- Knöpfe und Links ---- */
+.knopf-reihe {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.seite-kurs_bearbeiten .knopf-reihe,
+.seite-raum_bearbeiten .knopf-reihe,
+.seite-buchung_bearbeiten .knopf-reihe,
+.seite-benutzer_bearbeiten .knopf-reihe {
+  margin-top: 26px;
+}
+
+.knopf {
+  padding: 11px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  background: linear-gradient(90deg, var(--blue) 0%, var(--teal) 100%);
+}
+
+.knopf:hover {
+  filter: brightness(1.05);
+}
+
+.knopf-loeschen {
+  background: linear-gradient(90deg, var(--orange) 0%, #d9534f 100%);
+}
+
+.knopf-loeschen:hover {
+  filter: brightness(1.05);
+}
+
+.link-abbrechen {
+  font-size: 14px;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.link-abbrechen:hover {
+  text-decoration: underline;
+}
+
+.seite-raum_loeschen .link-belegung {
+  font-size: 13px;
+  color: var(--blue);
+  text-decoration: none;
+}
+
+/* Rück-Link der Hinweisseiten, als Knopf gestaltet */
+.link-zurueck {
+  display: inline-block;
+  padding: 10px 20px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--blue) 0%, var(--teal) 100%);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.link-zurueck:hover {
+  filter: brightness(1.05);
+}
+
+/* ---- Meldungen ---- */
+.fehler {
+  margin: 0 0 18px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #fdeceb;
+  border: 1px solid #f0b3ae;
+  color: #a13a2f;
+  font-size: 13px;
+}
+
+.seite-kurs_loeschen .fehler,
+.seite-raum_loeschen .fehler,
+.seite-buchung_loeschen .fehler {
+  margin-bottom: 20px;
+}
+
+.fehler ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+/* Abstand zwischen mehreren Fehlern - kurs_bearbeiten hatte ihn bisher
+   nicht und bleibt deshalb (noch) ohne */
+.seite-raum_bearbeiten .fehler li + li,
+.seite-buchung_bearbeiten .fehler li + li,
+.seite-benutzer_bearbeiten .fehler li + li {
+  margin-top: 4px;
+}
+
+.hinweis {
+  margin: 0 0 18px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #eaf4f5;
+  border: 1px solid #b9dde1;
+  color: #17636c;
+  font-size: 13px;
+}
+
+.seite-benutzer_bearbeiten .hinweis {
+  line-height: 1.5;
+}
+
+.seite-raum_bearbeiten .hinweis a {
+  color: #17636c;
+}
+
+.regel-hinweis {
+  margin: 18px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ---- Freischaltcode-Anzeige (benutzer_code_anzeigen_falls_vorhanden()) ---- */
+.seite-freischaltcode .code {
+  margin: 10px 0 14px;
+  padding: 18px 10px;
+  border-radius: 12px;
+  border: 2px dashed var(--teal);
+  background: #f2f9fa;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 42px;
+  font-weight: 700;
+  letter-spacing: 8px;
+  color: var(--text-dark);
+}
+
+.seite-freischaltcode .einloesen {
+  margin: 0 0 22px;
+  font-size: 13px;
+  color: var(--text-dark);
+  word-break: break-all;
+}
+
+.seite-freischaltcode .einloesen a {
+  color: var(--blue);
+}
+
+.seite-freischaltcode .warnung {
+  margin: 0 0 22px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #fff4e8;
+  border: 1px solid #f3c79e;
+  color: #8a4b16;
+  font-size: 13px;
+  text-align: left;
+  line-height: 1.5;
+}

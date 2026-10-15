@@ -22,6 +22,7 @@
  */
 
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/funktionen.php';
 require_once __DIR__ . '/auth.php';
 
 /**
@@ -200,117 +201,10 @@ function benutzer_code_anzeigen_falls_vorhanden()
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Freischaltcode – FitFürInfo</title>
-<style>
-  :root {
-    --teal: #1a8f9c;
-    --blue: #2f6fb0;
-    --orange: #e8792e;
-    --card-bg: #ffffff;
-    --page-bg: #eef3f4;
-    --text-dark: #2b3a42;
-    --text-muted: #7c8a91;
-    --border: #dfe6e8;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    min-height: 100vh;
-    font-family: "Segoe UI", Roboto, Arial, sans-serif;
-    background: var(--page-bg);
-  }
-  .kopf {
-    position: relative;
-    background: linear-gradient(135deg, var(--teal), var(--blue));
-    color: #fff;
-    padding: 40px 20px 70px;
-    text-align: center;
-  }
-  .kopf h1 { margin: 0 0 4px; font-size: 24px; font-weight: 700; }
-  .kopf p { margin: 0; opacity: .9; font-size: 14px; }
-  .kopf .welle { position: absolute; left: 0; bottom: -1px; width: 100%; height: 60px; display: block; }
-  .inhalt { max-width: 560px; margin: 24px auto 40px; padding: 0 16px; }
-
-  /* ---- Tab-Leiste: gleiche Optik wie die Tabs in kurse.php ---- */
-  .tab-group {
-    display: flex;
-    gap: 16px;
-    max-width: 380px;
-    margin: 0 auto 20px;
-  }
-  .tab {
-    flex: 1;
-    text-align: center;
-    padding: 10px 0;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-muted);
-    text-decoration: none;
-    cursor: pointer;
-    border: 1px solid var(--border);
-    background: #fbfcfc;
-  }
-  .tab:hover,
-  .tab:focus-visible { border-color: var(--blue); color: var(--blue); }
-  .tab.active {
-    background: linear-gradient(90deg, var(--blue) 0%, var(--teal) 45%, var(--orange) 100%);
-    color: #ffffff;
-    border-color: transparent;
-  }
-
-  .karte {
-    background: var(--card-bg);
-    border-radius: 14px;
-    box-shadow: 0 12px 28px rgba(20, 40, 50, .12);
-    padding: 28px 28px 32px;
-    text-align: center;
-  }
-  .karte-titel { margin: 0 0 6px; font-size: 20px; color: var(--text-dark); }
-  .karte-text { margin: 0 0 14px; font-size: 14px; color: var(--text-muted); line-height: 1.5; }
-  .code {
-    margin: 10px 0 14px;
-    padding: 18px 10px;
-    border-radius: 12px;
-    border: 2px dashed var(--teal);
-    background: #f2f9fa;
-    font-family: Consolas, "Courier New", monospace;
-    font-size: 42px;
-    font-weight: 700;
-    letter-spacing: 8px;
-    color: var(--text-dark);
-  }
-  .einloesen {
-    margin: 0 0 22px;
-    font-size: 13px;
-    color: var(--text-dark);
-    word-break: break-all;
-  }
-  .einloesen a { color: var(--blue); }
-  .warnung {
-    margin: 0 0 22px;
-    padding: 10px 14px;
-    border-radius: 8px;
-    background: #fff4e8;
-    border: 1px solid #f3c79e;
-    color: #8a4b16;
-    font-size: 13px;
-    text-align: left;
-    line-height: 1.5;
-  }
-  .link-zurueck {
-    display: inline-block;
-    padding: 10px 20px;
-    border-radius: 8px;
-    background: linear-gradient(90deg, var(--blue) 0%, var(--teal) 100%);
-    color: #fff;
-    font-size: 14px;
-    font-weight: 700;
-    text-decoration: none;
-  }
-  .link-zurueck:hover { filter: brightness(1.05); }
-</style>
+<link rel="stylesheet" href="<?php echo h(asset_url('css/style.css')); ?>">
+<link rel="stylesheet" href="<?php echo h(asset_url('css/formular.css')); ?>">
 </head>
-<body>
+<body class="seite-freischaltcode">
   <div class="kopf">
     <h1>FitFürInfo</h1>
     <p>Freischaltcode</p>
@@ -327,11 +221,11 @@ function benutzer_code_anzeigen_falls_vorhanden()
   </div>
   <div class="inhalt">
 
-    <nav class="tab-group">
-      <a href="kurse.php" class="tab">Kurse</a>
-      <a href="raeume.php" class="tab">Räume</a>
-      <a href="belegung.php" class="tab">Belegung</a>
-      <a href="benutzer.php" class="tab active">Benutzer</a>
+    <nav class="reiter-gruppe">
+      <a href="kurse.php" class="reiter">Kurse</a>
+      <a href="raeume.php" class="reiter">Räume</a>
+      <a href="belegung.php" class="reiter">Belegung</a>
+      <a href="benutzer.php" class="reiter active">Benutzer</a>
     </nav>
 
     <?php session_fehler_anzeigen(); ?>

@@ -5,6 +5,7 @@
 // Bewusst PHP-5.6-Syntax, damit es auf dem Schulrechner laeuft.
 
 require_once __DIR__ . '/../lib/db.php';
+require_once __DIR__ . '/../lib/funktionen.php';
 require_once __DIR__ . '/../lib/auth.php';
 require_once __DIR__ . '/../lib/kurs_rechte.php';
 
@@ -127,132 +128,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?php echo $istBearbeiten ? 'Kurs bearbeiten' : 'Neuen Kurs anlegen'; ?> – FitFürInfo</title>
-<style>
-  :root {
-    --teal: #1a8f9c;
-    --blue: #2f6fb0;
-    --orange: #e8792e;
-    --card-bg: #ffffff;
-    --page-bg: #eef3f4;
-    --text-dark: #2b3a42;
-    --text-muted: #7c8a91;
-    --border: #dfe6e8;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    min-height: 100vh;
-    font-family: "Segoe UI", Roboto, Arial, sans-serif;
-    background: var(--page-bg);
-  }
-  .kopf {
-    position: relative;
-    background: linear-gradient(135deg, var(--teal), var(--blue));
-    color: #fff;
-    padding: 40px 20px 70px;
-    text-align: center;
-  }
-  .kopf h1 { margin: 0 0 4px; font-size: 24px; font-weight: 700; }
-  .kopf p { margin: 0; opacity: .9; font-size: 14px; }
-  .kopf .welle { position: absolute; left: 0; bottom: -1px; width: 100%; height: 60px; display: block; }
-  .inhalt { max-width: 640px; margin: 24px auto 40px; padding: 0 16px; }
-  .karte {
-    background: var(--card-bg);
-    border-radius: 14px;
-    box-shadow: 0 12px 28px rgba(20, 40, 50, .12);
-    padding: 28px 28px 32px;
-  }
-  .karte-titel { margin: 0 0 18px; font-size: 20px; color: var(--text-dark); }
-  label {
-    display: block;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-dark);
-    margin: 16px 0 6px;
-  }
-  label:first-of-type { margin-top: 0; }
-  input[type="text"],
-  input[type="number"],
-  textarea {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-size: 14px;
-    font-family: inherit;
-    color: var(--text-dark);
-    background: #fbfcfc;
-  }
-  input:focus,
-  textarea:focus {
-    outline: none;
-    border-color: var(--blue);
-    background: #ffffff;
-  }
-  textarea { resize: vertical; min-height: 90px; }
-  fieldset {
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 12px 14px;
-    margin: 18px 0 0;
-  }
-  legend {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-dark);
-    padding: 0 6px;
-  }
-  .checkbox-liste {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px 18px;
-  }
-  .checkbox-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    font-weight: normal;
-    color: var(--text-dark);
-    margin: 0;
-  }
-  .checkbox-item input { width: auto; }
-  .knopf-reihe {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-top: 26px;
-  }
-  .knopf {
-    padding: 11px 24px;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 700;
-    color: #ffffff;
-    cursor: pointer;
-    background: linear-gradient(90deg, var(--blue) 0%, var(--teal) 100%);
-  }
-  .knopf:hover { filter: brightness(1.05); }
-  .link-abbrechen {
-    font-size: 14px;
-    color: var(--text-muted);
-    text-decoration: none;
-  }
-  .link-abbrechen:hover { text-decoration: underline; }
-  .fehler {
-    margin: 0 0 18px;
-    padding: 10px 14px;
-    border-radius: 8px;
-    background: #fdeceb;
-    border: 1px solid #f0b3ae;
-    color: #a13a2f;
-    font-size: 13px;
-  }
-  .fehler ul { margin: 0; padding-left: 18px; }
-</style>
+<link rel="stylesheet" href="<?php echo h(asset_url('css/style.css')); ?>">
+<link rel="stylesheet" href="<?php echo h(asset_url('css/formular.css')); ?>">
 </head>
-<body>
+<body class="seite-kurs_bearbeiten">
 
   <div class="kopf">
     <h1>FitFürInfo</h1>
