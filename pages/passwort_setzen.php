@@ -10,6 +10,7 @@
  */
 
 require_once __DIR__ . '/../lib/db.php';
+require_once __DIR__ . '/../lib/funktionen.php';
 require_once __DIR__ . '/../lib/auth.php';
 
 session_starten();
@@ -52,135 +53,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="utf-8">
 <title>Passwort setzen – FitFuerInfo</title>
-<style>
-:root {
-  --teal: #1a8f9c;
-  --blue: #2f6fb0;
-  --orange: #e8792e;
-}
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  color: #222;
-  background: #f2f5f7;
-}
-.kopf {
-  position: relative;
-  background: linear-gradient(135deg, var(--teal), var(--blue));
-  color: #fff;
-  padding: 56px 20px 100px;
-  text-align: center;
-}
-.kopf h1 {
-  margin: 0 0 6px;
-  font-size: 26px;
-  font-weight: normal;
-}
-.kopf p {
-  margin: 0;
-  opacity: .9;
-  font-size: 14px;
-}
-.kopf .welle {
-  position: absolute;
-  left: 0;
-  bottom: -1px;
-  width: 100%;
-  height: 70px;
-  display: block;
-}
-.inhalt {
-  max-width: 380px;
-  margin: -64px auto 40px;
-  padding: 0 16px;
-}
-.karte {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 12px 30px rgba(20, 40, 60, .15);
-  padding: 32px 28px;
-}
-.karte label {
-  display: block;
-  font-size: 13px;
-  font-weight: bold;
-  color: #444;
-  margin: 16px 0 6px;
-}
-.karte label:first-of-type {
-  margin-top: 0;
-}
-.karte input[type="text"],
-.karte input[type="password"] {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #ccd3d8;
-  border-radius: 6px;
-  font-size: 14px;
-}
-.karte input[type="text"]:focus,
-.karte input[type="password"]:focus {
-  outline: none;
-  border-color: var(--teal);
-}
-.hinweis {
-  margin-top: 14px;
-  padding: 10px 12px;
-  border-radius: 6px;
-  font-size: 12.5px;
-  background: #eef6f7;
-  border: 1px solid #cfe6e9;
-  color: #3a6b72;
-}
-.knopf {
-  width: 100%;
-  margin-top: 20px;
-  padding: 11px 12px;
-  border: none;
-  border-radius: 6px;
-  background: var(--orange);
-  color: #fff;
-  font-size: 15px;
-  font-weight: bold;
-  cursor: pointer;
-}
-.knopf:hover { opacity: .92; }
-.meldung {
-  margin-top: 16px;
-  padding: 10px 12px;
-  border-radius: 6px;
-  font-size: 13px;
-  background: #fdeceb;
-  border: 1px solid #f0b3ae;
-  color: #a13a2f;
-}
-.meldung ul {
-  margin: 0;
-  padding-left: 18px;
-}
-.meldung-erfolg {
-  margin-top: 16px;
-  padding: 10px 12px;
-  border-radius: 6px;
-  font-size: 13px;
-  background: #e6f4ea;
-  border: 1px solid #a8d5b5;
-  color: #205c33;
-}
-.fuss {
-  margin-top: 20px;
-  text-align: center;
-  font-size: 13px;
-}
-.fuss a {
-  color: var(--blue);
-  text-decoration: none;
-}
-.fuss a:hover { text-decoration: underline; }
-</style>
+<link rel="stylesheet" href="<?php echo h(asset_url('css/style.css')); ?>">
+<link rel="stylesheet" href="<?php echo h(asset_url('css/passwort_setzen.css')); ?>">
 </head>
-<body>
+<body class="seite-passwort_setzen">
 
 <div class="kopf">
   <h1>FitFuerInfo</h1>

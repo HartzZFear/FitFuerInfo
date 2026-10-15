@@ -127,20 +127,9 @@ foreach ($ergebnisse as $e) {
 <head>
 <meta charset="utf-8">
 <title>Selbsttest – FitFuerInfo</title>
-<style>
-body { font-family: Arial, Helvetica, sans-serif; margin: 40px; color: #222; line-height: 1.5; }
-h1 { font-size: 22px; font-weight: normal; margin-bottom: 4px; }
-p.sub { color: #666; margin-top: 0; }
-table { border-collapse: collapse; margin-top: 20px; width: 100%; max-width: 760px; }
-th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid #ddd; font-size: 14px; }
-th { background: #f3f3f3; font-weight: bold; }
-.ok { color: #1a7f37; font-weight: bold; }
-.fail { color: #b4261e; font-weight: bold; }
-.box { max-width: 760px; padding: 14px 16px; margin-top: 24px; border-radius: 4px; font-size: 14px; }
-.gut { background: #e6f4ea; border: 1px solid #a8d5b5; }
-.schlecht { background: #fdeceb; border: 1px solid #f0b3ae; }
-code { background: #f3f3f3; padding: 1px 5px; border-radius: 3px; }
-</style>
+<?php /* Relativ und ohne ?v=: Die Testseite muss auch laufen, wenn
+         config.php (BASE_URL, ASSET_VERSION) noch fehlt. */ ?>
+<link rel="stylesheet" href="test.css">
 </head>
 <body>
 
@@ -148,7 +137,7 @@ code { background: #f3f3f3; padding: 1px 5px; border-radius: 3px; }
 <p class="sub">FitFuerInfo – Kurs- und Raumverwaltung</p>
 
 <table>
-<tr><th style="width:60px;">Status</th><th style="width:230px;">Pruefung</th><th>Ergebnis</th></tr>
+<tr><th class="spalte-status">Status</th><th class="spalte-pruefung">Pruefung</th><th>Ergebnis</th></tr>
 <?php foreach ($ergebnisse as $e): ?>
 <tr>
   <td class="<?php echo $e['ok'] ? 'ok' : 'fail'; ?>"><?php echo $e['ok'] ? 'OK' : 'FEHLER'; ?></td>
