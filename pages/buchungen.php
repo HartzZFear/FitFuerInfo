@@ -165,7 +165,7 @@ function ist_eigene_buchung($buchung, $benutzerId, $istAdmin)
     <aside class="sidebar">
       <form method="get" action="buchungen.php">
         <p class="sidebar-label">Raum</p>
-        <select name="raum_id" onchange="this.form.submit()">
+        <select name="raum_id" data-auto-submit>
           <option value="0">Alle Räume</option>
           <?php foreach ($alleRaeume as $raumOption): ?>
           <option value="<?php echo (int) $raumOption['id']; ?>"
@@ -176,7 +176,7 @@ function ist_eigene_buchung($buchung, $benutzerId, $istAdmin)
         </select>
 
         <p class="sidebar-label">Kurs</p>
-        <select name="kurs_id" onchange="this.form.submit()">
+        <select name="kurs_id" data-auto-submit>
           <option value="0">Alle Kurse</option>
           <?php foreach ($alleKurse as $kursOption): ?>
           <option value="<?php echo (int) $kursOption['id']; ?>"
@@ -187,16 +187,16 @@ function ist_eigene_buchung($buchung, $benutzerId, $istAdmin)
         </select>
 
         <p class="sidebar-label">Ab Datum</p>
-        <input type="date" name="ab" value="<?php echo h($abDatum); ?>" onchange="this.form.submit()">
+        <input type="date" name="ab" value="<?php echo h($abDatum); ?>" data-auto-submit>
 
         <p class="sidebar-label">Wer</p>
         <div class="radio-group">
           <label class="radio-option">
-            <input type="radio" name="wer" value="meine" onchange="this.form.submit()" <?php echo $nurMeine ? 'checked' : ''; ?>>
+            <input type="radio" name="wer" value="meine" data-auto-submit <?php echo $nurMeine ? 'checked' : ''; ?>>
             Nur meine Buchungen
           </label>
           <label class="radio-option">
-            <input type="radio" name="wer" value="alle" onchange="this.form.submit()" <?php echo $nurMeine ? '' : 'checked'; ?>>
+            <input type="radio" name="wer" value="alle" data-auto-submit <?php echo $nurMeine ? '' : 'checked'; ?>>
             Alle
           </label>
         </div>

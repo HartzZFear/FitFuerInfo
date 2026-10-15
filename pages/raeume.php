@@ -222,7 +222,7 @@ function ist_mein_raum($raum, $bearbeiterJeRaum, $benutzerId, $istAdmin)
         <input type="text" name="suche" class="search-input" placeholder="Raumname....." value="<?php echo h($suche); ?>">
 
         <p class="sidebar-label">Software</p>
-        <select name="software_id" onchange="this.form.submit()">
+        <select name="software_id" data-auto-submit>
           <option value="0">Alle</option>
           <?php foreach ($alleSoftware as $softwareOption): ?>
           <option value="<?php echo (int) $softwareOption['id']; ?>"
@@ -234,16 +234,16 @@ function ist_mein_raum($raum, $bearbeiterJeRaum, $benutzerId, $istAdmin)
 
         <p class="sidebar-label">Mindestens Arbeitsplätze</p>
         <input type="number" name="min_plaetze" min="1" placeholder="beliebig"
-               value="<?php echo h($minPlaetze); ?>" onchange="this.form.submit()">
+               value="<?php echo h($minPlaetze); ?>" data-auto-submit>
 
         <p class="sidebar-label">Zuständigkeit</p>
         <div class="radio-group">
           <label class="radio-option">
-            <input type="radio" name="zustaendig" value="meine" onchange="this.form.submit()" <?php echo $nurEigene ? 'checked' : ''; ?>>
+            <input type="radio" name="zustaendig" value="meine" data-auto-submit <?php echo $nurEigene ? 'checked' : ''; ?>>
             Nur meine
           </label>
           <label class="radio-option">
-            <input type="radio" name="zustaendig" value="alle" onchange="this.form.submit()" <?php echo $nurEigene ? '' : 'checked'; ?>>
+            <input type="radio" name="zustaendig" value="alle" data-auto-submit <?php echo $nurEigene ? '' : 'checked'; ?>>
             Alle
           </label>
         </div>

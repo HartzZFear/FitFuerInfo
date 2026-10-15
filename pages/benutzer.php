@@ -264,8 +264,7 @@ function anzahl_text($anzahl, $einzahl, $mehrzahl)
 
             <?php if ($status === 'gesperrt'): ?>
             <form method="post" action="benutzer.php"
-                  data-frage="<?php echo h($benutzer['name'] . ' wieder entsperren?'); ?>"
-                  onsubmit="return confirm(this.getAttribute('data-frage'));">
+                  data-frage="<?php echo h($benutzer['name'] . ' wieder entsperren?'); ?>">
               <?php csrf_feld(); ?>
               <input type="hidden" name="aktion" value="entsperren">
               <input type="hidden" name="id" value="<?php echo $id; ?>">
@@ -275,8 +274,7 @@ function anzahl_text($anzahl, $einzahl, $mehrzahl)
             <?php /* Sich selbst sperren geht nicht (benutzer_darf_aendern()) -
                      deshalb gibt es den Knopf auf der eigenen Karte gar nicht. */ ?>
             <form method="post" action="benutzer.php"
-                  data-frage="<?php echo h($benutzer['name'] . ' wirklich sperren? Eine laufende Sitzung endet beim nächsten Klick.'); ?>"
-                  onsubmit="return confirm(this.getAttribute('data-frage'));">
+                  data-frage="<?php echo h($benutzer['name'] . ' wirklich sperren? Eine laufende Sitzung endet beim nächsten Klick.'); ?>">
               <?php csrf_feld(); ?>
               <input type="hidden" name="aktion" value="sperren">
               <input type="hidden" name="id" value="<?php echo $id; ?>">
@@ -287,8 +285,7 @@ function anzahl_text($anzahl, $einzahl, $mehrzahl)
 
           <div class="benutzer-actions">
             <form method="post" action="benutzer.php"
-                  data-frage="<?php echo h('Neuen Freischaltcode für ' . $benutzer['name'] . ' erzeugen? Ein noch offener Code wird damit ungültig; ein bestehendes Passwort gilt weiter, bis der neue Code eingelöst wird.'); ?>"
-                  onsubmit="return confirm(this.getAttribute('data-frage'));">
+                  data-frage="<?php echo h('Neuen Freischaltcode für ' . $benutzer['name'] . ' erzeugen? Ein noch offener Code wird damit ungültig; ein bestehendes Passwort gilt weiter, bis der neue Code eingelöst wird.'); ?>">
               <?php csrf_feld(); ?>
               <input type="hidden" name="aktion" value="code">
               <input type="hidden" name="id" value="<?php echo $id; ?>">
@@ -308,14 +305,14 @@ function anzahl_text($anzahl, $einzahl, $mehrzahl)
         <input type="text" name="suche" class="search-input" placeholder="Name oder E-Mail....." value="<?php echo h($suche); ?>">
 
         <p class="sidebar-label">Rolle</p>
-        <select name="rolle" onchange="this.form.submit()">
+        <select name="rolle" data-auto-submit>
           <option value="">Alle</option>
           <option value="admin" <?php echo $filterRolle === 'admin' ? 'selected' : ''; ?>>Admin</option>
           <option value="mitarbeiter" <?php echo $filterRolle === 'mitarbeiter' ? 'selected' : ''; ?>>Mitarbeiter</option>
         </select>
 
         <p class="sidebar-label">Status</p>
-        <select name="status" onchange="this.form.submit()">
+        <select name="status" data-auto-submit>
           <option value="">Alle</option>
           <?php foreach ($statusTexte as $wert => $text): ?>
           <option value="<?php echo h($wert); ?>" <?php echo $filterStatus === $wert ? 'selected' : ''; ?>><?php echo h($text); ?></option>

@@ -151,11 +151,11 @@ function ist_eigene_karte($kurs, $eigentuemerJeKurs, $benutzerId)
         <p class="sidebar-label">Eigentümerschaft</p>
         <div class="radio-group">
           <label class="radio-option">
-            <input type="radio" name="ownership" value="own" onchange="this.form.submit()" <?php echo $nurEigene ? 'checked' : ''; ?>>
+            <input type="radio" name="ownership" value="own" data-auto-submit <?php echo $nurEigene ? 'checked' : ''; ?>>
             Nur eigene
           </label>
           <label class="radio-option">
-            <input type="radio" name="ownership" value="all" onchange="this.form.submit()" <?php echo $nurEigene ? '' : 'checked'; ?>>
+            <input type="radio" name="ownership" value="all" data-auto-submit <?php echo $nurEigene ? '' : 'checked'; ?>>
             Alle
           </label>
         </div>

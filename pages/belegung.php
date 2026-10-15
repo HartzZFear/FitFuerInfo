@@ -353,7 +353,7 @@ function buchung_tooltip($buchung)
         <input type="hidden" name="datum" value="<?php echo h($datum->format('Y-m-d')); ?>">
 
         <p class="sidebar-label">Raum</p>
-        <select name="raum_id" onchange="this.form.submit()">
+        <select name="raum_id" data-auto-submit>
           <?php if ($ansicht !== 'woche'): ?>
           <option value="0">Alle Räume</option>
           <?php endif; ?>
@@ -366,7 +366,7 @@ function buchung_tooltip($buchung)
         </select>
 
         <p class="sidebar-label">Kurs</p>
-        <select name="kurs_id" onchange="this.form.submit()">
+        <select name="kurs_id" data-auto-submit>
           <option value="0">Alle Kurse</option>
           <?php foreach ($alleKurse as $kursOption): ?>
           <option value="<?php echo (int) $kursOption['id']; ?>"
@@ -377,7 +377,7 @@ function buchung_tooltip($buchung)
         </select>
 
         <label class="check-option">
-          <input type="checkbox" name="nur_meine" value="1" onchange="this.form.submit()" <?php echo $param['nur_meine'] ? 'checked' : ''; ?>>
+          <input type="checkbox" name="nur_meine" value="1" data-auto-submit <?php echo $param['nur_meine'] ? 'checked' : ''; ?>>
           Nur meine Buchungen
         </label>
 
@@ -397,23 +397,6 @@ function buchung_tooltip($buchung)
 
   </div>
 
-  <script>
-    // Hinweis "waagerecht scrollen" nur zeigen, wenn das Raster wirklich
-    // breiter als sein Bereich ist (bei schmalen Fenstern).
-    (function () {
-      var bereich = document.getElementById('slotScroll');
-      var hinweis = document.getElementById('scrollHinweis');
-      if (!bereich || !hinweis) {
-        return;
-      }
-
-      function pruefen() {
-        hinweis.hidden = bereich.scrollWidth <= bereich.clientWidth + 1;
-      }
-
-      window.addEventListener('resize', pruefen);
-      pruefen();
-    })();
-  </script>
+  <script src="<?php echo h(asset_url('js/belegung.js')); ?>"></script>
 </body>
 </html>
