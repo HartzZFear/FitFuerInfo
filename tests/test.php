@@ -56,6 +56,17 @@ if ($configOk && $pdoOk) {
     } catch (Exception $e) {
         pruefe('Datenbankverbindung', false, $e->getMessage());
     }
+
+    // config.php ist jetzt geladen: ASSET_VERSION haengt als ?v=... an den
+    // CSS/JS-Links (asset_url()). Aeltere lokale config.php-Dateien haben sie
+    // noch nicht.
+    pruefe(
+        'ASSET_VERSION in config.php',
+        defined('ASSET_VERSION'),
+        defined('ASSET_VERSION')
+            ? 'Version ' . ASSET_VERSION
+            : 'fehlt – Zeile mit ASSET_VERSION aus config/config.example.php uebernehmen'
+    );
 }
 
 // --- 5. Tabellen -------------------------------------------------------
