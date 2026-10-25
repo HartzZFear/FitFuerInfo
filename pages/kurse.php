@@ -8,7 +8,7 @@ erfordere_login();
 $meineId  = benutzer_id();
 $istAdmin = ist_admin();
 
-$suche     = isset($_GET['suche']) ? trim($_GET['suche']) : '';
+$suche     = eingabe_text($_GET, 'suche');
 $nurEigene = isset($_GET['ownership']) && $_GET['ownership'] === 'own';
 
 $kurse = kurs_liste($suche, $nurEigene, $meineId);

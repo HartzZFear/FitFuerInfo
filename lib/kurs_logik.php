@@ -203,19 +203,40 @@ function kurs_teilnehmerzahl($text)
  * Prueft die Eingaben und legt den Kurs an bzw. speichert ihn, samt
  * Software und - nur beim Admin - Eigentuemern.
  *
+ * Wer die Teilnehmerzahl erhoeht oder Software hinzufuegt, kann damit
+ * bereits bestehende Buchungen ungueltig machen (Buchungsregeln 4 und 5).
+ * Deshalb wird der neue Stand innerhalb der Transaktion mit
+ * kurs_konflikte_mit_buchungen() geprueft und bei Konflikten verworfen.
+ *
+ * Bewusst nicht abgesichert (Write Skew): Eine ungueltige Buchung kann nur
+ * entstehen, wenn zwei Personen im selben Augenblick Kurs und Raum derselben
+ * kuenftigen Buchung aendern und erst beide Aenderungen zusammen die Buchung
+ * ungueltig machen (z. B. Teilnehmer hoch und Plaetze runter). Jede
+ * Transaktion sperrt nur ihre eigene Zeile (kurs bzw. raum) und prueft gegen
+ * den alten Stand der anderen. Eine Loesung waere eine gemeinsame Sperre fuer
+ * kurs_speichern(), raum_speichern() und buchung_speichern() (z. B. GET_LOCK).
+ * Das ist bewusst nicht umgesetzt.
+ *
  * @param  int|null $kursId     null = neuer Kurs
  * @param  array    $eingabe    titel, beschreibung, max_teilnehmer (Text aus dem Formular),
  *                              software (int[]), eigentuemer (int[], nur beim Admin ausgewertet)
  * @param  int      $benutzerId wird beim Anlegen Ersteller
  * @param  bool     $istAdmin   nur der Admin aendert die Eigentuemer
- * @return true|array true bei Erfolg, sonst deutsche Fehlermeldungen
+ * @return true|array true bei Erfolg, sonst
+ *                    array('fehler' => deutsche Fehlermeldungen,
+ *                          'konflikte' => true, wenn kuenftige Buchungen nicht mehr passen wuerden)
  */
 function kurs_speichern($kursId, $eingabe, $benutzerId, $istAdmin)
 {
     $fehler = array();
 
+    // Die Spalte kurs.titel ist VARCHAR(100). Ohne diese Pruefung wuerde
+    // MariaDB (ohne Strict-Mode) einen laengeren Titel still abschneiden.
+    // mb_strlen zaehlt Zeichen, nicht Bytes ("ü" = 1 Zeichen).
     if ($eingabe['titel'] === '') {
         $fehler[] = 'Bitte einen Kurstitel eingeben.';
+    } elseif (mb_strlen($eingabe['titel'], 'UTF-8') > 100) {
+        $fehler[] = 'Der Kurstitel darf höchstens 100 Zeichen lang sein.';
     }
 
     $maxTeilnehmer = kurs_teilnehmerzahl($eingabe['max_teilnehmer']);
@@ -224,20 +245,37 @@ function kurs_speichern($kursId, $eingabe, $benutzerId, $istAdmin)
     }
 
     if (!empty($fehler)) {
-        return $fehler;
+        return array('fehler' => $fehler, 'konflikte' => false);
     }
 
     $beschreibung = $eingabe['beschreibung'] !== '' ? $eingabe['beschreibung'] : null;
+    $istNeu       = $kursId === null;
+    $konflikte    = array();
 
-    // Transaktion: Kurs, Software und Eigentuemer sind mehrere Schreibbefehle,
-    // die zusammengehoeren. Scheitert einer (z. B. eine manipulierte
-    // Software-ID verletzt den Fremdschluessel), wird nichts gespeichert
-    // statt eines halb geaenderten Kurses.
+    // Transaktion aus zwei Gruenden:
+    // 1. Kurs, Software und Eigentuemer sind mehrere Schreibbefehle, die
+    //    zusammengehoeren. Scheitert einer (z. B. eine manipulierte
+    //    Software-ID verletzt den Fremdschluessel), wird nichts gespeichert
+    //    statt eines halb geaenderten Kurses.
+    // 2. Erst wird geschrieben, dann geprueft, ob der neue Stand noch zu den
+    //    kuenftigen Buchungen passt; wenn nicht, macht rollBack() alles
+    //    rueckgaengig.
     $db = db();
     try {
         $db->beginTransaction();
 
         if ($kursId !== null) {
+            // Die Zeile des Kurses sperren, bevor geschrieben und geprueft
+            // wird. Dieselbe Sperre nimmt buchung_speichern() vor dem
+            // Speichern einer Buchung - dadurch kann niemand einen Termin fuer
+            // den Kurs anlegen, waehrend hier gerade seine Teilnehmerzahl oder
+            // Software geaendert wird. Die Raumzeile wird bewusst NICHT
+            // gesperrt: buchung_speichern() sperrt erst raum, dann kurs.
+            // Wuerde hier nach kurs noch raum gesperrt, waere die Reihenfolge
+            // umgedreht, und zwei gleichzeitige Anfragen koennten sich
+            // gegenseitig blockieren (Deadlock). Ein neuer Kurs hat noch keine
+            // Buchungen, also keine Sperre.
+            abfrage('SELECT id FROM kurs WHERE id = ? FOR UPDATE', array($kursId));
             abfrage(
                 'UPDATE kurs SET titel = ?, beschreibung = ?, max_teilnehmer = ? WHERE id = ?',
                 array($eingabe['titel'], $beschreibung, $maxTeilnehmer, $kursId)
@@ -262,15 +300,31 @@ function kurs_speichern($kursId, $eingabe, $benutzerId, $istAdmin)
             }
         }
 
-        $db->commit();
+        // Jetzt steht der neue Stand in der Transaktion - genau so sieht ihn
+        // die Pruefung. Passt er nicht zu den kuenftigen Buchungen, macht das
+        // rollBack() unten alles rueckgaengig. Ein neuer Kurs hat noch keine
+        // Buchungen.
+        if (!$istNeu) {
+            $konflikte = kurs_konflikte_mit_buchungen($kursId);
+        }
+
+        if (empty($konflikte)) {
+            $db->commit();
+            return true;
+        }
+
+        $db->rollBack();
     } catch (PDOException $e) {
         if ($db->inTransaction()) {
             $db->rollBack();
         }
-        return array('Der Kurs konnte nicht gespeichert werden. Bitte erneut versuchen.');
+        return array(
+            'fehler'    => array('Der Kurs konnte nicht gespeichert werden. Bitte erneut versuchen.'),
+            'konflikte' => false,
+        );
     }
 
-    return true;
+    return array('fehler' => $konflikte, 'konflikte' => true);
 }
 
 /**

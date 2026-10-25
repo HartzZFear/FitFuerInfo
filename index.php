@@ -3,7 +3,7 @@
  * Front-Controller: einziger Einstiegspunkt der Anwendung.
  *
  * Jede Seite wird als index.php?seite=<name> aufgerufen. Ablauf:
- *   1. Konfiguration und lib/ laden, Session starten
+ *   1. Konfiguration und lib/ laden, Fehlerseite anmelden, Session starten
  *   2. Seitennamen gegen die Whitelist ERLAUBTE_SEITEN (config/app.php) pruefen
  *   3. Cache-Header setzen
  *   4. Seite mit Kopf und Fuss ausgeben (seite_ausgeben() in lib/funktionen.php)
@@ -37,6 +37,10 @@ if (!defined('ERLAUBTE_SEITEN')) {
         . 'Details zeigt tests/test.php.'
     );
 }
+
+// Jede Exception, die keine Funktion selbst abfaengt, landet hier: Besucher
+// sehen dann eine verstaendliche Fehlerseite statt Dateipfaden und SQL.
+set_exception_handler('fehler_seite_zeigen');
 
 session_starten();
 

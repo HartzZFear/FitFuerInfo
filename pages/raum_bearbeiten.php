@@ -66,8 +66,8 @@ $hatKonflikte  = false;
 
 // --- Speichern ------------------------------------------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name                 = isset($_POST['name']) ? trim($_POST['name']) : '';
-    $arbeitsplaetzeEingabe = isset($_POST['arbeitsplaetze']) ? trim($_POST['arbeitsplaetze']) : '';
+    $name                 = eingabe_text($_POST, 'name');
+    $arbeitsplaetzeEingabe = eingabe_text($_POST, 'arbeitsplaetze');
 
     $ausgewaehlteSoftwareIds = formular_ids('software');
 
@@ -119,11 +119,7 @@ $ohneKopfzeile = true;
       <?php /* Bei Konflikten mit bestehenden Buchungen hilft der Blick in die
                Belegung des Raums - deshalb dann den Link dorthin einblenden. */ ?>
       <?php if ($hatKonflikte && $raumId !== null): ?>
-      <div class="hinweis">
-        Es wurde nichts gespeichert. Wer die Änderung trotzdem braucht, muss zuerst die
-        betroffenen Buchungen anpassen oder löschen:
-        <a href="<?php echo h(url('buchungen', array('raum_id' => (int) $raumId))); ?>">Belegung dieses Raums anzeigen</a>.
-      </div>
+      <?php echo konflikt_hinweis('Belegung dieses Raums anzeigen', url('buchungen', array('raum_id' => (int) $raumId))); ?>
       <?php endif; ?>
 
       <form method="post" action="<?php echo h(url('raum_bearbeiten', $istBearbeiten ? array('id' => (int) $raumId) : array())); ?>">

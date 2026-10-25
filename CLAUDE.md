@@ -93,6 +93,7 @@ Links, Formulare und Weiterleitungen zeigen immer auf `BASE_URL . '/index.php?se
   2. **Unten: HTML-Ausgabe** – nur Darstellung. PHP beschränkt sich auf kurze Ausgaben (`<?php echo h($x); ?>`), Aufrufe von UI-Bausteinen und einfache `foreach`/`if` in alternativer Syntax (`foreach (...):` … `endforeach;`).
 - **Kein SQL in Seiten.** Datenbankzugriffe stehen in Funktionen in `lib/`.
 - **Kein** `<style>`- und **kein** `<script>`-Block mit Inhalt. CSS und JS gehören in `assets/`. Werte, die JavaScript vom Server braucht, über `data-`-Attribute übergeben.
+- Ausnahme: `style`-Attribute, deren Werte erst zur Laufzeit berechnet werden (Spaltenzahl des Kalenderrasters sowie Lage und Höhe der Termine in `pages/belegung.php`); feste Werte gehören in die CSS-Datei.
 - Ziel: Seiten bleiben klein und lesbar. Wird eine Seite lang, ist das ein Zeichen, dass Logik nach `lib/` gehört.
 
 ## Funktionen auslagern (`lib/`)

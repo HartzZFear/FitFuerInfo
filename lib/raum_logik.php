@@ -255,7 +255,7 @@ function raum_speichern($raumId, $eingabe, $istAdmin)
 
     if ($eingabe['name'] === '') {
         $fehler[] = 'Bitte einen Raumnamen eingeben.';
-    } elseif (strlen($eingabe['name']) > 50) {
+    } elseif (mb_strlen($eingabe['name'], 'UTF-8') > 50) {
         $fehler[] = 'Der Raumname darf höchstens 50 Zeichen lang sein.';
     }
 

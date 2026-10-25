@@ -1,5 +1,8 @@
 # lokale Zugangsdaten - NIEMALS committen
 /config/config.php
+# alter Ort der config.php vor Schritt 1 - schuetzt Teammitglieder, die sie
+# nach dem Pull noch nicht nach config/ verschoben haben
+/src/web/config.php
 
 # lokale Berichte (Doku/Fachgespraech) - nicht im Repo
 /Berichte/

@@ -21,7 +21,7 @@ $istAdmin = ist_admin();
 // --- Filter aus der URL ---------------------------------------------------
 // Alle vier Filter sind frei kombinierbar und stehen in einem gemeinsamen
 // GET-Formular. Das SQL dazu steht in raum_liste() (lib/raum_logik.php).
-$suche     = isset($_GET['suche']) ? trim($_GET['suche']) : '';
+$suche     = eingabe_text($_GET, 'suche');
 $nurEigene = isset($_GET['zustaendig']) && $_GET['zustaendig'] === 'meine';
 
 $filterSoftwareId = isset($_GET['software_id']) ? (int) $_GET['software_id'] : 0;
@@ -29,7 +29,7 @@ $filterSoftwareId = isset($_GET['software_id']) ? (int) $_GET['software_id'] : 0
 // Mindestanzahl: dieselbe Regel wie fuer Arbeitsplaetze (ganze Zahl ab 1).
 // Alles andere (leer, Text, 0, negativ) bedeutet "kein Filter" - das Feld
 // bleibt dann leer.
-$minPlaetze = isset($_GET['min_plaetze']) ? trim($_GET['min_plaetze']) : '';
+$minPlaetze = eingabe_text($_GET, 'min_plaetze');
 if (raum_arbeitsplaetze($minPlaetze) === null) {
     $minPlaetze = '';
 }

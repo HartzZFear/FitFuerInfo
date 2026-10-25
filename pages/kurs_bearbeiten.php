@@ -3,6 +3,11 @@
 // kurs_bearbeiten (Aufruf: index.php?seite=kurs_bearbeiten)
 // Kurs anlegen (ohne ?id=) oder bearbeiten (mit ?id=N).
 //
+// Wer die Teilnehmerzahl erhoeht oder Software hinzufuegt, kann damit
+// bereits bestehende Buchungen ungueltig machen (Buchungsregeln 4 und 5).
+// Das prueft kurs_speichern() vor dem Commit - siehe
+// kurs_konflikte_mit_buchungen().
+//
 // Bewusst PHP-5.6-Syntax, damit es auf dem Schulrechner laeuft.
 
 erfordere_login();
@@ -36,12 +41,13 @@ $maxTeilnehmer            = $istBearbeiten ? $kurs['max_teilnehmer'] : '';
 $ausgewaehlteSoftwareIds  = $istBearbeiten ? kurs_software_ids($kursId) : array();
 $ausgewaehlteEigentuemerIds = ($istBearbeiten && $istAdmin) ? kurs_eigentuemer_eintraege($kursId) : array();
 
-$fehler = array();
+$fehler       = array();
+$hatKonflikte = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $titel               = isset($_POST['titel']) ? trim($_POST['titel']) : '';
-    $beschreibung         = isset($_POST['beschreibung']) ? trim($_POST['beschreibung']) : '';
-    $maxTeilnehmerEingabe = isset($_POST['max_teilnehmer']) ? trim($_POST['max_teilnehmer']) : '';
+    $titel               = eingabe_text($_POST, 'titel');
+    $beschreibung         = eingabe_text($_POST, 'beschreibung');
+    $maxTeilnehmerEingabe = eingabe_text($_POST, 'max_teilnehmer');
 
     $ausgewaehlteSoftwareIds = formular_ids('software');
     if ($istAdmin) {
@@ -67,7 +73,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: ' . url('kurse'));
         exit;
     }
-    $fehler = $ergebnis;
+    $fehler       = $ergebnis['fehler'];
+    $hatKonflikte = $ergebnis['konflikte'];
 }
 
 $seitentitel   = $istBearbeiten ? 'Kurs bearbeiten' : 'Neuen Kurs anlegen';
@@ -82,10 +89,16 @@ $ohneKopfzeile = true;
 
       <?php echo fehler_liste($fehler); ?>
 
+      <?php /* Bei Konflikten mit bestehenden Buchungen hilft der Blick auf die
+               Termine des Kurses - deshalb dann den Link dorthin einblenden. */ ?>
+      <?php if ($hatKonflikte && $kursId !== null): ?>
+      <?php echo konflikt_hinweis('Buchungen dieses Kurses anzeigen', url('buchungen', array('kurs_id' => (int) $kursId))); ?>
+      <?php endif; ?>
+
       <form method="post" action="<?php echo h(url('kurs_bearbeiten', $istBearbeiten ? array('id' => (int) $kursId) : array())); ?>">
         <?php csrf_feld(); ?>
         <label for="titel">Titel</label>
-        <input type="text" id="titel" name="titel" value="<?php echo h($titel); ?>" required>
+        <input type="text" id="titel" name="titel" maxlength="100" value="<?php echo h($titel); ?>" required>
 
         <label for="beschreibung">Beschreibung</label>
         <textarea id="beschreibung" name="beschreibung"><?php echo h($beschreibung); ?></textarea>

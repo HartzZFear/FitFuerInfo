@@ -70,7 +70,7 @@ unset($_SESSION['benutzer_meldung'], $_SESSION['benutzer_fehler']);
 // --- Filter aus der URL ---------------------------------------------------
 // Alle drei Filter sind frei kombinierbar. Das SQL dazu steht in
 // benutzer_liste() (lib/benutzer_logik.php).
-$suche        = isset($_GET['suche']) ? trim($_GET['suche']) : '';
+$suche        = eingabe_text($_GET, 'suche');
 $filterRolle  = isset($_GET['rolle']) ? $_GET['rolle'] : '';
 $filterStatus = isset($_GET['status']) ? $_GET['status'] : '';
 

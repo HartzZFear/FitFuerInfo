@@ -18,7 +18,7 @@ $filterKursId = isset($_GET['kurs_id']) ? (int) $_GET['kurs_id'] : 0;
 $nurMeine     = isset($_GET['wer']) && $_GET['wer'] === 'meine';
 
 // "ab Datum", Standard heute. Ungueltige Eingaben fallen auf heute zurueck.
-$abDatum = isset($_GET['ab']) ? trim($_GET['ab']) : '';
+$abDatum = eingabe_text($_GET, 'ab');
 $abObj   = DateTime::createFromFormat('Y-m-d', $abDatum);
 if (!$abObj || $abObj->format('Y-m-d') !== $abDatum) {
     $abDatum = date('Y-m-d');

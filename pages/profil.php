@@ -23,9 +23,9 @@ $fehler = array();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $ergebnis = benutzer_passwort_aendern(
         $meineId,
-        isset($_POST['passwort_alt']) ? $_POST['passwort_alt'] : '',
-        isset($_POST['passwort1']) ? $_POST['passwort1'] : '',
-        isset($_POST['passwort2']) ? $_POST['passwort2'] : ''
+        eingabe_text($_POST, 'passwort_alt', false),
+        eingabe_text($_POST, 'passwort1', false),
+        eingabe_text($_POST, 'passwort2', false)
     );
 
     if ($ergebnis === true) {

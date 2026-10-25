@@ -19,10 +19,10 @@ $benutzername = '';
 $code         = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $benutzername = isset($_POST['username']) ? trim($_POST['username']) : '';
-    $code         = isset($_POST['code']) ? trim($_POST['code']) : '';
-    $passwort1    = isset($_POST['passwort1']) ? $_POST['passwort1'] : '';
-    $passwort2    = isset($_POST['passwort2']) ? $_POST['passwort2'] : '';
+    $benutzername = eingabe_text($_POST, 'username');
+    $code         = eingabe_text($_POST, 'code');
+    $passwort1    = eingabe_text($_POST, 'passwort1', false);
+    $passwort2    = eingabe_text($_POST, 'passwort2', false);
 
     if ($benutzername === '' || $code === '') {
         $fehler[] = 'Bitte Benutzername und Freischaltcode eingeben.';
@@ -50,7 +50,7 @@ $seitenCss     = array('passwort_setzen.css');
 $ohneKopfzeile = true;
 ?>
 <div class="kopf">
-  <h1>FitFuerInfo</h1>
+  <h1>FitFürInfo</h1>
   <p>Passwort setzen</p>
   <svg class="welle" viewBox="0 0 500 70" preserveAspectRatio="none">
     <path d="M0,40 C125,80 375,0 500,40 L500,70 L0,70 Z"></path>

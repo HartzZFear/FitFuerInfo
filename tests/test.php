@@ -170,7 +170,7 @@ foreach ($ergebnisse as $e) {
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<title>Selbsttest – FitFuerInfo</title>
+<title>Selbsttest – FitFürInfo</title>
 <?php /* Relativ und ohne ?v=: Die Testseite muss auch laufen, wenn
          config.php (BASE_URL, ASSET_VERSION) noch fehlt. */ ?>
 <link rel="stylesheet" href="test.css">
@@ -178,7 +178,7 @@ foreach ($ergebnisse as $e) {
 <body>
 
 <h1>Selbsttest der lokalen Einrichtung</h1>
-<p class="sub">FitFuerInfo – Kurs- und Raumverwaltung</p>
+<p class="sub">FitFürInfo – Kurs- und Raumverwaltung</p>
 
 <table>
 <tr><th class="spalte-status">Status</th><th class="spalte-pruefung">Pruefung</th><th>Ergebnis</th></tr>

@@ -29,7 +29,7 @@ const ERLAUBTE_SEITEN = array(
 // an jedem Link (asset_url() in lib/funktionen.php). Nach einer Aenderung an
 // einer Datei in assets/ hier um eins erhoehen - dann laedt jeder Browser
 // die neue Fassung, statt die alte aus seinem Cache zu nehmen.
-const ASSET_VERSION = '2';
+const ASSET_VERSION = '5';
 
 // Mindestanforderung an Passwoerter laut Aufgabenstellung:
 // mindestens vier Zeichen, darunter ein Kleinbuchstabe und eine Zahl.

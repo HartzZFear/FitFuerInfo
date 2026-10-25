@@ -63,8 +63,8 @@ if ($istBearbeiten) {
 } else {
     $kursIdWert = isset($_GET['kurs_id']) ? (string) (int) $_GET['kurs_id'] : '';
     $raumIdWert = isset($_GET['raum_id']) ? (string) (int) $_GET['raum_id'] : '';
-    $datumWert  = isset($_GET['datum'])   ? trim($_GET['datum'])            : date('Y-m-d');
-    $startWert  = isset($_GET['start'])   ? trim($_GET['start'])            : '08:00';
+    $datumWert  = isset($_GET['datum'])   ? eingabe_text($_GET, 'datum') : date('Y-m-d');
+    $startWert  = isset($_GET['start'])   ? eingabe_text($_GET, 'start') : '08:00';
     $endeWert   = buchung_ende_vorschlag($startWert, $alleSlots);
 }
 
@@ -73,11 +73,11 @@ $passendeRaeume = array();
 
 // --- Speichern ------------------------------------------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $kursIdWert = isset($_POST['kurs_id']) ? trim($_POST['kurs_id']) : '';
-    $raumIdWert = isset($_POST['raum_id']) ? trim($_POST['raum_id']) : '';
-    $datumWert  = isset($_POST['datum'])   ? trim($_POST['datum'])   : '';
-    $startWert  = isset($_POST['start'])   ? trim($_POST['start'])   : '';
-    $endeWert   = isset($_POST['ende'])    ? trim($_POST['ende'])    : '';
+    $kursIdWert = eingabe_text($_POST, 'kurs_id');
+    $raumIdWert = eingabe_text($_POST, 'raum_id');
+    $datumWert  = eingabe_text($_POST, 'datum');
+    $startWert  = eingabe_text($_POST, 'start');
+    $endeWert   = eingabe_text($_POST, 'ende');
 
     $kursId = (int) $kursIdWert;
     $raumId = (int) $raumIdWert;

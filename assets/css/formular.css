@@ -137,8 +137,21 @@
 
 .seite-zugriff_verweigert .karte-text,
 .seite-anfrage_abgelehnt .karte-text,
-.seite-nicht_gefunden .karte-text {
+.seite-nicht_gefunden .karte-text,
+.seite-fehler .karte-text {
   margin-bottom: 20px;
+}
+
+/* Fehlerseite: technische Details, nur bei DEBUG = true */
+.fehler-details {
+  margin: -8px 0 22px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--text-dark);
+  white-space: pre-wrap;
+  word-break: break-all;
 }
 
 .seite-freischaltcode .karte-text {
@@ -359,7 +372,8 @@ legend {
   line-height: 1.5;
 }
 
-.seite-raum_bearbeiten .hinweis a {
+.seite-raum_bearbeiten .hinweis a,
+.seite-kurs_bearbeiten .hinweis a {
   color: #17636c;
 }
 
