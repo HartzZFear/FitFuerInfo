@@ -11,12 +11,12 @@
  * Konto gesperrt (aktiv = 0); erfordere_login() beendet dann auch eine noch
  * laufende Session.
  *
- * Damit sich niemand aussperrt, gilt:
- *   - der letzte aktive Admin darf weder gesperrt noch zum Mitarbeiter
- *     gemacht werden
- *   - der Admin darf sich nicht selbst sperren
- * Diese Pruefung steht in benutzer_darf_aendern() und laeuft IMMER
- * serverseitig, nicht nur ueber das Ein-/Ausblenden der Buttons.
+ * Fuer das Admin-Konto gilt:
+ *   - die Rolle wird ueber die Oberflaeche nie geaendert, "admin" also
+ *     weder vergeben noch entzogen (benutzer_speichern())
+ *   - das Admin-Konto kann nicht gesperrt werden (benutzer_sperre_pruefen())
+ * Beides laeuft IMMER serverseitig, nicht nur ueber das Ein-/Ausblenden der
+ * Buttons.
  *
  * Bewusst PHP-5.6-Syntax, damit es auf dem Schulrechner laeuft.
  */
@@ -281,99 +281,46 @@ function benutzer_aktive()
 }
 
 /**
- * Anzahl der Admins, die nicht gesperrt sind.
+ * Prueft, ob ein Benutzer gesperrt werden darf: das Admin-Konto nicht.
  *
- * @return int
- */
-function benutzer_anzahl_aktive_admins()
-{
-    return (int) abfrage(
-        'SELECT COUNT(*) FROM benutzer WHERE rolle = ? AND aktiv = 1',
-        array('admin')
-    )->fetchColumn();
-}
-
-/**
- * Sperrt (SELECT ... FOR UPDATE) die Zeilen aller aktiven Admins bis zum
- * Ende der laufenden Transaktion. So koennen zwei Admins nicht gleichzeitig
- * je den anderen sperren und damit keinen aktiven Admin uebrig lassen.
- * Gehoert deshalb vor benutzer_darf_aendern() in dieselbe Transaktion.
- */
-function benutzer_admins_sperren()
-{
-    abfrage('SELECT id FROM benutzer WHERE rolle = ? AND aktiv = 1 FOR UPDATE', array('admin'));
-}
-
-/**
- * Prueft, ob eine Aenderung an Rolle oder Status eines bestehenden Benutzers
- * erlaubt ist, und sammelt - wie buchung_pruefen() - alle Verstoesse ein.
+ * Laut Anforderung genau ein Admin (Gruppenentscheidung) – deshalb kein
+ * Schutz für mehrere Admins nötig. Es reicht, das Admin-Konto vor dem
+ * Sperren zu schuetzen; die Rolle selbst aendert die Oberflaeche nie
+ * (siehe benutzer_speichern()).
  *
- * Abgelehnt wird, wenn
- *   - der Admin sich selbst sperren wuerde, oder
- *   - der Benutzer der letzte aktive Admin ist und gesperrt oder zum
- *     Mitarbeiter gemacht werden soll.
- *
- * @param  int    $zielId    der zu aendernde Benutzer
- * @param  int    $eigeneId  der angemeldete Admin
- * @param  string $neueRolle 'admin' oder 'mitarbeiter'
- * @param  bool   $neuAktiv
- * @return array leer = erlaubt, sonst deutsche Fehlermeldungen
+ * @param  string $rolle    gespeicherte Rolle des Benutzers
+ * @param  bool   $neuAktiv false = der Benutzer soll gesperrt werden
+ * @return array leer = erlaubt, sonst die deutsche Fehlermeldung
  */
-function benutzer_darf_aendern($zielId, $eigeneId, $neueRolle, $neuAktiv)
+function benutzer_sperre_pruefen($rolle, $neuAktiv)
 {
-    $fehler = array();
-
-    $ziel = abfrage('SELECT rolle, aktiv FROM benutzer WHERE id = ?', array((int) $zielId))->fetch();
-    if (!$ziel) {
-        $fehler[] = 'Diesen Benutzer gibt es nicht.';
-        return $fehler;
+    if ($rolle === 'admin' && !$neuAktiv) {
+        return array('Das Admin-Konto kann nicht gesperrt werden.');
     }
-
-    if ((int) $zielId === (int) $eigeneId && !$neuAktiv) {
-        $fehler[] = 'Sie können Ihr eigenes Konto nicht sperren.';
-    }
-
-    $istAktiverAdmin    = $ziel['rolle'] === 'admin' && (int) $ziel['aktiv'] === 1;
-    $bleibtAktiverAdmin = $neueRolle === 'admin' && $neuAktiv;
-
-    if ($istAktiverAdmin && !$bleibtAktiverAdmin && benutzer_anzahl_aktive_admins() <= 1) {
-        $fehler[] = 'Das ist der letzte aktive Admin. Er kann weder gesperrt noch zum Mitarbeiter '
-            . 'gemacht werden - sonst könnte niemand mehr Benutzer verwalten.';
-    }
-
-    return $fehler;
+    return array();
 }
 
 /**
  * Sperrt oder entsperrt einen Benutzer (Knoepfe in der Benutzerliste).
  *
+ * Ein einzelner UPDATE-Befehl, deshalb keine Transaktion: Die Rolle, die
+ * benutzer_sperre_pruefen() vorher ansieht, kann sich ueber die Oberflaeche
+ * nicht aendern.
+ *
  * @param  array $ziel     Zeile aus benutzer_laden()
- * @param  int   $eigeneId der angemeldete Admin
  * @param  bool  $neuAktiv true = entsperren, false = sperren
  * @return true|array true bei Erfolg, sonst deutsche Fehlermeldungen
  */
-function benutzer_aktiv_setzen($ziel, $eigeneId, $neuAktiv)
+function benutzer_aktiv_setzen($ziel, $neuAktiv)
 {
-    $db = db();
-    $db->beginTransaction();
+    $fehler = benutzer_sperre_pruefen($ziel['rolle'], $neuAktiv);
+    if (!empty($fehler)) {
+        return $fehler;
+    }
 
     try {
-        // Admin-Zeilen sperren, bevor geprueft wird - sonst koennten zwei
-        // Admins gleichzeitig den jeweils anderen sperren.
-        benutzer_admins_sperren();
-        $fehler = benutzer_darf_aendern($ziel['id'], $eigeneId, $ziel['rolle'], $neuAktiv);
-
-        if (!empty($fehler)) {
-            $db->rollBack();
-            return $fehler;
-        }
-
         abfrage('UPDATE benutzer SET aktiv = ? WHERE id = ?', array($neuAktiv ? 1 : 0, $ziel['id']));
-        $db->commit();
     } catch (PDOException $e) {
-        if ($db->inTransaction()) {
-            $db->rollBack();
-        }
         return array('Die Änderung konnte nicht gespeichert werden. Bitte erneut versuchen.');
     }
 
@@ -383,21 +330,25 @@ function benutzer_aktiv_setzen($ziel, $eigeneId, $neuAktiv)
 /**
  * Prueft die Eingaben und legt einen Benutzer an bzw. speichert ihn.
  *
+ * Die Rolle kommt bewusst NICHT aus dem Formular: Felder, die nicht
+ * geaendert werden duerfen, werden gar nicht erst aus der Anfrage
+ * uebernommen. Ein neuer Benutzer ist immer Mitarbeiter, und beim
+ * Bearbeiten kommt die Spalte rolle im UPDATE nicht vor. So kann auch eine
+ * manipulierte Anfrage die Rolle "admin" weder vergeben noch entziehen.
+ *
  * Ein neuer Benutzer wird ohne Passwort gespeichert und bekommt gleich
  * einen Freischaltcode; der Code wird mit benutzer_code_merken() fuer die
  * einmalige Anzeige auf der Benutzerliste abgelegt.
  *
- * @param  int|null $zielId   null = neuer Benutzer
- * @param  array    $eingabe  name, email, rolle, aktiv (bool)
- * @param  int      $eigeneId der angemeldete Admin
+ * @param  array|null $ziel    Zeile aus benutzer_laden(), null = neuer Benutzer
+ * @param  array      $eingabe name, email, aktiv (bool)
  * @return true|array true bei Erfolg, sonst deutsche Fehlermeldungen
  */
-function benutzer_speichern($zielId, $eingabe, $eigeneId)
+function benutzer_speichern($ziel, $eingabe)
 {
     $fehler = array();
     $name   = $eingabe['name'];
     $email  = $eingabe['email'];
-    $rolle  = $eingabe['rolle'];
     $aktiv  = $eingabe['aktiv'];
 
     if ($name === '') {
@@ -415,61 +366,53 @@ function benutzer_speichern($zielId, $eingabe, $eigeneId)
         }
     }
 
-    if (!in_array($rolle, array('admin', 'mitarbeiter'), true)) {
-        $fehler[] = 'Bitte eine gültige Rolle auswählen.';
+    if ($ziel !== null) {
+        $fehler = array_merge($fehler, benutzer_sperre_pruefen($ziel['rolle'], $aktiv));
+    }
+
+    // Der Name ist in der Datenbank eindeutig (uk_benutzer_name). Vorher
+    // pruefen, damit der Admin eine verstaendliche Meldung bekommt statt
+    // eines Datenbankfehlers. Auch bei Formatfehlern, damit alle Meldungen
+    // (z. B. ungueltige E-Mail UND doppelter Name) auf einmal erscheinen.
+    $sql       = 'SELECT id FROM benutzer WHERE name = ?';
+    $parameter = array($name);
+    if ($ziel !== null) {
+        $sql .= ' AND id <> ?';
+        $parameter[] = $ziel['id'];
+    }
+
+    if ($name !== '' && abfrage($sql, $parameter)->fetch()) {
+        $fehler[] = 'Es gibt bereits einen Benutzer mit dem Namen "' . $name . '". '
+            . 'Groß- und Kleinschreibung zählt dabei nicht.';
+    }
+
+    if (!empty($fehler)) {
         return $fehler;
     }
 
-    // Auch bei Formatfehlern weiterpruefen, damit alle Meldungen (z. B.
-    // ungueltige E-Mail UND doppelter Name) auf einmal erscheinen.
-    // Gespeichert wird nur, wenn $fehler leer bleibt.
-    $db = db();
-    $db->beginTransaction();
+    $emailWert = $email === '' ? null : $email;
+    $db        = db();
 
     try {
-        if ($zielId !== null) {
-            // Admin-Zeilen sperren, bevor geprueft wird - sonst koennten
-            // zwei Admins gleichzeitig den jeweils anderen entmachten.
-            benutzer_admins_sperren();
-            $fehler = array_merge($fehler, benutzer_darf_aendern($zielId, $eigeneId, $rolle, $aktiv));
-        }
-
-        // Der Name ist in der Datenbank eindeutig (uk_benutzer_name).
-        // Vorher pruefen, damit der Admin eine verstaendliche Meldung
-        // bekommt statt eines Datenbankfehlers.
-        $sql       = 'SELECT id FROM benutzer WHERE name = ?';
-        $parameter = array($name);
-        if ($zielId !== null) {
-            $sql .= ' AND id <> ?';
-            $parameter[] = $zielId;
-        }
-
-        if ($name !== '' && abfrage($sql, $parameter)->fetch()) {
-            $fehler[] = 'Es gibt bereits einen Benutzer mit dem Namen "' . $name . '". '
-                . 'Groß- und Kleinschreibung zählt dabei nicht.';
-        }
-
-        if (!empty($fehler)) {
-            $db->rollBack();
-            return $fehler;
-        }
-
-        $emailWert = $email === '' ? null : $email;
-
-        if ($zielId !== null) {
+        if ($ziel !== null) {
+            // Ein einzelner UPDATE-Befehl - keine Transaktion noetig. Ist der
+            // Name erst nach der Pruefung oben vergeben worden, lehnt der
+            // UNIQUE-Schluessel ab (siehe catch).
             abfrage(
-                'UPDATE benutzer SET name = ?, email = ?, rolle = ?, aktiv = ? WHERE id = ?',
-                array($name, $emailWert, $rolle, $aktiv ? 1 : 0, $zielId)
+                'UPDATE benutzer SET name = ?, email = ?, aktiv = ? WHERE id = ?',
+                array($name, $emailWert, $aktiv ? 1 : 0, $ziel['id'])
             );
-            $db->commit();
             return true;
         }
 
-        // Neuer Benutzer: ohne Passwort speichern (passwort_hash bleibt
-        // NULL) und gleich einen Freischaltcode erzeugen.
+        // Transaktion: Benutzer anlegen und Freischaltcode speichern sind zwei
+        // Schreibbefehle, die zusammengehoeren. Scheitert der Code (z. B. kein
+        // sicherer Zufallsgenerator), gibt es sonst einen Benutzer ohne Code,
+        // obwohl die Seite "nicht gespeichert" meldet.
+        $db->beginTransaction();
         abfrage(
             'INSERT INTO benutzer (name, email, passwort_hash, rolle, aktiv) VALUES (?, ?, NULL, ?, ?)',
-            array($name, $emailWert, $rolle, $aktiv ? 1 : 0)
+            array($name, $emailWert, 'mitarbeiter', $aktiv ? 1 : 0)
         );
         $neueId = (int) $db->lastInsertId();
         $code   = benutzer_code_erzeugen($neueId);
@@ -482,11 +425,9 @@ function benutzer_speichern($zielId, $eingabe, $eigeneId)
         // 23000 = Verletzung eines UNIQUE-Schluessels, z. B. wenn jemand
         // denselben Namen gleichzeitig angelegt hat.
         if ($e instanceof PDOException && $e->getCode() === '23000') {
-            $fehler[] = 'Es gibt bereits einen Benutzer mit dem Namen "' . $name . '".';
-        } else {
-            $fehler[] = 'Der Benutzer konnte nicht gespeichert werden. Bitte erneut versuchen.';
+            return array('Es gibt bereits einen Benutzer mit dem Namen "' . $name . '".');
         }
-        return $fehler;
+        return array('Der Benutzer konnte nicht gespeichert werden. Bitte erneut versuchen.');
     }
 
     // Einmalige Anzeige uebernimmt die Benutzerliste.

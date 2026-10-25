@@ -72,9 +72,9 @@ $seitenCss   = array('hilfe.css');
       <p>
         Wer einen Raum bearbeiten darf, hat dadurch <strong>keine</strong> Rechte an den
         Buchungen in diesem Raum. Benutzer werden nicht gelöscht, sondern gesperrt; ein
-        gesperrter Benutzer wird beim nächsten Klick abgemeldet. Der letzte aktive Admin
-        kann weder gesperrt noch zum Mitarbeiter gemacht werden, und niemand kann sich
-        selbst sperren.
+        gesperrter Benutzer wird beim nächsten Klick abgemeldet. Die Rolle Admin wird nicht
+        über die Oberfläche vergeben oder entzogen, und das Admin-Konto kann nicht gesperrt
+        werden.
       </p>
     </section>
 

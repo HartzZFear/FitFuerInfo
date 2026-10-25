@@ -8,8 +8,9 @@
 // bekommt einen Freischaltcode, der danach genau einmal angezeigt wird; das
 // Passwort setzt der Mitarbeiter selbst in passwort_setzen.php.
 //
-// Beim Bearbeiten gelten die Regeln aus benutzer_darf_aendern(): Der letzte
-// aktive Admin bleibt Admin und aktiv, und niemand sperrt sich selbst.
+// Die Rolle wird hier nur angezeigt, nie geaendert: Neue Benutzer sind
+// Mitarbeiter, und das Admin-Konto kann nicht gesperrt werden (siehe
+// benutzer_speichern() und benutzer_sperre_pruefen()).
 //
 // Loeschen gibt es nicht - kurs.ersteller_id und buchung.benutzer_id stehen
 // auf RESTRICT. Stattdessen wird gesperrt.
@@ -18,8 +19,6 @@
 
 erfordere_admin();
 csrf_pruefen();
-
-$meineId = benutzer_id();
 
 $istBearbeiten = isset($_GET['id']) && $_GET['id'] !== '';
 $zielId        = $istBearbeiten ? (int) $_GET['id'] : null;
@@ -50,15 +49,15 @@ $fehler = array();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name  = isset($_POST['name']) ? trim($_POST['name']) : '';
     $email = isset($_POST['email']) ? trim($_POST['email']) : '';
-    $rolle = isset($_POST['rolle']) ? $_POST['rolle'] : '';
     $aktiv = isset($_POST['aktiv']) && $_POST['aktiv'] === '1';
 
-    $ergebnis = benutzer_speichern($zielId, array(
+    // Die Rolle wird bewusst nicht aus dem Formular gelesen - siehe
+    // benutzer_speichern().
+    $ergebnis = benutzer_speichern($benutzer, array(
         'name'  => $name,
         'email' => $email,
-        'rolle' => $rolle,
         'aktiv' => $aktiv,
-    ), $meineId);
+    ));
 
     if ($ergebnis === true) {
         // Beim Anlegen zeigt die Benutzerliste den neuen Freischaltcode an,
@@ -71,17 +70,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
     $fehler = $ergebnis;
-
-    // Ungueltige Rolle (manipuliertes Formular): Auswahl zeigt wieder Mitarbeiter.
-    if (!in_array($rolle, array('admin', 'mitarbeiter'), true)) {
-        $rolle = 'mitarbeiter';
-    }
 }
 
 $seitentitel   = $istBearbeiten ? 'Benutzer bearbeiten' : 'Neuen Benutzer anlegen';
 $seitenCss     = array('formular.css');
 $ohneKopfzeile = true;
-$istIch        = $istBearbeiten && (int) $zielId === (int) $meineId;
 ?>
 <?php formular_kopf($seitentitel); ?>
 
@@ -121,10 +114,11 @@ $istIch        = $istBearbeiten && (int) $zielId === (int) $meineId;
         <label for="email">E-Mail <span class="optional">(optional)</span></label>
         <input type="email" id="email" name="email" maxlength="100" value="<?php echo h($email); ?>">
 
+        <?php /* Nur Anzeige: deaktivierte Felder schickt der Browser nicht mit,
+                 und benutzer_speichern() liest die Rolle ohnehin nicht. */ ?>
         <label for="rolle">Rolle</label>
-        <select id="rolle" name="rolle">
-          <option value="mitarbeiter" <?php echo $rolle === 'mitarbeiter' ? 'selected' : ''; ?>>Mitarbeiter</option>
-          <option value="admin" <?php echo $rolle === 'admin' ? 'selected' : ''; ?>>Admin</option>
+        <select id="rolle" disabled>
+          <option selected><?php echo $rolle === 'admin' ? 'Admin' : 'Mitarbeiter'; ?></option>
         </select>
 
         <label class="checkbox-item">
@@ -139,10 +133,7 @@ $istIch        = $istBearbeiten && (int) $zielId === (int) $meineId;
         Benutzer können nicht gelöscht werden, weil an ihnen Kurse und Buchungen hängen.
         Wer keinen Zugang mehr haben soll, wird gesperrt („aktiv“ abwählen) – eine laufende
         Sitzung endet dann beim nächsten Klick.
-        <?php if ($istIch): ?>
-        Das eigene Konto kann nicht gesperrt werden.
-        <?php endif; ?>
-        Der letzte aktive Admin bleibt immer Admin und aktiv.
+        Die Rolle wird hier nicht geändert, und das Admin-Konto kann nicht gesperrt werden.
       </p>
     </div>
   </div>

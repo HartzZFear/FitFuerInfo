@@ -16,9 +16,6 @@
 erfordere_admin();
 csrf_pruefen();
 
-$meineId  = benutzer_id();
-$istAdmin = ist_admin();
-
 // --- Aktionen per POST ----------------------------------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $aktion  = isset($_POST['aktion']) ? $_POST['aktion'] : '';
@@ -40,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } elseif ($aktion === 'sperren' || $aktion === 'entsperren') {
         $neuAktiv = $aktion === 'entsperren';
-        $ergebnis = benutzer_aktiv_setzen($ziel, $meineId, $neuAktiv);
+        $ergebnis = benutzer_aktiv_setzen($ziel, $neuAktiv);
 
         if ($ergebnis === true) {
             $meldung = $neuAktiv
@@ -166,9 +163,9 @@ $seitenCss   = array('benutzer.css');
               <input type="hidden" name="id" value="<?php echo $id; ?>">
               <button type="submit" class="btn-entsperren">entsperren</button>
             </form>
-            <?php elseif ($id !== (int) $meineId): ?>
-            <?php /* Sich selbst sperren geht nicht (benutzer_darf_aendern()) -
-                     deshalb gibt es den Knopf auf der eigenen Karte gar nicht. */ ?>
+            <?php elseif ($benutzer['rolle'] !== 'admin'): ?>
+            <?php /* Das Admin-Konto kann nicht gesperrt werden (benutzer_sperre_pruefen()) -
+                     deshalb gibt es den Knopf auf seiner Karte gar nicht. */ ?>
             <form method="post" action="<?php echo h(url('benutzer')); ?>"
                   data-frage="<?php echo h($benutzer['name'] . ' wirklich sperren? Eine laufende Sitzung endet beim nächsten Klick.'); ?>">
               <?php csrf_feld(); ?>
