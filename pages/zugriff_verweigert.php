@@ -2,7 +2,7 @@
 <?php
 // zugriff_verweigert - Hinweis, wenn eine serverseitige Rechtepruefung
 // fehlschlaegt. Wird nur ueber seite_wechseln() aus
-// zugriff_verweigert_seite() (lib/kurs_rechte.php) angezeigt, deshalb nicht
+// zugriff_verweigert_seite() (lib/funktionen.php) angezeigt, deshalb nicht
 // in ERLAUBTE_SEITEN.
 //
 // $hinweis['nachricht']     Fehlermeldung

@@ -21,6 +21,8 @@ require_once __DIR__ . '/lib/funktionen.php';
 require_once __DIR__ . '/lib/cache.php';
 require_once __DIR__ . '/lib/auth.php';
 require_once __DIR__ . '/lib/kurs_rechte.php';
+require_once __DIR__ . '/lib/kurs_logik.php';
+require_once __DIR__ . '/lib/software_logik.php';
 require_once __DIR__ . '/lib/raum_rechte.php';
 require_once __DIR__ . '/lib/buchung_logik.php';
 require_once __DIR__ . '/lib/kalender_logik.php';

@@ -64,6 +64,17 @@ function benutzer_code_erzeugen($benutzerId)
 }
 
 /**
+ * Alle nicht gesperrten Benutzer, alphabetisch - fuer die Checkbox-Listen
+ * "Eigentuemer" (Kurs) und "Bearbeiter" (Raum), die nur der Admin sieht.
+ *
+ * @return array Zeilen mit id, name
+ */
+function benutzer_aktive()
+{
+    return abfrage('SELECT id, name FROM benutzer WHERE aktiv = 1 ORDER BY name')->fetchAll();
+}
+
+/**
  * Anzahl der Admins, die nicht gesperrt sind.
  *
  * @return int
