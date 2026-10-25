@@ -22,8 +22,8 @@ if (isset($_GET['gesperrt']) && $_GET['gesperrt'] === '1') {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $benutzername = isset($_POST['username']) ? trim($_POST['username']) : '';
-    $passwort     = isset($_POST['password']) ? $_POST['password'] : '';
+    $benutzername = eingabe_text($_POST, 'username');
+    $passwort     = eingabe_text($_POST, 'password', false);
 
     if ($benutzername === '' || $passwort === '') {
         $fehler = 'Bitte Benutzername und Passwort eingeben.';

@@ -45,9 +45,9 @@ $fehler       = array();
 $hatKonflikte = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $titel               = isset($_POST['titel']) ? trim($_POST['titel']) : '';
-    $beschreibung         = isset($_POST['beschreibung']) ? trim($_POST['beschreibung']) : '';
-    $maxTeilnehmerEingabe = isset($_POST['max_teilnehmer']) ? trim($_POST['max_teilnehmer']) : '';
+    $titel               = eingabe_text($_POST, 'titel');
+    $beschreibung         = eingabe_text($_POST, 'beschreibung');
+    $maxTeilnehmerEingabe = eingabe_text($_POST, 'max_teilnehmer');
 
     $ausgewaehlteSoftwareIds = formular_ids('software');
     if ($istAdmin) {

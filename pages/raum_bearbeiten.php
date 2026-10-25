@@ -66,8 +66,8 @@ $hatKonflikte  = false;
 
 // --- Speichern ------------------------------------------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name                 = isset($_POST['name']) ? trim($_POST['name']) : '';
-    $arbeitsplaetzeEingabe = isset($_POST['arbeitsplaetze']) ? trim($_POST['arbeitsplaetze']) : '';
+    $name                 = eingabe_text($_POST, 'name');
+    $arbeitsplaetzeEingabe = eingabe_text($_POST, 'arbeitsplaetze');
 
     $ausgewaehlteSoftwareIds = formular_ids('software');
 

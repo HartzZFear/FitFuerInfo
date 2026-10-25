@@ -47,8 +47,8 @@ $fehler = array();
 
 // --- Speichern ------------------------------------------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name  = isset($_POST['name']) ? trim($_POST['name']) : '';
-    $email = isset($_POST['email']) ? trim($_POST['email']) : '';
+    $name  = eingabe_text($_POST, 'name');
+    $email = eingabe_text($_POST, 'email');
     $aktiv = isset($_POST['aktiv']) && $_POST['aktiv'] === '1';
 
     // Die Rolle wird bewusst nicht aus dem Formular gelesen - siehe

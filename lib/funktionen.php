@@ -158,6 +158,37 @@ function zugriff_verweigert_seite($nachricht, $zurueckSeite = 'kurse', $zurueckT
 }
 
 /**
+ * Zeigt bei einem unerwarteten Fehler die Hinweisseite "Es ist ein Fehler
+ * aufgetreten" (pages/fehler.php). index.php meldet die Funktion mit
+ * set_exception_handler() an: Sie laeuft fuer jede Exception, die keine
+ * Funktion selbst abfaengt (z. B. ein Datenbankfehler ausserhalb einer
+ * Transaktion). Danach ist das Skript zu Ende.
+ *
+ * Ohne diese Funktion zeigt PHP die Fehlermeldung mit Dateipfaden und SQL
+ * (DEBUG = true) bzw. eine leere oder halbe Seite (DEBUG = false).
+ *
+ * Ablauf: Den Fehler ins Apache-Fehlerlog schreiben, damit er auch mit
+ * DEBUG = false noch zu finden ist. Was die Seite bisher ausgegeben hat,
+ * liegt noch im Puffer von seite_ausgeben() und wird verworfen. Dann die
+ * Fehlerseite ganz normal mit Kopf und Fuss ausgeben - die Details nur bei
+ * DEBUG = true.
+ *
+ * @param Exception $e
+ */
+function fehler_seite_zeigen($e)
+{
+    error_log('fitfuerinfo: ' . $e);
+
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+
+    seite_ausgeben('fehler', array(
+        'details' => (defined('DEBUG') && DEBUG) ? (string) $e : '',
+    ));
+}
+
+/**
  * Anzahl mit passender Einzahl/Mehrzahl, z. B. "1 Kurs" / "3 Kurse".
  *
  * @param  int    $anzahl
@@ -168,6 +199,25 @@ function zugriff_verweigert_seite($nachricht, $zurueckSeite = 'kurse', $zurueckT
 function anzahl_text($anzahl, $einzahl, $mehrzahl)
 {
     return (int) $anzahl . ' ' . ((int) $anzahl === 1 ? $einzahl : $mehrzahl);
+}
+
+/**
+ * Liest ein Textfeld aus $_GET oder $_POST. Fehlt das Feld oder ist es kein
+ * Text (z. B. ein manipuliertes ?suche[]=...), kommt '' zurueck - genau wie
+ * bei einem leeren Feld. So erzeugt eine manipulierte Anfrage keine
+ * PHP-Warnung, die Dateipfade verraten wuerde.
+ *
+ * @param  array  $quelle  $_GET oder $_POST
+ * @param  string $feld    Name des Feldes
+ * @param  bool   $trimmen Leerzeichen am Anfang und Ende entfernen (bei Passwoertern false)
+ * @return string
+ */
+function eingabe_text($quelle, $feld, $trimmen = true)
+{
+    if (!isset($quelle[$feld]) || !is_string($quelle[$feld])) {
+        return '';
+    }
+    return $trimmen ? trim($quelle[$feld]) : $quelle[$feld];
 }
 
 /**

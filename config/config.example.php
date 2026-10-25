@@ -25,8 +25,8 @@ define('DB_CHARSET', 'utf8mb4');
 // "/fitfuerinfo". Liegt das Projekt direkt in htdocs, hier "" eintragen.
 define('BASE_URL', '/fitfuerinfo');
 
-// Auf true lassen, solange entwickelt wird: zeigt Fehlermeldungen an.
-// WICHTIG: Fuer Abgabe und Praesentation MUSS hier false stehen - sonst
-// sieht jeder Besucher bei einem Fehler PHP-Meldungen mit Dateipfaden und
-// Datenbankdetails.
-define('DEBUG', true);
+// Fehlermeldungen mit Details anzeigen? Fuer Abgabe und Praesentation false
+// lassen: Bei einem Fehler erscheint dann nur die Fehlerseite ohne Dateipfade
+// und SQL. Zum Entwickeln in der eigenen config.php auf true setzen - dann
+// stehen PHP-Meldungen und die Fehlerdetails direkt auf der Seite.
+define('DEBUG', false);
