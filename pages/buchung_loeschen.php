@@ -23,14 +23,7 @@ if ($buchungId < 1) {
     );
 }
 
-$buchung = abfrage(
-    'SELECT b.id, b.benutzer_id, b.start, b.ende, r.name AS raum, k.titel AS kurs
-     FROM buchung b
-     JOIN raum r ON r.id = b.raum_id
-     JOIN kurs k ON k.id = b.kurs_id
-     WHERE b.id = ?',
-    array($buchungId)
-)->fetch();
+$buchung = buchung_mit_namen_laden($buchungId);
 
 if (!$buchung) {
     zugriff_verweigert_seite(
@@ -60,13 +53,12 @@ if (!buchung_darf_loeschen($buchung, $meineId, $istAdmin)) {
 $fehler = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    try {
-        abfrage('DELETE FROM buchung WHERE id = ?', array($buchungId));
+    $ergebnis = buchung_loeschen($buchungId);
+    if ($ergebnis === true) {
         header('Location: ' . url('buchungen'));
         exit;
-    } catch (PDOException $e) {
-        $fehler = 'Die Buchung konnte nicht gelöscht werden. Bitte erneut versuchen.';
     }
+    $fehler = $ergebnis;
 }
 
 $seitentitel   = 'Buchung löschen';
@@ -85,7 +77,7 @@ $ohneKopfzeile = true;
       <h2 class="karte-titel"><?php echo h($seitentitel); ?></h2>
 
       <?php if ($fehler !== ''): ?>
-      <div class="fehler"><?php echo h($fehler); ?></div>
+      <?php echo meldung($fehler); ?>
       <p><a class="link-abbrechen" href="<?php echo h(url('buchungen')); ?>">Zurück zur Belegung</a></p>
       <?php else: ?>
       <p class="karte-text">
@@ -96,10 +88,7 @@ $ohneKopfzeile = true;
       </p>
       <form method="post" action="<?php echo h(url('buchung_loeschen', array('id' => (int) $buchungId))); ?>">
         <?php csrf_feld(); ?>
-        <div class="knopf-reihe">
-          <button type="submit" class="knopf knopf-loeschen">Ja, endgültig löschen</button>
-          <a class="link-abbrechen" href="<?php echo h(url('buchungen')); ?>">Abbrechen</a>
-        </div>
+        <?php echo knopf_reihe('Ja, endgültig löschen', 'buchungen', true); ?>
       </form>
       <?php endif; ?>
     </div>

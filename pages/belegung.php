@@ -16,8 +16,8 @@ $meineId  = benutzer_id();
 $istAdmin = ist_admin();
 
 // Fuer die Filter-Dropdowns und die Pruefung der IDs aus der URL.
-$alleRaeume = abfrage('SELECT id, name FROM raum ORDER BY name')->fetchAll();
-$alleKurse  = abfrage('SELECT id, titel FROM kurs ORDER BY titel')->fetchAll();
+$alleRaeume = raum_alle();
+$alleKurse  = kurs_alle();
 
 $raumNamen = array();
 foreach ($alleRaeume as $raum) {
@@ -73,14 +73,7 @@ if ($ansicht === 'woche') {
     $jeTag = kalender_nach_tag($buchungen, $param, $meineId);
 }
 
-// Legende: nur die Kurse, die im sichtbaren Zeitraum auch vorkommen.
-$legendeKurse = array();
-foreach ($buchungen as $buchung) {
-    if (kalender_sichtbar($buchung, $param, $meineId)) {
-        $legendeKurse[(int) $buchung['kurs_id']] = $buchung['kurs'];
-    }
-}
-asort($legendeKurse);
+$legendeKurse = kalender_legende($buchungen, $param, $meineId);
 
 // Blaettern und Umschalten - die Filter bleiben ueber kalender_url() erhalten.
 $urlZurueck = kalender_url($param, array('datum' => kalender_blaettern($ansicht, $datum, -1)));
@@ -91,44 +84,7 @@ $beschriftungZurueck = array('monat' => 'Vormonat', 'woche' => 'Vorwoche', 'tag'
 $beschriftungWeiter  = array('monat' => 'Folgemonat', 'woche' => 'Folgewoche', 'tag' => 'Folgetag');
 
 // Listenansicht mit denselben Filtern, ab dem ersten sichtbaren Tag.
-$listenParameter = array('ab' => substr($zeitraum['von'], 0, 10));
-if ($raumIdAnzeige > 0) {
-    $listenParameter['raum_id'] = $raumIdAnzeige;
-}
-if ($param['kurs_id'] > 0) {
-    $listenParameter['kurs_id'] = $param['kurs_id'];
-}
-if ($param['nur_meine']) {
-    $listenParameter['wer'] = 'meine';
-}
-$urlListe = url('buchungen', $listenParameter);
-
-/**
- * Link zum Anlegen einer Buchung in einem freien Slot. Ist ein Kurs
- * gefiltert, den der Benutzer buchen darf, wird er gleich mit vorbelegt.
- */
-function buchen_url($raumId, $datum, $zeit, $param, $meineKursIds)
-{
-    $query = array(
-        'raum_id' => (int) $raumId,
-        'datum'   => $datum,
-        'start'   => $zeit,
-    );
-    if ($param['kurs_id'] > 0 && in_array($param['kurs_id'], $meineKursIds, true)) {
-        $query['kurs_id'] = $param['kurs_id'];
-    }
-
-    return url('buchung_bearbeiten', $query);
-}
-
-/**
- * Text fuer das title-Attribut eines Buchungsblocks.
- */
-function buchung_tooltip($buchung)
-{
-    return $buchung['kurs'] . ' · ' . substr($buchung['start'], 11, 5) . '–' . substr($buchung['ende'], 11, 5)
-        . ' · ' . $buchung['raum'] . ' · gebucht von ' . $buchung['gebucht_von'];
-}
+$urlListe = kalender_listen_url($param, $zeitraum, $raumIdAnzeige);
 
 $seitentitel = 'Belegung';
 $aktiverTab  = 'belegung';
@@ -259,7 +215,7 @@ $seitenJs    = array('belegung.js');
               }
           ?>
           <?php if ($buchbar): ?>
-          <a href="<?php echo h(buchen_url($spaltenRaum, $spaltenTag, $zeit, $param, $meineKursIds)); ?>"
+          <a href="<?php echo h(kalender_buchen_url($spaltenRaum, $spaltenTag, $zeit, $param, $meineKursIds)); ?>"
              class="<?php echo $klassen; ?>" style="<?php echo $position; ?>;"
              title="<?php echo h($zeit); ?> – hier buchen">+</a>
           <?php else: ?>
@@ -377,7 +333,7 @@ $seitenJs    = array('belegung.js');
       </form>
 
       <?php if ($darfBuchen): ?>
-      <a href="<?php echo h(url('buchung_bearbeiten')); ?>" class="btn-add" aria-label="Buchung hinzufügen">+</a>
+      <?php echo knopf_hinzufuegen('buchung_bearbeiten', 'Buchung hinzufügen'); ?>
       <?php endif; ?>
     </aside>
 

@@ -129,6 +129,17 @@ function kurs_ist_eigene_karte($kurs, $eigentuemerJeKurs, $benutzerId)
 }
 
 /**
+ * Alle Kurse, alphabetisch - fuer die Kurs-Dropdowns in Belegung und
+ * Buchungsliste.
+ *
+ * @return array Zeilen mit id, titel
+ */
+function kurs_alle()
+{
+    return abfrage('SELECT id, titel FROM kurs ORDER BY titel')->fetchAll();
+}
+
+/**
  * Einen Kurs laden.
  *
  * @param  int $kursId

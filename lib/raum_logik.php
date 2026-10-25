@@ -180,6 +180,17 @@ function raum_ist_meiner($raum, $bearbeiterJeRaum, $benutzerId, $istAdmin)
 }
 
 /**
+ * Alle Raeume, alphabetisch - fuer die Raum-Dropdowns in Belegung,
+ * Buchungsliste und Buchungsformular.
+ *
+ * @return array Zeilen mit id, name, arbeitsplaetze
+ */
+function raum_alle()
+{
+    return abfrage('SELECT id, name, arbeitsplaetze FROM raum ORDER BY name')->fetchAll();
+}
+
+/**
  * Einen Raum laden.
  *
  * @param  int $raumId

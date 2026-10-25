@@ -568,3 +568,75 @@ function kalender_slot_buchbar($datum, $zeit, $darfBuchen)
 
     return !buchung_ist_vergangen($datum . ' ' . $zeit . ':00');
 }
+
+/**
+ * Link zum Anlegen einer Buchung in einem freien Slot. Ist ein Kurs
+ * gefiltert, den der Benutzer buchen darf, wird er gleich mit vorbelegt.
+ *
+ * @param  int    $raumId
+ * @param  string $datum        'YYYY-MM-DD'
+ * @param  string $zeit         'HH:MM'
+ * @param  array  $param        Ergebnis von kalender_parameter()
+ * @param  int[]  $meineKursIds Kurse, fuer die der Benutzer buchen darf
+ * @return string url('buchung_bearbeiten', ...)
+ */
+function kalender_buchen_url($raumId, $datum, $zeit, $param, $meineKursIds)
+{
+    $query = array(
+        'raum_id' => (int) $raumId,
+        'datum'   => $datum,
+        'start'   => $zeit,
+    );
+    if ($param['kurs_id'] > 0 && in_array($param['kurs_id'], $meineKursIds, true)) {
+        $query['kurs_id'] = $param['kurs_id'];
+    }
+
+    return url('buchung_bearbeiten', $query);
+}
+
+/**
+ * Legende unter dem Kalender: nur die Kurse, die im sichtbaren Zeitraum
+ * auch vorkommen (und nicht durch einen Filter ausgeblendet sind).
+ *
+ * @param  array $buchungen  Zeilen aus kalender_buchungen_laden()
+ * @param  array $param      Ergebnis von kalender_parameter()
+ * @param  int   $benutzerId
+ * @return array kurs_id => Kurstitel, alphabetisch
+ */
+function kalender_legende($buchungen, $param, $benutzerId)
+{
+    $legende = array();
+    foreach ($buchungen as $buchung) {
+        if (kalender_sichtbar($buchung, $param, $benutzerId)) {
+            $legende[(int) $buchung['kurs_id']] = $buchung['kurs'];
+        }
+    }
+    asort($legende);
+
+    return $legende;
+}
+
+/**
+ * Link "Listenansicht": dieselben Filter, die Liste beginnt am ersten
+ * sichtbaren Tag. Gegenstueck zu buchung_kalender_url().
+ *
+ * @param  array $param         Ergebnis von kalender_parameter()
+ * @param  array $zeitraum      Ergebnis von kalender_zeitraum()
+ * @param  int   $raumIdAnzeige angezeigter Raum (Woche: nie 0, wenn es Raeume gibt)
+ * @return string url('buchungen', ...)
+ */
+function kalender_listen_url($param, $zeitraum, $raumIdAnzeige)
+{
+    $parameter = array('ab' => substr($zeitraum['von'], 0, 10));
+    if ($raumIdAnzeige > 0) {
+        $parameter['raum_id'] = $raumIdAnzeige;
+    }
+    if ($param['kurs_id'] > 0) {
+        $parameter['kurs_id'] = $param['kurs_id'];
+    }
+    if ($param['nur_meine']) {
+        $parameter['wer'] = 'meine';
+    }
+
+    return url('buchungen', $parameter);
+}

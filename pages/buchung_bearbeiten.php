@@ -21,7 +21,7 @@ $buchungId     = $istBearbeiten ? (int) $_GET['id'] : null;
 $buchung = null;
 
 if ($istBearbeiten) {
-    $buchung = abfrage('SELECT * FROM buchung WHERE id = ?', array($buchungId))->fetch();
+    $buchung = buchung_laden($buchungId);
 
     if (!$buchung) {
         zugriff_verweigert_seite(
@@ -50,7 +50,7 @@ if ($istBearbeiten) {
 
 // Nur Kurse anbieten, fuer die der Benutzer buchen darf. Der Admin sieht alle.
 $meineKurse = buchbare_kurse($meineId, $istAdmin);
-$alleRaeume = abfrage('SELECT id, name, arbeitsplaetze FROM raum ORDER BY name')->fetchAll();
+$alleRaeume = raum_alle();
 $alleSlots  = zeitslots();
 
 // --- Vorbelegung der Felder ---------------------------------------------
@@ -65,14 +65,7 @@ if ($istBearbeiten) {
     $raumIdWert = isset($_GET['raum_id']) ? (string) (int) $_GET['raum_id'] : '';
     $datumWert  = isset($_GET['datum'])   ? trim($_GET['datum'])            : date('Y-m-d');
     $startWert  = isset($_GET['start'])   ? trim($_GET['start'])            : '08:00';
-
-    // Endzeit vorbelegen: eine Stunde nach dem Start, aber nie nach
-    // BUCHUNG_TAG_ENDE. Der Benutzer kann sie danach frei aendern.
-    $endeWert = BUCHUNG_TAG_ENDE;
-    $startPos = array_search($startWert, $alleSlots, true);
-    if ($startPos !== false && isset($alleSlots[$startPos + 2])) {
-        $endeWert = $alleSlots[$startPos + 2];
-    }
+    $endeWert   = buchung_ende_vorschlag($startWert, $alleSlots);
 }
 
 $fehler         = array();
@@ -92,9 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Darf der Benutzer ueberhaupt fuer diesen Kurs buchen? Das Dropdown
     // zeigt nur erlaubte Kurse, aber ein manipuliertes Formular kann jede
     // beliebige ID schicken - deshalb hier noch einmal pruefen.
-    if ($kursId < 1) {
-        $fehler[] = 'Bitte einen Kurs auswählen.';
-    } elseif (!kurs_darf_verwalten($kursId, $meineId, $istAdmin)) {
+    if ($kursId >= 1 && !kurs_darf_verwalten($kursId, $meineId, $istAdmin)) {
         zugriff_verweigert_seite(
             'Sie sind nicht Eigentümer dieses Kurses und können dafür keine Buchung anlegen.',
             'buchungen',
@@ -102,78 +93,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         );
     }
 
-    if ($raumId < 1) {
-        $fehler[] = 'Bitte einen Raum auswählen.';
+    $ergebnis = buchung_speichern($buchungId, array(
+        'kurs_id' => $kursId,
+        'raum_id' => $raumId,
+        'datum'   => $datumWert,
+        'start'   => $startWert,
+        'ende'    => $endeWert,
+    ), $meineId);
+
+    if ($ergebnis === true) {
+        header('Location: ' . url('buchungen'));
+        exit;
     }
-
-    $start = buchung_zeitpunkt($datumWert, $startWert);
-    $ende  = buchung_zeitpunkt($datumWert, $endeWert);
-
-    if ($start === null || $ende === null) {
-        $fehler[] = 'Datum oder Uhrzeit sind ungültig. Bitte Datum, Start- und Endzeit erneut auswählen.';
-    }
-
-    if (empty($fehler)) {
-        $db = db();
-        $db->beginTransaction();
-
-        try {
-            // Erst raum, dann kurs sperren - immer in dieser Reihenfolge,
-            // damit sich zwei gleichzeitige Buchungen nicht gegenseitig
-            // blockieren (Deadlock). Die Sperre haelt bis zum COMMIT und
-            // verhindert, dass zwei Anfragen beide die Pruefung bestehen
-            // und sich anschliessend ueberschneiden.
-            abfrage('SELECT id FROM raum WHERE id = ? FOR UPDATE', array($raumId));
-            abfrage('SELECT id FROM kurs WHERE id = ? FOR UPDATE', array($kursId));
-
-            // Beim Bearbeiten die eigene ID ausschliessen, sonst kollidiert
-            // die Buchung bei den Regeln 2 und 3 mit sich selbst.
-            $fehler = buchung_pruefen($raumId, $kursId, $start, $ende, $istBearbeiten ? $buchungId : null);
-
-            if (empty($fehler)) {
-                if ($istBearbeiten) {
-                    // benutzer_id bleibt unveraendert: die Buchung gehoert
-                    // weiterhin dem, der sie angelegt hat.
-                    abfrage(
-                        'UPDATE buchung SET raum_id = ?, kurs_id = ?, start = ?, ende = ? WHERE id = ?',
-                        array($raumId, $kursId, $start, $ende, $buchungId)
-                    );
-                } else {
-                    abfrage(
-                        'INSERT INTO buchung (raum_id, kurs_id, benutzer_id, start, ende) VALUES (?, ?, ?, ?, ?)',
-                        array($raumId, $kursId, $meineId, $start, $ende)
-                    );
-                }
-
-                $db->commit();
-                header('Location: ' . url('buchungen'));
-                exit;
-            }
-
-            $db->rollBack();
-        } catch (PDOException $e) {
-            if ($db->inTransaction()) {
-                $db->rollBack();
-            }
-            $fehler[] = 'Die Buchung konnte nicht gespeichert werden. Bitte erneut versuchen.';
-        }
-    }
+    $fehler = $ergebnis;
 
     // Wenn Software (Regel 4) oder Platz (Regel 5) das Problem waren, ist
     // ein anderer Raum die Loesung - deshalb hier die Liste dazu anzeigen.
-    if (!empty($fehler) && $kursId > 0 && $raumId > 0) {
-        $raumZeile = abfrage('SELECT arbeitsplaetze FROM raum WHERE id = ?', array($raumId))->fetch();
-        $kursZeile = abfrage('SELECT max_teilnehmer FROM kurs WHERE id = ?', array($kursId))->fetch();
-
-        if ($raumZeile && $kursZeile) {
-            $softwareVerletzt = count(buchung_fehlende_software($kursId, $raumId)) > 0;
-            $platzVerletzt    = (int) $kursZeile['max_teilnehmer'] > (int) $raumZeile['arbeitsplaetze'];
-
-            if ($softwareVerletzt || $platzVerletzt) {
-                $passendeRaeume = passende_raeume($kursId);
-            }
-        }
-    }
+    $passendeRaeume = buchung_raum_vorschlaege($kursId, $raumId);
 }
 
 $seitentitel   = $istBearbeiten ? 'Buchung bearbeiten' : 'Neue Buchung anlegen';
@@ -191,15 +127,7 @@ $ohneKopfzeile = true;
     <div class="karte">
       <h2 class="karte-titel"><?php echo h($seitentitel); ?></h2>
 
-      <?php if (!empty($fehler)): ?>
-      <div class="fehler">
-        <ul>
-          <?php foreach ($fehler as $einzelnerFehler): ?>
-          <li><?php echo h($einzelnerFehler); ?></li>
-          <?php endforeach; ?>
-        </ul>
-      </div>
-      <?php endif; ?>
+      <?php echo fehler_liste($fehler); ?>
 
       <?php if (!empty($passendeRaeume)): ?>
       <div class="hinweis">
@@ -274,10 +202,7 @@ $ohneKopfzeile = true;
           </div>
         </div>
 
-        <div class="knopf-reihe">
-          <button type="submit" class="knopf">Speichern</button>
-          <a class="link-abbrechen" href="<?php echo h(url('buchungen')); ?>">Abbrechen</a>
-        </div>
+        <?php echo knopf_reihe('Speichern', 'buchungen'); ?>
       </form>
 
       <p class="regel-hinweis">
