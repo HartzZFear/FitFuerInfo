@@ -6,8 +6,9 @@ welcher Raum belegt ist. Das System prüft dabei automatisch Zeiten, Überschnei
 benötigte Software und Platzzahl – beim Buchen und auch dann, wenn später ein Raum oder ein
 Kurs geändert wird.
 
-**Voraussetzung:** XAMPP **5.6** (PHP 5.6) mit Apache und MySQL, getestet mit 5.6.36 und
-5.6.40. Neuere XAMPP-Versionen werden nicht unterstützt.
+**Voraussetzung:** XAMPP **5.6** (PHP 5.6) mit Apache und MySQL, getestet mit 5.6.40; der
+Test auf dem Schulrechner (5.6.36) steht noch aus. Neuere XAMPP-Versionen werden nicht
+unterstützt.
 Download: `sourceforge.net/projects/xampp/files/XAMPP Windows/5.6.36/`
 → `xampp-win32-5.6.36-0-VC11-installer.exe`, Installationsordner `C:\xampp`.
 
@@ -125,15 +126,42 @@ ohne sie passiert, steht oben in der Datei (danach muss `git diff` wieder leer s
 
 ## Nach dem Pull (für Teammitglieder)
 
-1. `git pull` auf `main-dev` bzw. den Branch holen, den man testen will.
-2. Sonst ist nichts zu tun:
-   - Die Datenbank ist unverändert – kein neuer Import nötig.
-   - Die eigene `config/config.php` bleibt, wie sie ist. Neu in der Vorlage ist nur
-     `DEBUG = false`; wer entwickelt, lässt in seiner `config.php` `DEBUG = true`.
-   - CSS und JavaScript haben eine neue Versionsnummer (`ASSET_VERSION`) – der Browser lädt
-     sie von selbst neu, Cache leeren ist nicht nötig.
-   - Neue Dateien in `lib/` und `pages/` bindet `index.php` selbst ein.
-3. Kontrolle: `http://localhost/fitfuerinfo/tests/test.php` – alles muss OK sein.
+Gilt für jeden Stand, auch wenn man lange nicht gepullt hat. Was schon passt, einfach
+überspringen. Alle Befehle in der Eingabeaufforderung im Ordner `C:\xampp\htdocs\fitfuerinfo`.
+
+1. **Neuesten Stand holen:**
+   ```
+   git checkout main-dev
+   git pull
+   ```
+   (Meldet `git pull` einen Fehler mit der Adresse des Repos, zuerst Schritt 5 machen.)
+2. **Eigene `config.php` an den neuen Ort.** Früher lag sie unter
+   `src\web\config.php`, jetzt gehört sie nach `config\config.php`. Liegt sie noch am alten
+   Ort: in den Ordner `config` **verschieben** (nicht kopieren):
+   ```
+   move src\web\config.php config\config.php
+   ```
+   Wichtig: Am alten Ort wird sie von Git nicht mehr ausgeblendet und würde beim nächsten
+   `git add .` mit den Zugangsdaten ins Repo wandern.
+3. **Zwei Zeilen löschen:** In `config\config.php` die Zeilen mit `ASSET_VERSION` und
+   `PW_MIN_LAENGE` löschen, falls vorhanden. Die stehen jetzt für alle in `config\app.php`.
+4. **DEBUG:** Wer am Code arbeitet, setzt in `config\config.php` `DEBUG` auf `true` (dann
+   sieht man Fehlermeldungen). Für Abgabe und Präsentation `false` – so steht es auch in der
+   Vorlage.
+5. **Adresse des Repos prüfen:** `git remote -v` eingeben. Steht dort nicht
+   `https://github.com/HartzZFear/FitFuerInfo.git`, umstellen:
+   ```
+   git remote set-url origin https://github.com/HartzZFear/FitFuerInfo.git
+   ```
+6. **Selbsttest:** `http://localhost/fitfuerinfo/tests/test.php` aufrufen – alle Zeilen
+   müssen OK sein. Bei FEHLER steht daneben, was zu tun ist.
+7. **Neue Adressen:** Alle Seiten laufen jetzt über `index.php?seite=...`, z. B.
+   `http://localhost/fitfuerinfo/index.php?seite=kurse`. Alte Lesezeichen auf `.../pages/...`
+   oder `.../src/web/...` gehen nicht mehr – einfach `http://localhost/fitfuerinfo/` öffnen
+   und neu speichern.
+
+Die Datenbank bleibt, wie sie ist: Seit der Umstellung hat sich an den Tabellen nichts
+geändert, ein neuer Import ist nicht nötig.
 
 ## Häufige Fehler
 
