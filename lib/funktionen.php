@@ -158,6 +158,19 @@ function zugriff_verweigert_seite($nachricht, $zurueckSeite = 'kurse', $zurueckT
 }
 
 /**
+ * Anzahl mit passender Einzahl/Mehrzahl, z. B. "1 Kurs" / "3 Kurse".
+ *
+ * @param  int    $anzahl
+ * @param  string $einzahl  z. B. 'Kurs'
+ * @param  string $mehrzahl z. B. 'Kurse'
+ * @return string
+ */
+function anzahl_text($anzahl, $einzahl, $mehrzahl)
+{
+    return (int) $anzahl . ' ' . ((int) $anzahl === 1 ? $einzahl : $mehrzahl);
+}
+
+/**
  * Liest die angekreuzten IDs einer Checkbox-Liste aus dem Formular,
  * z. B. software[] -> formular_ids('software'). Jeder Wert wird zur Zahl;
  * fehlt das Feld oder ist es keine Liste, kommt ein leeres Array zurueck.

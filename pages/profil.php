@@ -21,52 +21,14 @@ $meineId = benutzer_id();
 $fehler = array();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $altesPasswort = isset($_POST['passwort_alt']) ? $_POST['passwort_alt'] : '';
-    $passwort1     = isset($_POST['passwort1']) ? $_POST['passwort1'] : '';
-    $passwort2     = isset($_POST['passwort2']) ? $_POST['passwort2'] : '';
+    $ergebnis = benutzer_passwort_aendern(
+        $meineId,
+        isset($_POST['passwort_alt']) ? $_POST['passwort_alt'] : '',
+        isset($_POST['passwort1']) ? $_POST['passwort1'] : '',
+        isset($_POST['passwort2']) ? $_POST['passwort2'] : ''
+    );
 
-    // Hash frisch aus der Datenbank, aktueller_benutzer() liefert ihn bewusst nicht.
-    $hash = abfrage('SELECT passwort_hash FROM benutzer WHERE id = ?', array($meineId))->fetchColumn();
-
-    $altesStimmt = false;
-    if ($altesPasswort === '') {
-        $fehler[] = 'Bitte das aktuelle Passwort eingeben.';
-    } elseif (!is_string($hash) || !password_verify($altesPasswort, $hash)) {
-        $fehler[] = 'Das aktuelle Passwort ist falsch.';
-    } else {
-        $altesStimmt = true;
-    }
-
-    // Wie in passwort_setzen.php, aber Regeln und Wiederholung werden
-    // unabhaengig voneinander geprueft, damit alle Probleme auf einmal
-    // angezeigt werden.
-    if ($passwort1 === '' || $passwort2 === '') {
-        $fehler[] = 'Bitte das neue Passwort zweimal eingeben.';
-    } else {
-        $fehler = array_merge($fehler, pruefe_passwortregeln($passwort1));
-
-        if ($passwort1 !== $passwort2) {
-            $fehler[] = 'Die beiden neuen Passwörter stimmen nicht überein.';
-        }
-        // Nur vergleichen, wenn das alte stimmt - sonst liesse sich ueber
-        // diese Meldung das aktuelle Passwort erraten.
-        if ($altesStimmt && $passwort1 === $altesPasswort) {
-            $fehler[] = 'Das neue Passwort muss sich vom bisherigen unterscheiden.';
-        }
-    }
-
-    if (empty($fehler)) {
-        // Ein noch offener Freischaltcode ("Passwort vergessen") wird mit
-        // verworfen: Wer sein Passwort gerade selbst gesetzt hat, braucht ihn
-        // nicht mehr, und ein herumliegender Code koennte es sonst
-        // ueberschreiben.
-        abfrage(
-            'UPDATE benutzer
-             SET passwort_hash = ?, freischaltcode = NULL, code_gueltig_bis = NULL
-             WHERE id = ?',
-            array(password_hash($passwort1, PASSWORD_DEFAULT), $meineId)
-        );
-
+    if ($ergebnis === true) {
         // Neue Session-ID, damit eine evtl. abgegriffene alte nicht weiter gilt.
         session_regenerate_id(true);
 
@@ -75,6 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: ' . url('profil'));
         exit;
     }
+    $fehler = $ergebnis;
 }
 
 $meldung = isset($_SESSION['profil_meldung']) ? $_SESSION['profil_meldung'] : '';
@@ -83,26 +46,10 @@ unset($_SESSION['profil_meldung']);
 // --- Daten fuer die Anzeige -----------------------------------------------
 $ich = aktueller_benutzer();
 
-// Eigentuemer = Ersteller ODER Eintrag in kurs_eigentuemer (wie benutzer.php).
-// UNION entfernt doppelte Kurse, wenn jemand beides ist.
-$anzahlKurse = (int) abfrage(
-    'SELECT COUNT(*) FROM (
-         SELECT id AS kurs_id FROM kurs WHERE ersteller_id = ?
-         UNION
-         SELECT kurs_id FROM kurs_eigentuemer WHERE benutzer_id = ?
-     ) AS eigentum',
-    array($meineId, $meineId)
-)->fetchColumn();
-
-$anzahlRaeume = (int) abfrage(
-    'SELECT COUNT(*) FROM raum_bearbeiter WHERE benutzer_id = ?',
-    array($meineId)
-)->fetchColumn();
-
-$anzahlBuchungen = (int) abfrage(
-    'SELECT COUNT(*) FROM buchung WHERE benutzer_id = ? AND start >= ?',
-    array($meineId, date('Y-m-d H:i:s'))
-)->fetchColumn();
+$zahlen          = benutzer_profil_zahlen($meineId);
+$anzahlKurse     = $zahlen['kurse'];
+$anzahlRaeume    = $zahlen['raeume'];
+$anzahlBuchungen = $zahlen['buchungen'];
 
 $rollenTexte = array(
     'admin'       => 'Admin (Systemverwalter)',

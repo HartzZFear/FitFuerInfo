@@ -27,11 +27,7 @@ $zielId        = $istBearbeiten ? (int) $_GET['id'] : null;
 $benutzer = null;
 
 if ($istBearbeiten) {
-    $benutzer = abfrage(
-        'SELECT id, name, email, rolle, aktiv, passwort_hash, freischaltcode, code_gueltig_bis
-         FROM benutzer WHERE id = ?',
-        array($zielId)
-    )->fetch();
+    $benutzer = benutzer_laden($zielId);
 
     if (!$benutzer) {
         zugriff_verweigert_seite(
@@ -57,103 +53,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $rolle = isset($_POST['rolle']) ? $_POST['rolle'] : '';
     $aktiv = isset($_POST['aktiv']) && $_POST['aktiv'] === '1';
 
-    if ($name === '') {
-        $fehler[] = 'Bitte einen Benutzernamen eingeben.';
-    } elseif (mb_strlen($name, 'UTF-8') > 50) {
-        $fehler[] = 'Der Benutzername darf höchstens 50 Zeichen lang sein.';
-    }
+    $ergebnis = benutzer_speichern($zielId, array(
+        'name'  => $name,
+        'email' => $email,
+        'rolle' => $rolle,
+        'aktiv' => $aktiv,
+    ), $meineId);
 
-    // E-Mail ist optional. Leer wird als NULL gespeichert.
-    if ($email !== '') {
-        if (mb_strlen($email, 'UTF-8') > 100) {
-            $fehler[] = 'Die E-Mail-Adresse darf höchstens 100 Zeichen lang sein.';
-        } elseif (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
-            $fehler[] = 'Die E-Mail-Adresse "' . $email . '" hat kein gültiges Format (Beispiel: name@schule.de).';
+    if ($ergebnis === true) {
+        // Beim Anlegen zeigt die Benutzerliste den neuen Freischaltcode an,
+        // beim Bearbeiten eine Bestaetigung.
+        if ($istBearbeiten) {
+            $_SESSION['benutzer_meldung'] = 'Die Änderungen an ' . $name . ' wurden gespeichert.';
+            $_SESSION['benutzer_fehler']  = array();
         }
+        header('Location: ' . url('benutzer'));
+        exit;
     }
+    $fehler = $ergebnis;
 
-    $rolleGueltig = in_array($rolle, array('admin', 'mitarbeiter'), true);
-    if (!$rolleGueltig) {
-        $fehler[] = 'Bitte eine gültige Rolle auswählen.';
-        $rolle    = 'mitarbeiter';
-    }
-
-    // Auch bei Formatfehlern weiterpruefen, damit alle Meldungen (z. B.
-    // ungueltige E-Mail UND doppelter Name) auf einmal erscheinen.
-    // Gespeichert wird weiter unten nur, wenn $fehler leer bleibt.
-    if ($rolleGueltig) {
-        $db = db();
-        $db->beginTransaction();
-
-        try {
-            if ($istBearbeiten) {
-                // Admin-Zeilen sperren, bevor geprueft wird - sonst koennten
-                // zwei Admins gleichzeitig den jeweils anderen entmachten.
-                benutzer_admins_sperren();
-                $fehler = array_merge($fehler, benutzer_darf_aendern($zielId, $meineId, $rolle, $aktiv));
-            }
-
-            // Der Name ist in der Datenbank eindeutig (uk_benutzer_name).
-            // Vorher pruefen, damit der Admin eine verstaendliche Meldung
-            // bekommt statt eines Datenbankfehlers.
-            $sql       = 'SELECT id FROM benutzer WHERE name = ?';
-            $parameter = array($name);
-            if ($istBearbeiten) {
-                $sql .= ' AND id <> ?';
-                $parameter[] = $zielId;
-            }
-
-            if ($name !== '' && abfrage($sql, $parameter)->fetch()) {
-                $fehler[] = 'Es gibt bereits einen Benutzer mit dem Namen "' . $name . '". '
-                    . 'Groß- und Kleinschreibung zählt dabei nicht.';
-            }
-
-            if (empty($fehler)) {
-                $emailWert = $email === '' ? null : $email;
-
-                if ($istBearbeiten) {
-                    abfrage(
-                        'UPDATE benutzer SET name = ?, email = ?, rolle = ?, aktiv = ? WHERE id = ?',
-                        array($name, $emailWert, $rolle, $aktiv ? 1 : 0, $zielId)
-                    );
-                    $db->commit();
-
-                    $_SESSION['benutzer_meldung'] = 'Die Änderungen an ' . $name . ' wurden gespeichert.';
-                    $_SESSION['benutzer_fehler']  = array();
-                    header('Location: ' . url('benutzer'));
-                    exit;
-                }
-
-                // Neuer Benutzer: ohne Passwort speichern (passwort_hash
-                // bleibt NULL) und gleich einen Freischaltcode erzeugen.
-                abfrage(
-                    'INSERT INTO benutzer (name, email, passwort_hash, rolle, aktiv) VALUES (?, ?, NULL, ?, ?)',
-                    array($name, $emailWert, $rolle, $aktiv ? 1 : 0)
-                );
-                $neueId = (int) $db->lastInsertId();
-                $code   = benutzer_code_erzeugen($neueId);
-                $db->commit();
-
-                // Einmalige Anzeige uebernimmt benutzer.php.
-                benutzer_code_merken($neueId, $code);
-                header('Location: ' . url('benutzer'));
-                exit;
-            }
-
-            $db->rollBack();
-        } catch (Exception $e) {
-            if ($db->inTransaction()) {
-                $db->rollBack();
-            }
-            // Faengt auch den RuntimeException aus erzeuge_freischaltcode().
-            // 23000 = Verletzung eines UNIQUE-Schluessels, z. B. wenn
-            // jemand denselben Namen gleichzeitig angelegt hat.
-            if ($e instanceof PDOException && $e->getCode() === '23000') {
-                $fehler[] = 'Es gibt bereits einen Benutzer mit dem Namen "' . $name . '".';
-            } else {
-                $fehler[] = 'Der Benutzer konnte nicht gespeichert werden. Bitte erneut versuchen.';
-            }
-        }
+    // Ungueltige Rolle (manipuliertes Formular): Auswahl zeigt wieder Mitarbeiter.
+    if (!in_array($rolle, array('admin', 'mitarbeiter'), true)) {
+        $rolle = 'mitarbeiter';
     }
 }
 
@@ -173,15 +94,7 @@ $istIch        = $istBearbeiten && (int) $zielId === (int) $meineId;
     <div class="karte">
       <h2 class="karte-titel"><?php echo h($seitentitel); ?></h2>
 
-      <?php if (!empty($fehler)): ?>
-      <div class="fehler">
-        <ul>
-          <?php foreach ($fehler as $einzelnerFehler): ?>
-          <li><?php echo h($einzelnerFehler); ?></li>
-          <?php endforeach; ?>
-        </ul>
-      </div>
-      <?php endif; ?>
+      <?php echo fehler_liste($fehler); ?>
 
       <?php if ($istBearbeiten && benutzer_status($benutzer) === 'wartet'): ?>
       <div class="hinweis">
@@ -219,10 +132,7 @@ $istIch        = $istBearbeiten && (int) $zielId === (int) $meineId;
           aktiv (darf sich anmelden)
         </label>
 
-        <div class="knopf-reihe">
-          <button type="submit" class="knopf">Speichern</button>
-          <a class="link-abbrechen" href="<?php echo h(url('benutzer')); ?>">Abbrechen</a>
-        </div>
+        <?php echo knopf_reihe('Speichern', 'benutzer'); ?>
       </form>
 
       <p class="regel-hinweis">
