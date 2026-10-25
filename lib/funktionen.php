@@ -131,3 +131,124 @@ function seite_wechseln($seite, $hinweis = array())
     seite_ausgeben($seite, $hinweis);
     exit;
 }
+
+/**
+ * Zeigt statt der aktuellen Seite die Hinweisseite "Zugriff verweigert"
+ * (pages/zugriff_verweigert.php) mit einer verstaendlichen Fehlermeldung
+ * und einem Link zurueck zur passenden Liste, und beendet danach das
+ * Skript. Wird verwendet, wenn eine serverseitige Rechtepruefung
+ * fehlschlaegt (z. B. Direktaufruf einer fremden Kurs-ID).
+ *
+ * Die Funktion wird aus allen Bereichen aufgerufen. Damit der Zurueck-Link
+ * dorthin fuehrt, wo der Benutzer hergekommen ist, geben die Buchungs-,
+ * Raum- und Benutzerseiten ihr Ziel selbst mit; ohne Angabe bleibt es bei
+ * der Kursliste.
+ *
+ * @param string $nachricht
+ * @param string $zurueckSeite Ziel des Zurueck-Links (Seitenname, z. B. 'raeume')
+ * @param string $zurueckText  Beschriftung des Zurueck-Links
+ */
+function zugriff_verweigert_seite($nachricht, $zurueckSeite = 'kurse', $zurueckText = 'Zurück zu den Kursen')
+{
+    seite_wechseln('zugriff_verweigert', array(
+        'nachricht'     => $nachricht,
+        'zurueck_seite' => $zurueckSeite,
+        'zurueck_text'  => $zurueckText,
+    ));
+}
+
+/**
+ * Anzahl mit passender Einzahl/Mehrzahl, z. B. "1 Kurs" / "3 Kurse".
+ *
+ * @param  int    $anzahl
+ * @param  string $einzahl  z. B. 'Kurs'
+ * @param  string $mehrzahl z. B. 'Kurse'
+ * @return string
+ */
+function anzahl_text($anzahl, $einzahl, $mehrzahl)
+{
+    return (int) $anzahl . ' ' . ((int) $anzahl === 1 ? $einzahl : $mehrzahl);
+}
+
+/**
+ * Liest die angekreuzten IDs einer Checkbox-Liste aus dem Formular,
+ * z. B. software[] -> formular_ids('software'). Jeder Wert wird zur Zahl;
+ * fehlt das Feld oder ist es keine Liste, kommt ein leeres Array zurueck.
+ *
+ * @param  string $feld Name des Feldes ohne []
+ * @return int[]
+ */
+function formular_ids($feld)
+{
+    $ids = array();
+    if (isset($_POST[$feld]) && is_array($_POST[$feld])) {
+        foreach ($_POST[$feld] as $wert) {
+            $ids[] = (int) $wert;
+        }
+    }
+    return $ids;
+}
+
+/**
+ * UI-Baustein: Liste von Fehlermeldungen im roten Kasten (.fehler).
+ * Ohne Fehler kommt ein leerer String zurueck, die Seite braucht also kein
+ * eigenes if.
+ *
+ * @param  string[] $fehler
+ * @return string HTML
+ */
+function fehler_liste($fehler)
+{
+    if (empty($fehler)) {
+        return '';
+    }
+
+    $html = '<div class="fehler"><ul>';
+    foreach ($fehler as $text) {
+        $html .= '<li>' . h($text) . '</li>';
+    }
+    return $html . '</ul></div>';
+}
+
+/**
+ * UI-Baustein: eine einzelne Meldung in einem Kasten.
+ *
+ * @param  string $text
+ * @param  string $klasse CSS-Klasse des Kastens: 'fehler' (rot) oder 'meldung'
+ * @return string HTML
+ */
+function meldung($text, $klasse = 'fehler')
+{
+    return '<div class="' . h($klasse) . '">' . h($text) . '</div>';
+}
+
+/**
+ * UI-Baustein: Knopfzeile unter einem Formular - Absende-Knopf und Link
+ * "Abbrechen" zurueck zur Liste.
+ *
+ * @param  string $knopfText      z. B. 'Speichern'
+ * @param  string $abbrechenSeite Seitenname fuer "Abbrechen", z. B. 'kurse'
+ * @param  bool   $loeschen       true = roter Loesch-Knopf (.knopf-loeschen)
+ * @return string HTML
+ */
+function knopf_reihe($knopfText, $abbrechenSeite, $loeschen = false)
+{
+    $klasse = $loeschen ? 'knopf knopf-loeschen' : 'knopf';
+
+    return '<div class="knopf-reihe">'
+        . '<button type="submit" class="' . $klasse . '">' . h($knopfText) . '</button>'
+        . '<a class="link-abbrechen" href="' . h(url($abbrechenSeite)) . '">Abbrechen</a>'
+        . '</div>';
+}
+
+/**
+ * UI-Baustein: runder "+"-Knopf unten in der Sidebar der Listenseiten.
+ *
+ * @param  string $seite        Formularseite zum Anlegen, z. B. 'kurs_bearbeiten'
+ * @param  string $beschriftung Text fuer Screenreader, z. B. 'Kurs hinzufügen'
+ * @return string HTML
+ */
+function knopf_hinzufuegen($seite, $beschriftung)
+{
+    return '<a href="' . h(url($seite)) . '" class="btn-add" aria-label="' . h($beschriftung) . '">+</a>';
+}

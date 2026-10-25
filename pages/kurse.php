@@ -11,78 +11,12 @@ $istAdmin = ist_admin();
 $suche     = isset($_GET['suche']) ? trim($_GET['suche']) : '';
 $nurEigene = isset($_GET['ownership']) && $_GET['ownership'] === 'own';
 
-$bedingungen = array();
-$parameter   = array();
-
-$sql = 'SELECT DISTINCT k.id, k.titel, k.beschreibung, k.max_teilnehmer, k.ersteller_id
-        FROM kurs k
-        LEFT JOIN kurs_eigentuemer ke ON ke.kurs_id = k.id';
-
-if ($suche !== '') {
-    $bedingungen[] = 'k.titel LIKE ?';
-    $parameter[]   = '%' . $suche . '%';
-}
-
-if ($nurEigene) {
-    $bedingungen[] = '(k.ersteller_id = ? OR ke.benutzer_id = ?)';
-    $parameter[]   = $meineId;
-    $parameter[]   = $meineId;
-}
-
-if (!empty($bedingungen)) {
-    $sql .= ' WHERE ' . implode(' AND ', $bedingungen);
-}
-
-$sql .= ' ORDER BY k.titel';
-
-$kurse = abfrage($sql, $parameter)->fetchAll();
+$kurse = kurs_liste($suche, $nurEigene, $meineId);
 
 // Eigentuemer und Software je Kurs nachladen (fuer Berechtigungen und Chips).
-$eigentuemerJeKurs = array();
-$softwareJeKurs    = array();
-
-$kursIds = array();
-foreach ($kurse as $k) {
-    $kursIds[] = $k['id'];
-}
-
-if (!empty($kursIds)) {
-    $platzhalter = implode(',', array_fill(0, count($kursIds), '?'));
-
-    $zeilen = abfrage(
-        'SELECT kurs_id, benutzer_id FROM kurs_eigentuemer WHERE kurs_id IN (' . $platzhalter . ')',
-        $kursIds
-    )->fetchAll();
-    foreach ($zeilen as $zeile) {
-        $eigentuemerJeKurs[$zeile['kurs_id']][] = (int) $zeile['benutzer_id'];
-    }
-
-    $zeilen = abfrage(
-        'SELECT ks.kurs_id, s.name
-         FROM kurs_software ks
-         JOIN software s ON s.id = ks.software_id
-         WHERE ks.kurs_id IN (' . $platzhalter . ')
-         ORDER BY s.name',
-        $kursIds
-    )->fetchAll();
-    foreach ($zeilen as $zeile) {
-        $softwareJeKurs[$zeile['kurs_id']][] = $zeile['name'];
-    }
-}
-
-/**
- * Nur fuer die Kartenanzeige: ist der eingeloggte Benutzer Ersteller oder
- * in kurs_eigentuemer eingetragen? Die massgebliche, serverseitige Pruefung
- * fuer Bearbeiten/Loeschen selbst steht in kurs_darf_verwalten() (lib/kurs_rechte.php).
- */
-function ist_eigene_karte($kurs, $eigentuemerJeKurs, $benutzerId)
-{
-    if ((int) $kurs['ersteller_id'] === (int) $benutzerId) {
-        return true;
-    }
-    return isset($eigentuemerJeKurs[$kurs['id']])
-        && in_array((int) $benutzerId, $eigentuemerJeKurs[$kurs['id']], true);
-}
+$kursIds           = array_column($kurse, 'id');
+$eigentuemerJeKurs = kurs_eigentuemer_je_kurs($kursIds);
+$softwareJeKurs    = kurs_software_je_kurs($kursIds);
 
 $seitentitel = 'Kurse';
 $aktiverTab  = 'kurse';
@@ -114,7 +48,7 @@ $seitenCss   = array('kurse.css');
           <?php endif; ?>
           <a class="link-belegung" href="<?php echo h(url('belegung', array('ansicht' => 'monat', 'kurs_id' => (int) $kurs['id']))); ?>">Termine</a>
 
-          <?php if ($istAdmin || ist_eigene_karte($kurs, $eigentuemerJeKurs, $meineId)): ?>
+          <?php if ($istAdmin || kurs_ist_eigene_karte($kurs, $eigentuemerJeKurs, $meineId)): ?>
           <div class="course-actions">
             <a href="<?php echo h(url('kurs_bearbeiten', array('id' => (int) $kurs['id']))); ?>" class="btn-edit">bearbeiten</a>
             <a href="<?php echo h(url('kurs_loeschen', array('id' => (int) $kurs['id']))); ?>" class="btn-delete">löschen</a>
@@ -148,7 +82,7 @@ $seitenCss   = array('kurse.css');
         <button type="submit" class="filter-submit">Suchen</button>
       </form>
 
-      <a href="<?php echo h(url('kurs_bearbeiten')); ?>" class="btn-add" aria-label="Kurs hinzufügen">+</a>
+      <?php echo knopf_hinzufuegen('kurs_bearbeiten', 'Kurs hinzufügen'); ?>
     </aside>
 
   </div>

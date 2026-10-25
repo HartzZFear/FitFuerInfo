@@ -8,8 +8,9 @@
 // bekommt einen Freischaltcode, der danach genau einmal angezeigt wird; das
 // Passwort setzt der Mitarbeiter selbst in passwort_setzen.php.
 //
-// Beim Bearbeiten gelten die Regeln aus benutzer_darf_aendern(): Der letzte
-// aktive Admin bleibt Admin und aktiv, und niemand sperrt sich selbst.
+// Die Rolle wird hier nur angezeigt, nie geaendert: Neue Benutzer sind
+// Mitarbeiter, und das Admin-Konto kann nicht gesperrt werden (siehe
+// benutzer_speichern() und benutzer_sperre_pruefen()).
 //
 // Loeschen gibt es nicht - kurs.ersteller_id und buchung.benutzer_id stehen
 // auf RESTRICT. Stattdessen wird gesperrt.
@@ -19,19 +20,13 @@
 erfordere_admin();
 csrf_pruefen();
 
-$meineId = benutzer_id();
-
 $istBearbeiten = isset($_GET['id']) && $_GET['id'] !== '';
 $zielId        = $istBearbeiten ? (int) $_GET['id'] : null;
 
 $benutzer = null;
 
 if ($istBearbeiten) {
-    $benutzer = abfrage(
-        'SELECT id, name, email, rolle, aktiv, passwort_hash, freischaltcode, code_gueltig_bis
-         FROM benutzer WHERE id = ?',
-        array($zielId)
-    )->fetch();
+    $benutzer = benutzer_laden($zielId);
 
     if (!$benutzer) {
         zugriff_verweigert_seite(
@@ -54,113 +49,32 @@ $fehler = array();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name  = isset($_POST['name']) ? trim($_POST['name']) : '';
     $email = isset($_POST['email']) ? trim($_POST['email']) : '';
-    $rolle = isset($_POST['rolle']) ? $_POST['rolle'] : '';
     $aktiv = isset($_POST['aktiv']) && $_POST['aktiv'] === '1';
 
-    if ($name === '') {
-        $fehler[] = 'Bitte einen Benutzernamen eingeben.';
-    } elseif (mb_strlen($name, 'UTF-8') > 50) {
-        $fehler[] = 'Der Benutzername darf höchstens 50 Zeichen lang sein.';
-    }
+    // Die Rolle wird bewusst nicht aus dem Formular gelesen - siehe
+    // benutzer_speichern().
+    $ergebnis = benutzer_speichern($benutzer, array(
+        'name'  => $name,
+        'email' => $email,
+        'aktiv' => $aktiv,
+    ));
 
-    // E-Mail ist optional. Leer wird als NULL gespeichert.
-    if ($email !== '') {
-        if (mb_strlen($email, 'UTF-8') > 100) {
-            $fehler[] = 'Die E-Mail-Adresse darf höchstens 100 Zeichen lang sein.';
-        } elseif (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
-            $fehler[] = 'Die E-Mail-Adresse "' . $email . '" hat kein gültiges Format (Beispiel: name@schule.de).';
+    if ($ergebnis === true) {
+        // Beim Anlegen zeigt die Benutzerliste den neuen Freischaltcode an,
+        // beim Bearbeiten eine Bestaetigung.
+        if ($istBearbeiten) {
+            $_SESSION['benutzer_meldung'] = 'Die Änderungen an ' . $name . ' wurden gespeichert.';
+            $_SESSION['benutzer_fehler']  = array();
         }
+        header('Location: ' . url('benutzer'));
+        exit;
     }
-
-    $rolleGueltig = in_array($rolle, array('admin', 'mitarbeiter'), true);
-    if (!$rolleGueltig) {
-        $fehler[] = 'Bitte eine gültige Rolle auswählen.';
-        $rolle    = 'mitarbeiter';
-    }
-
-    // Auch bei Formatfehlern weiterpruefen, damit alle Meldungen (z. B.
-    // ungueltige E-Mail UND doppelter Name) auf einmal erscheinen.
-    // Gespeichert wird weiter unten nur, wenn $fehler leer bleibt.
-    if ($rolleGueltig) {
-        $db = db();
-        $db->beginTransaction();
-
-        try {
-            if ($istBearbeiten) {
-                // Admin-Zeilen sperren, bevor geprueft wird - sonst koennten
-                // zwei Admins gleichzeitig den jeweils anderen entmachten.
-                benutzer_admins_sperren();
-                $fehler = array_merge($fehler, benutzer_darf_aendern($zielId, $meineId, $rolle, $aktiv));
-            }
-
-            // Der Name ist in der Datenbank eindeutig (uk_benutzer_name).
-            // Vorher pruefen, damit der Admin eine verstaendliche Meldung
-            // bekommt statt eines Datenbankfehlers.
-            $sql       = 'SELECT id FROM benutzer WHERE name = ?';
-            $parameter = array($name);
-            if ($istBearbeiten) {
-                $sql .= ' AND id <> ?';
-                $parameter[] = $zielId;
-            }
-
-            if ($name !== '' && abfrage($sql, $parameter)->fetch()) {
-                $fehler[] = 'Es gibt bereits einen Benutzer mit dem Namen "' . $name . '". '
-                    . 'Groß- und Kleinschreibung zählt dabei nicht.';
-            }
-
-            if (empty($fehler)) {
-                $emailWert = $email === '' ? null : $email;
-
-                if ($istBearbeiten) {
-                    abfrage(
-                        'UPDATE benutzer SET name = ?, email = ?, rolle = ?, aktiv = ? WHERE id = ?',
-                        array($name, $emailWert, $rolle, $aktiv ? 1 : 0, $zielId)
-                    );
-                    $db->commit();
-
-                    $_SESSION['benutzer_meldung'] = 'Die Änderungen an ' . $name . ' wurden gespeichert.';
-                    $_SESSION['benutzer_fehler']  = array();
-                    header('Location: ' . url('benutzer'));
-                    exit;
-                }
-
-                // Neuer Benutzer: ohne Passwort speichern (passwort_hash
-                // bleibt NULL) und gleich einen Freischaltcode erzeugen.
-                abfrage(
-                    'INSERT INTO benutzer (name, email, passwort_hash, rolle, aktiv) VALUES (?, ?, NULL, ?, ?)',
-                    array($name, $emailWert, $rolle, $aktiv ? 1 : 0)
-                );
-                $neueId = (int) $db->lastInsertId();
-                $code   = benutzer_code_erzeugen($neueId);
-                $db->commit();
-
-                // Einmalige Anzeige uebernimmt benutzer.php.
-                benutzer_code_merken($neueId, $code);
-                header('Location: ' . url('benutzer'));
-                exit;
-            }
-
-            $db->rollBack();
-        } catch (Exception $e) {
-            if ($db->inTransaction()) {
-                $db->rollBack();
-            }
-            // Faengt auch den RuntimeException aus erzeuge_freischaltcode().
-            // 23000 = Verletzung eines UNIQUE-Schluessels, z. B. wenn
-            // jemand denselben Namen gleichzeitig angelegt hat.
-            if ($e instanceof PDOException && $e->getCode() === '23000') {
-                $fehler[] = 'Es gibt bereits einen Benutzer mit dem Namen "' . $name . '".';
-            } else {
-                $fehler[] = 'Der Benutzer konnte nicht gespeichert werden. Bitte erneut versuchen.';
-            }
-        }
-    }
+    $fehler = $ergebnis;
 }
 
 $seitentitel   = $istBearbeiten ? 'Benutzer bearbeiten' : 'Neuen Benutzer anlegen';
 $seitenCss     = array('formular.css');
 $ohneKopfzeile = true;
-$istIch        = $istBearbeiten && (int) $zielId === (int) $meineId;
 ?>
 <?php formular_kopf($seitentitel); ?>
 
@@ -173,15 +87,7 @@ $istIch        = $istBearbeiten && (int) $zielId === (int) $meineId;
     <div class="karte">
       <h2 class="karte-titel"><?php echo h($seitentitel); ?></h2>
 
-      <?php if (!empty($fehler)): ?>
-      <div class="fehler">
-        <ul>
-          <?php foreach ($fehler as $einzelnerFehler): ?>
-          <li><?php echo h($einzelnerFehler); ?></li>
-          <?php endforeach; ?>
-        </ul>
-      </div>
-      <?php endif; ?>
+      <?php echo fehler_liste($fehler); ?>
 
       <?php if ($istBearbeiten && benutzer_status($benutzer) === 'wartet'): ?>
       <div class="hinweis">
@@ -208,10 +114,11 @@ $istIch        = $istBearbeiten && (int) $zielId === (int) $meineId;
         <label for="email">E-Mail <span class="optional">(optional)</span></label>
         <input type="email" id="email" name="email" maxlength="100" value="<?php echo h($email); ?>">
 
+        <?php /* Nur Anzeige: deaktivierte Felder schickt der Browser nicht mit,
+                 und benutzer_speichern() liest die Rolle ohnehin nicht. */ ?>
         <label for="rolle">Rolle</label>
-        <select id="rolle" name="rolle">
-          <option value="mitarbeiter" <?php echo $rolle === 'mitarbeiter' ? 'selected' : ''; ?>>Mitarbeiter</option>
-          <option value="admin" <?php echo $rolle === 'admin' ? 'selected' : ''; ?>>Admin</option>
+        <select id="rolle" disabled>
+          <option selected><?php echo $rolle === 'admin' ? 'Admin' : 'Mitarbeiter'; ?></option>
         </select>
 
         <label class="checkbox-item">
@@ -219,20 +126,14 @@ $istIch        = $istBearbeiten && (int) $zielId === (int) $meineId;
           aktiv (darf sich anmelden)
         </label>
 
-        <div class="knopf-reihe">
-          <button type="submit" class="knopf">Speichern</button>
-          <a class="link-abbrechen" href="<?php echo h(url('benutzer')); ?>">Abbrechen</a>
-        </div>
+        <?php echo knopf_reihe('Speichern', 'benutzer'); ?>
       </form>
 
       <p class="regel-hinweis">
         Benutzer können nicht gelöscht werden, weil an ihnen Kurse und Buchungen hängen.
         Wer keinen Zugang mehr haben soll, wird gesperrt („aktiv“ abwählen) – eine laufende
         Sitzung endet dann beim nächsten Klick.
-        <?php if ($istIch): ?>
-        Das eigene Konto kann nicht gesperrt werden.
-        <?php endif; ?>
-        Der letzte aktive Admin bleibt immer Admin und aktiv.
+        Die Rolle wird hier nicht geändert, und das Admin-Konto kann nicht gesperrt werden.
       </p>
     </div>
   </div>

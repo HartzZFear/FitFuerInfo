@@ -17,7 +17,7 @@ $kursId        = $istBearbeiten ? (int) $_GET['id'] : null;
 $kurs = null;
 
 if ($istBearbeiten) {
-    $kurs = abfrage('SELECT * FROM kurs WHERE id = ?', array($kursId))->fetch();
+    $kurs = kurs_laden($kursId);
 
     if (!$kurs) {
         zugriff_verweigert_seite('Dieser Kurs existiert nicht oder wurde bereits gelöscht.');
@@ -27,30 +27,14 @@ if ($istBearbeiten) {
     }
 }
 
-$alleSoftware  = abfrage('SELECT id, name FROM software ORDER BY name')->fetchAll();
-$alleBenutzer  = $istAdmin
-    ? abfrage('SELECT id, name FROM benutzer WHERE aktiv = 1 ORDER BY name')->fetchAll()
-    : array();
+$alleSoftware  = software_alle();
+$alleBenutzer  = $istAdmin ? benutzer_aktive() : array();
 
 $titel                   = $istBearbeiten ? $kurs['titel'] : '';
 $beschreibung             = ($istBearbeiten && $kurs['beschreibung'] !== null) ? $kurs['beschreibung'] : '';
 $maxTeilnehmer            = $istBearbeiten ? $kurs['max_teilnehmer'] : '';
-$ausgewaehlteSoftwareIds  = array();
-$ausgewaehlteEigentuemerIds = array();
-
-if ($istBearbeiten) {
-    $zeilen = abfrage('SELECT software_id FROM kurs_software WHERE kurs_id = ?', array($kursId))->fetchAll();
-    foreach ($zeilen as $zeile) {
-        $ausgewaehlteSoftwareIds[] = (int) $zeile['software_id'];
-    }
-
-    if ($istAdmin) {
-        $zeilen = abfrage('SELECT benutzer_id FROM kurs_eigentuemer WHERE kurs_id = ?', array($kursId))->fetchAll();
-        foreach ($zeilen as $zeile) {
-            $ausgewaehlteEigentuemerIds[] = (int) $zeile['benutzer_id'];
-        }
-    }
-}
+$ausgewaehlteSoftwareIds  = $istBearbeiten ? kurs_software_ids($kursId) : array();
+$ausgewaehlteEigentuemerIds = ($istBearbeiten && $istAdmin) ? kurs_eigentuemer_eintraege($kursId) : array();
 
 $fehler = array();
 
@@ -59,63 +43,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $beschreibung         = isset($_POST['beschreibung']) ? trim($_POST['beschreibung']) : '';
     $maxTeilnehmerEingabe = isset($_POST['max_teilnehmer']) ? trim($_POST['max_teilnehmer']) : '';
 
-    $ausgewaehlteSoftwareIds = array();
-    if (isset($_POST['software']) && is_array($_POST['software'])) {
-        foreach ($_POST['software'] as $sid) {
-            $ausgewaehlteSoftwareIds[] = (int) $sid;
-        }
-    }
-
+    $ausgewaehlteSoftwareIds = formular_ids('software');
     if ($istAdmin) {
-        $ausgewaehlteEigentuemerIds = array();
-        if (isset($_POST['eigentuemer']) && is_array($_POST['eigentuemer'])) {
-            foreach ($_POST['eigentuemer'] as $eid) {
-                $ausgewaehlteEigentuemerIds[] = (int) $eid;
-            }
-        }
+        $ausgewaehlteEigentuemerIds = formular_ids('eigentuemer');
     }
 
-    if ($titel === '') {
-        $fehler[] = 'Bitte einen Kurstitel eingeben.';
+    // Gueltige Teilnehmerzahl uebernehmen; bei ungueltiger Eingabe bleibt
+    // im Feld der bisherige Wert stehen.
+    $zahl = kurs_teilnehmerzahl($maxTeilnehmerEingabe);
+    if ($zahl !== null) {
+        $maxTeilnehmer = $zahl;
     }
 
-    if ($maxTeilnehmerEingabe === '' || !ctype_digit($maxTeilnehmerEingabe) || (int) $maxTeilnehmerEingabe < 1) {
-        $fehler[] = 'Die maximale Teilnehmerzahl muss eine ganze Zahl von mindestens 1 sein.';
-    } else {
-        $maxTeilnehmer = (int) $maxTeilnehmerEingabe;
-    }
+    $ergebnis = kurs_speichern($kursId, array(
+        'titel'          => $titel,
+        'beschreibung'   => $beschreibung,
+        'max_teilnehmer' => $maxTeilnehmerEingabe,
+        'software'       => $ausgewaehlteSoftwareIds,
+        'eigentuemer'    => $ausgewaehlteEigentuemerIds,
+    ), $meineId, $istAdmin);
 
-    if (empty($fehler)) {
-        $beschreibungWert = $beschreibung !== '' ? $beschreibung : null;
-
-        if ($istBearbeiten) {
-            abfrage(
-                'UPDATE kurs SET titel = ?, beschreibung = ?, max_teilnehmer = ? WHERE id = ?',
-                array($titel, $beschreibungWert, $maxTeilnehmer, $kursId)
-            );
-        } else {
-            abfrage(
-                'INSERT INTO kurs (titel, beschreibung, max_teilnehmer, ersteller_id) VALUES (?, ?, ?, ?)',
-                array($titel, $beschreibungWert, $maxTeilnehmer, $meineId)
-            );
-            $kursId = (int) db()->lastInsertId();
-        }
-
-        abfrage('DELETE FROM kurs_software WHERE kurs_id = ?', array($kursId));
-        foreach ($ausgewaehlteSoftwareIds as $sid) {
-            abfrage('INSERT INTO kurs_software (kurs_id, software_id) VALUES (?, ?)', array($kursId, $sid));
-        }
-
-        if ($istAdmin) {
-            abfrage('DELETE FROM kurs_eigentuemer WHERE kurs_id = ?', array($kursId));
-            foreach ($ausgewaehlteEigentuemerIds as $eid) {
-                abfrage('INSERT INTO kurs_eigentuemer (kurs_id, benutzer_id) VALUES (?, ?)', array($kursId, $eid));
-            }
-        }
-
+    if ($ergebnis === true) {
         header('Location: ' . url('kurse'));
         exit;
     }
+    $fehler = $ergebnis;
 }
 
 $seitentitel   = $istBearbeiten ? 'Kurs bearbeiten' : 'Neuen Kurs anlegen';
@@ -128,15 +80,7 @@ $ohneKopfzeile = true;
     <div class="karte">
       <h2 class="karte-titel"><?php echo h($seitentitel); ?></h2>
 
-      <?php if (!empty($fehler)): ?>
-      <div class="fehler">
-        <ul>
-          <?php foreach ($fehler as $einzelnerFehler): ?>
-          <li><?php echo h($einzelnerFehler); ?></li>
-          <?php endforeach; ?>
-        </ul>
-      </div>
-      <?php endif; ?>
+      <?php echo fehler_liste($fehler); ?>
 
       <form method="post" action="<?php echo h(url('kurs_bearbeiten', $istBearbeiten ? array('id' => (int) $kursId) : array())); ?>">
         <?php csrf_feld(); ?>
@@ -177,10 +121,7 @@ $ohneKopfzeile = true;
         </fieldset>
         <?php endif; ?>
 
-        <div class="knopf-reihe">
-          <button type="submit" class="knopf">Speichern</button>
-          <a class="link-abbrechen" href="<?php echo h(url('kurse')); ?>">Abbrechen</a>
-        </div>
+        <?php echo knopf_reihe('Speichern', 'kurse'); ?>
       </form>
     </div>
   </div>

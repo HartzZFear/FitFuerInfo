@@ -151,8 +151,9 @@ function aktueller_benutzer()
  * Zusaetzlich wird das Konto bei jedem Seitenaufruf frisch aus der
  * Datenbank gelesen: Sperrt der Admin einen Benutzer, endet dessen
  * laufende Session beim naechsten Klick (Hinweis auf der Login-Seite).
- * Die Rolle in der Session wird dabei ebenfalls nachgezogen, damit ein
- * zum Mitarbeiter gemachter Admin seine Rechte sofort verliert.
+ * Die Rolle in der Session wird dabei ebenfalls nachgezogen. Ueber die
+ * Oberflaeche aendert sich die Rolle nie; wird sie aber direkt in der
+ * Datenbank geaendert (z. B. phpMyAdmin), gilt das so ab dem naechsten Klick.
  */
 function erfordere_login()
 {

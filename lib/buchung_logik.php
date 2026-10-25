@@ -467,3 +467,279 @@ function buchbare_kurse($benutzerId, $istAdmin)
         array((int) $benutzerId, (int) $benutzerId)
     )->fetchAll();
 }
+
+/**
+ * Eine Buchung laden (alle Spalten).
+ *
+ * @param  int $buchungId
+ * @return array|false Zeile aus buchung oder false, wenn es sie nicht gibt
+ */
+function buchung_laden($buchungId)
+{
+    return abfrage('SELECT * FROM buchung WHERE id = ?', array((int) $buchungId))->fetch();
+}
+
+/**
+ * Eine Buchung mit Raum- und Kursnamen laden, fuer die Sicherheitsabfrage
+ * vor dem Loeschen.
+ *
+ * @param  int $buchungId
+ * @return array|false Zeile mit id, benutzer_id, start, ende, raum, kurs
+ */
+function buchung_mit_namen_laden($buchungId)
+{
+    return abfrage(
+        'SELECT b.id, b.benutzer_id, b.start, b.ende, r.name AS raum, k.titel AS kurs
+         FROM buchung b
+         JOIN raum r ON r.id = b.raum_id
+         JOIN kurs k ON k.id = b.kurs_id
+         WHERE b.id = ?',
+        array((int) $buchungId)
+    )->fetch();
+}
+
+/**
+ * Buchungsliste mit den Filtern der Seite buchungen. Die Filter landen
+ * ausschliesslich als Parameter im Prepared Statement.
+ *
+ * @param  array $filter     raum_id (0 = alle), kurs_id (0 = alle),
+ *                           ab ('YYYY-MM-DD'), nur_meine (bool)
+ * @param  int   $benutzerId fuer "nur meine"
+ * @return array Zeilen mit id, benutzer_id, start, ende, raum, kurs, gebucht_von
+ */
+function buchung_liste($filter, $benutzerId)
+{
+    $bedingungen = array('b.start >= ?');
+    $parameter   = array($filter['ab'] . ' 00:00:00');
+
+    if ($filter['raum_id'] > 0) {
+        $bedingungen[] = 'b.raum_id = ?';
+        $parameter[]   = $filter['raum_id'];
+    }
+    if ($filter['kurs_id'] > 0) {
+        $bedingungen[] = 'b.kurs_id = ?';
+        $parameter[]   = $filter['kurs_id'];
+    }
+    if ($filter['nur_meine']) {
+        $bedingungen[] = 'b.benutzer_id = ?';
+        $parameter[]   = $benutzerId;
+    }
+
+    return abfrage(
+        'SELECT b.id, b.benutzer_id, b.start, b.ende,
+                r.name AS raum, k.titel AS kurs, u.name AS gebucht_von
+         FROM buchung b
+         JOIN raum r     ON r.id = b.raum_id
+         JOIN kurs k     ON k.id = b.kurs_id
+         JOIN benutzer u ON u.id = b.benutzer_id
+         WHERE ' . implode(' AND ', $bedingungen) . '
+         ORDER BY b.start, r.name',
+        $parameter
+    )->fetchAll();
+}
+
+/**
+ * Link "Kalenderansicht" der Buchungsliste: dieselben Filter, der Kalender
+ * startet beim "ab"-Datum (Standard: Wochenansicht). Gegenstueck zu
+ * kalender_listen_url().
+ *
+ * @param  array $filter wie bei buchung_liste()
+ * @return string url('belegung', ...)
+ */
+function buchung_kalender_url($filter)
+{
+    $parameter = array('datum' => $filter['ab']);
+    if ($filter['raum_id'] > 0) {
+        $parameter['raum_id'] = $filter['raum_id'];
+    }
+    if ($filter['kurs_id'] > 0) {
+        $parameter['kurs_id'] = $filter['kurs_id'];
+    }
+    if ($filter['nur_meine']) {
+        $parameter['nur_meine'] = 1;
+    }
+    return url('belegung', $parameter);
+}
+
+/**
+ * Nur fuer die Anzeige der Buttons: gehoert die Buchung dem eingeloggten
+ * Benutzer? Die Daten liegen durch den JOIN schon vor, deshalb hier ohne
+ * eigene Abfrage. Die massgebliche Pruefung steht serverseitig in
+ * buchung_darf_verwalten() und laeuft beim Aufruf von buchung_bearbeiten
+ * bzw. buchung_loeschen erneut.
+ *
+ * @param  array $buchung    Zeile aus buchung_liste()
+ * @param  int   $benutzerId
+ * @param  bool  $istAdmin
+ * @return bool
+ */
+function buchung_ist_eigene($buchung, $benutzerId, $istAdmin)
+{
+    if ($istAdmin) {
+        return true;
+    }
+    return (int) $buchung['benutzer_id'] === (int) $benutzerId;
+}
+
+/**
+ * Vorschlag fuer die Endzeit einer neuen Buchung: eine Stunde nach dem
+ * Start, aber nie nach BUCHUNG_TAG_ENDE. Der Benutzer kann sie danach frei
+ * aendern.
+ *
+ * @param  string   $start 'HH:MM'
+ * @param  string[] $slots Ergebnis von zeitslots()
+ * @return string 'HH:MM'
+ */
+function buchung_ende_vorschlag($start, $slots)
+{
+    $startPos = array_search($start, $slots, true);
+    if ($startPos !== false && isset($slots[$startPos + 2])) {
+        return $slots[$startPos + 2];
+    }
+    return BUCHUNG_TAG_ENDE;
+}
+
+/**
+ * Prueft die Eingaben und alle fuenf Buchungsregeln und legt die Buchung an
+ * bzw. speichert sie.
+ *
+ * Ob der Benutzer fuer den Kurs buchen und die Buchung bearbeiten darf,
+ * prueft die Seite vorher (kurs_darf_verwalten(), buchung_darf_verwalten()).
+ *
+ * @param  int|null $buchungId  null = neue Buchung
+ * @param  array    $eingabe    kurs_id, raum_id (int), datum ('YYYY-MM-DD'),
+ *                              start, ende ('HH:MM')
+ * @param  int      $benutzerId wird beim Anlegen als Bucher eingetragen
+ * @return true|array true bei Erfolg, sonst alle deutschen Fehlermeldungen
+ */
+function buchung_speichern($buchungId, $eingabe, $benutzerId)
+{
+    $fehler = array();
+    $kursId = (int) $eingabe['kurs_id'];
+    $raumId = (int) $eingabe['raum_id'];
+
+    if ($kursId < 1) {
+        $fehler[] = 'Bitte einen Kurs auswählen.';
+    }
+    if ($raumId < 1) {
+        $fehler[] = 'Bitte einen Raum auswählen.';
+    }
+
+    $start = buchung_zeitpunkt($eingabe['datum'], $eingabe['start']);
+    $ende  = buchung_zeitpunkt($eingabe['datum'], $eingabe['ende']);
+
+    if ($start === null || $ende === null) {
+        $fehler[] = 'Datum oder Uhrzeit sind ungültig. Bitte Datum, Start- und Endzeit erneut auswählen.';
+    }
+
+    if (!empty($fehler)) {
+        return $fehler;
+    }
+
+    // Transaktion: verhindert Doppelbuchungen, wenn zwei Benutzer
+    // gleichzeitig denselben Raum (oder denselben Kurs) zur selben Zeit
+    // buchen. Ablauf: sperren -> pruefen -> schreiben.
+    $db = db();
+    try {
+        $db->beginTransaction();
+
+        // Erst raum, dann kurs sperren - immer in dieser Reihenfolge, damit
+        // sich zwei gleichzeitige Buchungen nicht gegenseitig blockieren
+        // (Deadlock). Die Sperre haelt bis zum COMMIT: eine zweite Anfrage
+        // fuer denselben Raum wartet hier, bis die erste fertig ist, und
+        // sieht deren Buchung dann bei der Pruefung.
+        abfrage('SELECT id FROM raum WHERE id = ? FOR UPDATE', array($raumId));
+        abfrage('SELECT id FROM kurs WHERE id = ? FOR UPDATE', array($kursId));
+
+        // Beim Bearbeiten die eigene ID ausschliessen, sonst kollidiert die
+        // Buchung bei den Regeln 2 und 3 mit sich selbst.
+        $fehler = buchung_pruefen($raumId, $kursId, $start, $ende, $buchungId);
+
+        if (!empty($fehler)) {
+            $db->rollBack();
+            return $fehler;
+        }
+
+        if ($buchungId !== null) {
+            // benutzer_id bleibt unveraendert: die Buchung gehoert weiterhin
+            // dem, der sie angelegt hat.
+            abfrage(
+                'UPDATE buchung SET raum_id = ?, kurs_id = ?, start = ?, ende = ? WHERE id = ?',
+                array($raumId, $kursId, $start, $ende, $buchungId)
+            );
+        } else {
+            abfrage(
+                'INSERT INTO buchung (raum_id, kurs_id, benutzer_id, start, ende) VALUES (?, ?, ?, ?, ?)',
+                array($raumId, $kursId, $benutzerId, $start, $ende)
+            );
+        }
+
+        $db->commit();
+    } catch (PDOException $e) {
+        if ($db->inTransaction()) {
+            $db->rollBack();
+        }
+        return array('Die Buchung konnte nicht gespeichert werden. Bitte erneut versuchen.');
+    }
+
+    return true;
+}
+
+/**
+ * Nach einer abgelehnten Buchung: Waren Software (Regel 4) oder Platz
+ * (Regel 5) das Problem, ist ein anderer Raum die Loesung - dann liefert
+ * die Funktion die Raeume, die zum Kurs passen. Sonst ein leeres Array.
+ *
+ * @param  int $kursId
+ * @param  int $raumId
+ * @return array Zeilen aus passende_raeume() oder leer
+ */
+function buchung_raum_vorschlaege($kursId, $raumId)
+{
+    if ($kursId < 1 || $raumId < 1) {
+        return array();
+    }
+
+    $raum = abfrage('SELECT arbeitsplaetze FROM raum WHERE id = ?', array((int) $raumId))->fetch();
+    $kurs = abfrage('SELECT max_teilnehmer FROM kurs WHERE id = ?', array((int) $kursId))->fetch();
+
+    if (!$raum || !$kurs) {
+        return array();
+    }
+
+    $softwareVerletzt = count(buchung_fehlende_software($kursId, $raumId)) > 0;
+    $platzVerletzt    = (int) $kurs['max_teilnehmer'] > (int) $raum['arbeitsplaetze'];
+
+    if ($softwareVerletzt || $platzVerletzt) {
+        return passende_raeume($kursId);
+    }
+    return array();
+}
+
+/**
+ * Loescht eine Buchung (ein einzelner Befehl, keine Transaktion noetig).
+ *
+ * @param  int $buchungId
+ * @return true|string true bei Erfolg, sonst eine deutsche Fehlermeldung
+ */
+function buchung_loeschen($buchungId)
+{
+    try {
+        abfrage('DELETE FROM buchung WHERE id = ?', array((int) $buchungId));
+    } catch (PDOException $e) {
+        return 'Die Buchung konnte nicht gelöscht werden. Bitte erneut versuchen.';
+    }
+    return true;
+}
+
+/**
+ * Text fuer das title-Attribut eines Buchungsblocks im Kalender.
+ *
+ * @param  array $buchung Zeile aus kalender_buchungen_laden()
+ * @return string z. B. "Linux-Grundlagen · 08:00–12:00 · Raum A · gebucht von lena"
+ */
+function buchung_tooltip($buchung)
+{
+    return $buchung['kurs'] . ' · ' . substr($buchung['start'], 11, 5) . '–' . substr($buchung['ende'], 11, 5)
+        . ' · ' . $buchung['raum'] . ' · gebucht von ' . $buchung['gebucht_von'];
+}

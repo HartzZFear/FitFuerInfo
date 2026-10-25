@@ -24,69 +24,23 @@ if (!$abObj || $abObj->format('Y-m-d') !== $abDatum) {
     $abDatum = date('Y-m-d');
 }
 
-$bedingungen = array('b.start >= ?');
-$parameter   = array($abDatum . ' 00:00:00');
-
-if ($filterRaumId > 0) {
-    $bedingungen[] = 'b.raum_id = ?';
-    $parameter[]   = $filterRaumId;
-}
-if ($filterKursId > 0) {
-    $bedingungen[] = 'b.kurs_id = ?';
-    $parameter[]   = $filterKursId;
-}
-if ($nurMeine) {
-    $bedingungen[] = 'b.benutzer_id = ?';
-    $parameter[]   = $meineId;
-}
-
-$buchungen = abfrage(
-    'SELECT b.id, b.benutzer_id, b.start, b.ende,
-            r.name AS raum, k.titel AS kurs, u.name AS gebucht_von
-     FROM buchung b
-     JOIN raum r     ON r.id = b.raum_id
-     JOIN kurs k     ON k.id = b.kurs_id
-     JOIN benutzer u ON u.id = b.benutzer_id
-     WHERE ' . implode(' AND ', $bedingungen) . '
-     ORDER BY b.start, r.name',
-    $parameter
-)->fetchAll();
+$filter = array(
+    'raum_id'   => $filterRaumId,
+    'kurs_id'   => $filterKursId,
+    'ab'        => $abDatum,
+    'nur_meine' => $nurMeine,
+);
+$buchungen = buchung_liste($filter, $meineId);
 
 // Fuer die Filter-Dropdowns und den "+"-Knopf.
-$alleRaeume = abfrage('SELECT id, name FROM raum ORDER BY name')->fetchAll();
-$alleKurse  = abfrage('SELECT id, titel FROM kurs ORDER BY titel')->fetchAll();
+$alleRaeume = raum_alle();
+$alleKurse  = kurs_alle();
 $meineKurse = buchbare_kurse($meineId, $istAdmin);
 
 $jetzt = new DateTime();
 
-// Gegenstueck zum Link "Listenansicht" in belegung.php: dieselben Filter,
-// der Kalender startet beim "ab"-Datum (Standard: Wochenansicht).
-$kalenderParameter = array('datum' => $abDatum);
-if ($filterRaumId > 0) {
-    $kalenderParameter['raum_id'] = $filterRaumId;
-}
-if ($filterKursId > 0) {
-    $kalenderParameter['kurs_id'] = $filterKursId;
-}
-if ($nurMeine) {
-    $kalenderParameter['nur_meine'] = 1;
-}
-$urlKalender = url('belegung', $kalenderParameter);
-
-/**
- * Nur fuer die Anzeige der Buttons: gehoert die Buchung dem eingeloggten
- * Benutzer? Die Daten liegen durch den JOIN schon vor, deshalb hier ohne
- * eigene Abfrage. Die massgebliche Pruefung steht serverseitig in
- * buchung_darf_verwalten() (buchung_logik.php) und laeuft beim Aufruf von
- * buchung_bearbeiten.php bzw. buchung_loeschen.php erneut.
- */
-function ist_eigene_buchung($buchung, $benutzerId, $istAdmin)
-{
-    if ($istAdmin) {
-        return true;
-    }
-    return (int) $buchung['benutzer_id'] === (int) $benutzerId;
-}
+// Gegenstueck zum Link "Listenansicht" in belegung.php.
+$urlKalender = buchung_kalender_url($filter);
 
 $seitentitel = 'Belegung';
 $aktiverTab  = 'belegung';
@@ -117,7 +71,7 @@ $seitenCss   = array('belegung.css');
     $startObj    = new DateTime($zeile['start']);
     $endeObj     = new DateTime($zeile['ende']);
     $istVergangen = $startObj < $jetzt;
-    $darfVerwalten = ist_eigene_buchung($zeile, $meineId, $istAdmin);
+    $darfVerwalten = buchung_ist_eigene($zeile, $meineId, $istAdmin);
 ?>
           <tr<?php echo $istVergangen ? ' class="zeile-vergangen"' : ''; ?>>
             <td class="spalte-zeit">
@@ -194,7 +148,7 @@ $seitenCss   = array('belegung.css');
       </form>
 
       <?php if (!empty($meineKurse)): ?>
-      <a href="<?php echo h(url('buchung_bearbeiten')); ?>" class="btn-add" aria-label="Buchung hinzufügen">+</a>
+      <?php echo knopf_hinzufuegen('buchung_bearbeiten', 'Buchung hinzufügen'); ?>
       <?php endif; ?>
     </aside>
 

@@ -19,7 +19,7 @@ if ($kursId < 1) {
     zugriff_verweigert_seite('Es wurde kein gültiger Kurs angegeben.');
 }
 
-$kurs = abfrage('SELECT * FROM kurs WHERE id = ?', array($kursId))->fetch();
+$kurs = kurs_laden($kursId);
 
 if (!$kurs) {
     zugriff_verweigert_seite('Dieser Kurs existiert nicht oder wurde bereits gelöscht.');
@@ -28,7 +28,7 @@ if (!kurs_darf_verwalten($kursId, $meineId, $istAdmin)) {
     zugriff_verweigert_seite('Sie sind nicht Eigentümer dieses Kurses und können ihn deshalb nicht löschen.');
 }
 
-$anzahlBuchungen = (int) abfrage('SELECT COUNT(*) FROM buchung WHERE kurs_id = ?', array($kursId))->fetchColumn();
+$anzahlBuchungen = kurs_anzahl_buchungen($kursId);
 
 $fehler = '';
 if ($anzahlBuchungen > 0) {
@@ -37,13 +37,12 @@ if ($anzahlBuchungen > 0) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $fehler === '') {
-    try {
-        abfrage('DELETE FROM kurs WHERE id = ?', array($kursId));
+    $ergebnis = kurs_loeschen($kursId);
+    if ($ergebnis === true) {
         header('Location: ' . url('kurse'));
         exit;
-    } catch (PDOException $e) {
-        $fehler = 'Der Kurs kann nicht gelöscht werden, solange noch Buchungen dafür bestehen.';
     }
+    $fehler = $ergebnis;
 }
 
 $seitentitel   = 'Kurs löschen';
@@ -57,7 +56,7 @@ $ohneKopfzeile = true;
       <h2 class="karte-titel"><?php echo h($seitentitel); ?></h2>
 
       <?php if ($fehler !== ''): ?>
-      <div class="fehler"><?php echo h($fehler); ?></div>
+      <?php echo meldung($fehler); ?>
       <p><a class="link-abbrechen" href="<?php echo h(url('kurse')); ?>">Zurück zu den Kursen</a></p>
       <?php else: ?>
       <p class="karte-text">
@@ -66,10 +65,7 @@ $ohneKopfzeile = true;
       </p>
       <form method="post" action="<?php echo h(url('kurs_loeschen', array('id' => (int) $kursId))); ?>">
         <?php csrf_feld(); ?>
-        <div class="knopf-reihe">
-          <button type="submit" class="knopf knopf-loeschen">Ja, endgültig löschen</button>
-          <a class="link-abbrechen" href="<?php echo h(url('kurse')); ?>">Abbrechen</a>
-        </div>
+        <?php echo knopf_reihe('Ja, endgültig löschen', 'kurse', true); ?>
       </form>
       <?php endif; ?>
     </div>

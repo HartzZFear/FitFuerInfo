@@ -53,28 +53,3 @@ function kurs_darf_verwalten($kursId, $benutzerId, $istAdmin)
 
     return in_array((int) $benutzerId, kurs_eigentuemer_ids($kursId), true);
 }
-
-/**
- * Zeigt statt der aktuellen Seite die Hinweisseite "Zugriff verweigert"
- * (pages/zugriff_verweigert.php) mit einer verstaendlichen Fehlermeldung
- * und einem Link zurueck zur passenden Liste, und beendet danach das
- * Skript. Wird verwendet, wenn eine serverseitige Rechtepruefung
- * fehlschlaegt (z. B. Direktaufruf einer fremden Kurs-ID).
- *
- * Die Funktion wird aus allen drei Bereichen aufgerufen. Damit der
- * Zurueck-Link dorthin fuehrt, wo der Benutzer hergekommen ist, geben die
- * Buchungs- und Raumseiten ihr Ziel selbst mit; ohne Angabe bleibt es bei
- * der Kursliste.
- *
- * @param string $nachricht
- * @param string $zurueckSeite Ziel des Zurueck-Links (Seitenname, z. B. 'raeume')
- * @param string $zurueckText  Beschriftung des Zurueck-Links
- */
-function zugriff_verweigert_seite($nachricht, $zurueckSeite = 'kurse', $zurueckText = 'Zurück zu den Kursen')
-{
-    seite_wechseln('zugriff_verweigert', array(
-        'nachricht'     => $nachricht,
-        'zurueck_seite' => $zurueckSeite,
-        'zurueck_text'  => $zurueckText,
-    ));
-}
