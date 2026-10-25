@@ -141,8 +141,8 @@ Gilt für jeden Stand, auch wenn man lange nicht gepullt hat. Was schon passt, e
    ```
    move src\web\config.php config\config.php
    ```
-   Wichtig: Am alten Ort wird sie von Git nicht mehr ausgeblendet und würde beim nächsten
-   `git add .` mit den Zugangsdaten ins Repo wandern.
+   Am alten Ort liest die Anwendung sie nicht mehr – ohne `config\config.php` meldet sie
+   „config/config.php fehlt“.
 3. **Zwei Zeilen löschen:** In `config\config.php` die Zeilen mit `ASSET_VERSION` und
    `PW_MIN_LAENGE` löschen, falls vorhanden. Die stehen jetzt für alle in `config\app.php`.
 4. **DEBUG:** Wer am Code arbeitet, setzt in `config\config.php` `DEBUG` auf `true` (dann
