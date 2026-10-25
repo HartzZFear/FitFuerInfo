@@ -120,8 +120,8 @@ function raum_kuenftige_buchungen($raumId)
  *   Regel 4 (Software) ueber buchung_fehlende_software()
  *   Regel 5 (Platz)    ueber raum.arbeitsplaetze gegen kurs.max_teilnehmer
  *
- * WICHTIG: Die Funktion liest den Raum aus der Datenbank. Beim Speichern in
- * raum_bearbeiten.php wird sie deshalb INNERHALB der Transaktion aufgerufen,
+ * WICHTIG: Die Funktion liest den Raum aus der Datenbank. raum_speichern()
+ * (raum_logik.php) ruft sie deshalb INNERHALB der Transaktion auf,
  * nachdem die Aenderungen geschrieben wurden - so sieht sie genau den Stand,
  * der gespeichert werden soll. Sind Fehler dabei, macht der Aufrufer ein
  * rollBack() und nichts davon wird wirksam.

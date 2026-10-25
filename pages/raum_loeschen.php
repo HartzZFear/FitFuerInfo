@@ -28,7 +28,7 @@ if ($raumId < 1) {
     );
 }
 
-$raum = abfrage('SELECT * FROM raum WHERE id = ?', array($raumId))->fetch();
+$raum = raum_laden($raumId);
 
 if (!$raum) {
     zugriff_verweigert_seite(
@@ -48,12 +48,7 @@ if (!raum_darf_loeschen($istAdmin)) {
     );
 }
 
-// Auch vergangene Buchungen zaehlen mit: der Fremdschluessel unterscheidet
-// nicht, und die Belegung der letzten Wochen soll nachvollziehbar bleiben.
-$anzahlBuchungen = (int) abfrage(
-    'SELECT COUNT(*) FROM buchung WHERE raum_id = ?',
-    array($raumId)
-)->fetchColumn();
+$anzahlBuchungen = raum_anzahl_buchungen($raumId);
 
 $fehler = '';
 if ($anzahlBuchungen > 0) {
@@ -62,15 +57,12 @@ if ($anzahlBuchungen > 0) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $fehler === '') {
-    try {
-        // raum_software und raum_bearbeiter haengen per ON DELETE CASCADE
-        // am Raum und verschwinden automatisch mit.
-        abfrage('DELETE FROM raum WHERE id = ?', array($raumId));
+    $ergebnis = raum_loeschen($raumId);
+    if ($ergebnis === true) {
         header('Location: ' . url('raeume'));
         exit;
-    } catch (PDOException $e) {
-        $fehler = 'Der Raum kann nicht gelöscht werden, solange noch Buchungen dafür bestehen.';
     }
+    $fehler = $ergebnis;
 }
 
 $seitentitel   = 'Raum löschen';
@@ -89,7 +81,7 @@ $ohneKopfzeile = true;
       <h2 class="karte-titel"><?php echo h($seitentitel); ?></h2>
 
       <?php if ($fehler !== ''): ?>
-      <div class="fehler"><?php echo h($fehler); ?></div>
+      <?php echo meldung($fehler); ?>
       <p>
         <a class="link-belegung" href="<?php echo h(url('buchungen', array('raum_id' => (int) $raumId))); ?>">Belegung dieses Raums anzeigen</a>
       </p>
@@ -102,10 +94,7 @@ $ohneKopfzeile = true;
       </p>
       <form method="post" action="<?php echo h(url('raum_loeschen', array('id' => (int) $raumId))); ?>">
         <?php csrf_feld(); ?>
-        <div class="knopf-reihe">
-          <button type="submit" class="knopf knopf-loeschen">Ja, endgültig löschen</button>
-          <a class="link-abbrechen" href="<?php echo h(url('raeume')); ?>">Abbrechen</a>
-        </div>
+        <?php echo knopf_reihe('Ja, endgültig löschen', 'raeume', true); ?>
       </form>
       <?php endif; ?>
     </div>

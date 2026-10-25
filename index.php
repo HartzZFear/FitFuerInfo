@@ -24,6 +24,7 @@ require_once __DIR__ . '/lib/kurs_rechte.php';
 require_once __DIR__ . '/lib/kurs_logik.php';
 require_once __DIR__ . '/lib/software_logik.php';
 require_once __DIR__ . '/lib/raum_rechte.php';
+require_once __DIR__ . '/lib/raum_logik.php';
 require_once __DIR__ . '/lib/buchung_logik.php';
 require_once __DIR__ . '/lib/kalender_logik.php';
 require_once __DIR__ . '/lib/benutzer_logik.php';

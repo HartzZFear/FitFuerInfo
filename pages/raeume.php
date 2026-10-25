@@ -20,129 +20,33 @@ $istAdmin = ist_admin();
 
 // --- Filter aus der URL ---------------------------------------------------
 // Alle vier Filter sind frei kombinierbar und stehen in einem gemeinsamen
-// GET-Formular; sie landen ausschliesslich als Parameter im Prepared
-// Statement, nie per Stringverkettung im SQL.
+// GET-Formular. Das SQL dazu steht in raum_liste() (lib/raum_logik.php).
 $suche     = isset($_GET['suche']) ? trim($_GET['suche']) : '';
 $nurEigene = isset($_GET['zustaendig']) && $_GET['zustaendig'] === 'meine';
 
 $filterSoftwareId = isset($_GET['software_id']) ? (int) $_GET['software_id'] : 0;
 
-// Mindestanzahl: nur ganze Zahlen ab 1. Alles andere (leer, Text, 0, negativ)
-// bedeutet "kein Filter" - das Feld bleibt dann leer.
+// Mindestanzahl: dieselbe Regel wie fuer Arbeitsplaetze (ganze Zahl ab 1).
+// Alles andere (leer, Text, 0, negativ) bedeutet "kein Filter" - das Feld
+// bleibt dann leer.
 $minPlaetze = isset($_GET['min_plaetze']) ? trim($_GET['min_plaetze']) : '';
-if ($minPlaetze !== '' && (!ctype_digit($minPlaetze) || (int) $minPlaetze < 1)) {
+if (raum_arbeitsplaetze($minPlaetze) === null) {
     $minPlaetze = '';
 }
 
-$bedingungen = array();
-$parameter   = array();
-
-$sql = 'SELECT DISTINCT r.id, r.name, r.arbeitsplaetze
-        FROM raum r
-        LEFT JOIN raum_bearbeiter rb ON rb.raum_id = r.id';
-
-if ($suche !== '') {
-    $bedingungen[] = 'r.name LIKE ?';
-    $parameter[]   = '%' . $suche . '%';
-}
-
-if ($nurEigene) {
-    $bedingungen[] = 'rb.benutzer_id = ?';
-    $parameter[]   = $meineId;
-}
-
-// Software ueber EXISTS statt ueber einen weiteren JOIN: so bleibt die
-// Ergebnismenge eindeutig, auch wenn ein Raum viele Pakete hat.
-if ($filterSoftwareId > 0) {
-    $bedingungen[] = 'EXISTS (
-            SELECT 1 FROM raum_software rs
-            WHERE rs.raum_id = r.id AND rs.software_id = ?
-        )';
-    $parameter[]   = $filterSoftwareId;
-}
-
-if ($minPlaetze !== '') {
-    $bedingungen[] = 'r.arbeitsplaetze >= ?';
-    $parameter[]   = (int) $minPlaetze;
-}
-
-if (!empty($bedingungen)) {
-    $sql .= ' WHERE ' . implode(' AND ', $bedingungen);
-}
-
-$sql .= ' ORDER BY r.name';
-
-$raeume = abfrage($sql, $parameter)->fetchAll();
+$raeume = raum_liste($suche, $nurEigene, $filterSoftwareId, $minPlaetze, $meineId);
 
 // Fuer das Software-Dropdown in der Sidebar.
-$alleSoftware = abfrage('SELECT id, name FROM software ORDER BY name')->fetchAll();
+$alleSoftware = software_alle();
 
 // Software, Bearbeiter und kuenftige Buchungen je Raum nachladen - in je
 // einer Abfrage fuer alle Raeume statt einer pro Karte.
-$softwareJeRaum    = array();
-$bearbeiterJeRaum  = array();
-$bearbeiterNamen   = array();
-$buchungenJeRaum   = array();
-
-$raumIds = array();
-foreach ($raeume as $r) {
-    $raumIds[] = $r['id'];
-}
-
-if (!empty($raumIds)) {
-    $platzhalter = implode(',', array_fill(0, count($raumIds), '?'));
-
-    $zeilen = abfrage(
-        'SELECT rs.raum_id, s.name
-         FROM raum_software rs
-         JOIN software s ON s.id = rs.software_id
-         WHERE rs.raum_id IN (' . $platzhalter . ')
-         ORDER BY s.name',
-        $raumIds
-    )->fetchAll();
-    foreach ($zeilen as $zeile) {
-        $softwareJeRaum[$zeile['raum_id']][] = $zeile['name'];
-    }
-
-    $zeilen = abfrage(
-        'SELECT rb.raum_id, rb.benutzer_id, b.name
-         FROM raum_bearbeiter rb
-         JOIN benutzer b ON b.id = rb.benutzer_id
-         WHERE rb.raum_id IN (' . $platzhalter . ')
-         ORDER BY b.name',
-        $raumIds
-    )->fetchAll();
-    foreach ($zeilen as $zeile) {
-        $bearbeiterJeRaum[$zeile['raum_id']][] = (int) $zeile['benutzer_id'];
-        $bearbeiterNamen[$zeile['raum_id']][]  = $zeile['name'];
-    }
-
-    $zeilen = abfrage(
-        'SELECT raum_id, COUNT(*) AS anzahl
-         FROM buchung
-         WHERE start >= ? AND raum_id IN (' . $platzhalter . ')
-         GROUP BY raum_id',
-        array_merge(array(date('Y-m-d H:i:s')), $raumIds)
-    )->fetchAll();
-    foreach ($zeilen as $zeile) {
-        $buchungenJeRaum[$zeile['raum_id']] = (int) $zeile['anzahl'];
-    }
-}
-
-/**
- * Nur fuer die Anzeige der Buttons: ist der eingeloggte Benutzer fuer diesen
- * Raum eingetragen? Die Daten liegen durch die Abfrage oben schon vor,
- * deshalb hier ohne eigene Abfrage. Die massgebliche Pruefung steht in
- * raum_darf_bearbeiten() (raum_rechte.php).
- */
-function ist_mein_raum($raum, $bearbeiterJeRaum, $benutzerId, $istAdmin)
-{
-    if ($istAdmin) {
-        return true;
-    }
-    return isset($bearbeiterJeRaum[$raum['id']])
-        && in_array((int) $benutzerId, $bearbeiterJeRaum[$raum['id']], true);
-}
+$raumIds          = array_column($raeume, 'id');
+$softwareJeRaum   = raum_software_je_raum($raumIds);
+$bearbeiter       = raum_bearbeiter_je_raum($raumIds);
+$bearbeiterJeRaum = $bearbeiter['ids'];
+$bearbeiterNamen  = $bearbeiter['namen'];
+$buchungenJeRaum  = raum_kommende_buchungen_je_raum($raumIds);
 
 $seitentitel = 'Räume';
 $aktiverTab  = 'raeume';
@@ -187,7 +91,7 @@ $seitenCss   = array('raeume.css');
             anzeigen
           </a>
 
-          <?php if (ist_mein_raum($raum, $bearbeiterJeRaum, $meineId, $istAdmin)): ?>
+          <?php if (raum_ist_meiner($raum, $bearbeiterJeRaum, $meineId, $istAdmin)): ?>
           <div class="raum-actions">
             <a href="<?php echo h(url('raum_bearbeiten', array('id' => (int) $raum['id']))); ?>" class="btn-edit">bearbeiten</a>
             <?php if (raum_darf_loeschen($istAdmin)): ?>
@@ -239,7 +143,7 @@ $seitenCss   = array('raeume.css');
       </form>
 
       <?php if (raum_darf_anlegen($istAdmin)): ?>
-      <a href="<?php echo h(url('raum_bearbeiten')); ?>" class="btn-add" aria-label="Raum hinzufügen">+</a>
+      <?php echo knopf_hinzufuegen('raum_bearbeiten', 'Raum hinzufügen'); ?>
       <?php endif; ?>
     </aside>
 

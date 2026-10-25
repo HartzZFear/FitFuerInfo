@@ -9,8 +9,8 @@
 // oder sich selbst Zustaendigkeiten geben.
 //
 // Wer Arbeitsplaetze reduziert oder Software entfernt, kann damit bereits
-// bestehende Buchungen ungueltig machen (Buchungsregeln 4 und 5). Das wird
-// vor dem Commit geprueft - siehe raum_konflikte_mit_buchungen().
+// bestehende Buchungen ungueltig machen (Buchungsregeln 4 und 5). Das prueft
+// raum_speichern() vor dem Commit - siehe raum_konflikte_mit_buchungen().
 //
 // Bewusst PHP-5.6-Syntax, damit es auf dem Schulrechner laeuft.
 
@@ -26,7 +26,7 @@ $raumId        = $istBearbeiten ? (int) $_GET['id'] : null;
 $raum = null;
 
 if ($istBearbeiten) {
-    $raum = abfrage('SELECT * FROM raum WHERE id = ?', array($raumId))->fetch();
+    $raum = raum_laden($raumId);
 
     if (!$raum) {
         zugriff_verweigert_seite(
@@ -52,27 +52,14 @@ if ($istBearbeiten) {
     );
 }
 
-$alleSoftware = abfrage('SELECT id, name FROM software ORDER BY name')->fetchAll();
-$alleBenutzer = $istAdmin
-    ? abfrage('SELECT id, name FROM benutzer WHERE aktiv = 1 ORDER BY name')->fetchAll()
-    : array();
+$alleSoftware = software_alle();
+$alleBenutzer = $istAdmin ? benutzer_aktive() : array();
 
 // --- Vorbelegung der Felder ---------------------------------------------
 $name                     = $istBearbeiten ? $raum['name'] : '';
 $arbeitsplaetze           = $istBearbeiten ? $raum['arbeitsplaetze'] : '';
-$ausgewaehlteSoftwareIds  = array();
-$ausgewaehlteBearbeiterIds = array();
-
-if ($istBearbeiten) {
-    $zeilen = abfrage('SELECT software_id FROM raum_software WHERE raum_id = ?', array($raumId))->fetchAll();
-    foreach ($zeilen as $zeile) {
-        $ausgewaehlteSoftwareIds[] = (int) $zeile['software_id'];
-    }
-
-    if ($istAdmin) {
-        $ausgewaehlteBearbeiterIds = raum_bearbeiter_ids($raumId);
-    }
-}
+$ausgewaehlteSoftwareIds  = $istBearbeiten ? raum_software_ids($raumId) : array();
+$ausgewaehlteBearbeiterIds = ($istBearbeiten && $istAdmin) ? raum_bearbeiter_ids($raumId) : array();
 
 $fehler        = array();
 $hatKonflikte  = false;
@@ -82,124 +69,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name                 = isset($_POST['name']) ? trim($_POST['name']) : '';
     $arbeitsplaetzeEingabe = isset($_POST['arbeitsplaetze']) ? trim($_POST['arbeitsplaetze']) : '';
 
-    $ausgewaehlteSoftwareIds = array();
-    if (isset($_POST['software']) && is_array($_POST['software'])) {
-        foreach ($_POST['software'] as $sid) {
-            $ausgewaehlteSoftwareIds[] = (int) $sid;
-        }
-    }
+    $ausgewaehlteSoftwareIds = formular_ids('software');
 
     // Die Bearbeiterliste kommt nur vom Admin - ein manipuliertes Formular
     // eines Mitarbeiters wird hier schlicht ignoriert.
     if ($istAdmin) {
-        $ausgewaehlteBearbeiterIds = array();
-        if (isset($_POST['bearbeiter']) && is_array($_POST['bearbeiter'])) {
-            foreach ($_POST['bearbeiter'] as $bid) {
-                $ausgewaehlteBearbeiterIds[] = (int) $bid;
-            }
-        }
+        $ausgewaehlteBearbeiterIds = formular_ids('bearbeiter');
     }
 
-    if ($name === '') {
-        $fehler[] = 'Bitte einen Raumnamen eingeben.';
-    } elseif (strlen($name) > 50) {
-        $fehler[] = 'Der Raumname darf höchstens 50 Zeichen lang sein.';
+    // Gueltige Anzahl uebernehmen; bei ungueltiger Eingabe bleibt im Feld
+    // der bisherige Wert stehen.
+    $zahl = raum_arbeitsplaetze($arbeitsplaetzeEingabe);
+    if ($zahl !== null) {
+        $arbeitsplaetze = $zahl;
     }
 
-    if ($arbeitsplaetzeEingabe === '' || !ctype_digit($arbeitsplaetzeEingabe) || (int) $arbeitsplaetzeEingabe < 1) {
-        $fehler[] = 'Die Anzahl der Arbeitsplätze muss eine ganze Zahl von mindestens 1 sein.';
-    } else {
-        $arbeitsplaetze = (int) $arbeitsplaetzeEingabe;
+    $ergebnis = raum_speichern($raumId, array(
+        'name'           => $name,
+        'arbeitsplaetze' => $arbeitsplaetzeEingabe,
+        'software'       => $ausgewaehlteSoftwareIds,
+        'bearbeiter'     => $ausgewaehlteBearbeiterIds,
+    ), $istAdmin);
+
+    if ($ergebnis === true) {
+        header('Location: ' . url('raeume'));
+        exit;
     }
-
-    if (empty($fehler)) {
-        $db = db();
-        $db->beginTransaction();
-
-        try {
-            // Die Zeile des Raums sperren, bevor geprueft und geschrieben
-            // wird. Dieselbe Sperre nimmt buchung_bearbeiten.php vor dem
-            // Speichern einer Buchung - dadurch kann niemand einen Termin
-            // in den Raum legen, waehrend hier gerade seine Plaetze oder
-            // seine Software geaendert werden.
-            if ($istBearbeiten) {
-                abfrage('SELECT id FROM raum WHERE id = ? FOR UPDATE', array($raumId));
-            }
-
-            // Der Raumname ist in der Datenbank eindeutig (uk_raum_name).
-            // Vorher pruefen, damit der Benutzer eine verstaendliche
-            // Meldung bekommt statt eines Datenbankfehlers.
-            $sql       = 'SELECT id FROM raum WHERE name = ?';
-            $parameter = array($name);
-            if ($istBearbeiten) {
-                $sql .= ' AND id <> ?';
-                $parameter[] = $raumId;
-            }
-
-            if (abfrage($sql, $parameter)->fetch()) {
-                $fehler[] = 'Es gibt bereits einen Raum mit dem Namen "' . $name . '".';
-            }
-
-            if (empty($fehler)) {
-                if ($istBearbeiten) {
-                    abfrage(
-                        'UPDATE raum SET name = ?, arbeitsplaetze = ? WHERE id = ?',
-                        array($name, $arbeitsplaetze, $raumId)
-                    );
-                } else {
-                    abfrage(
-                        'INSERT INTO raum (name, arbeitsplaetze) VALUES (?, ?)',
-                        array($name, $arbeitsplaetze)
-                    );
-                    $raumId = (int) $db->lastInsertId();
-                }
-
-                abfrage('DELETE FROM raum_software WHERE raum_id = ?', array($raumId));
-                foreach ($ausgewaehlteSoftwareIds as $sid) {
-                    abfrage('INSERT INTO raum_software (raum_id, software_id) VALUES (?, ?)', array($raumId, $sid));
-                }
-
-                if ($istAdmin) {
-                    abfrage('DELETE FROM raum_bearbeiter WHERE raum_id = ?', array($raumId));
-                    foreach ($ausgewaehlteBearbeiterIds as $bid) {
-                        abfrage('INSERT INTO raum_bearbeiter (raum_id, benutzer_id) VALUES (?, ?)', array($raumId, $bid));
-                    }
-                }
-
-                // Jetzt steht der neue Stand in der Transaktion - genau so
-                // sieht ihn die Pruefung. Passt er nicht zu den kuenftigen
-                // Buchungen, macht das rollBack() unten alles rueckgaengig.
-                $konflikte = raum_konflikte_mit_buchungen($raumId);
-                if (!empty($konflikte)) {
-                    $hatKonflikte = true;
-                }
-                foreach ($konflikte as $meldung) {
-                    $fehler[] = $meldung;
-                }
-            }
-
-            if (empty($fehler)) {
-                $db->commit();
-                header('Location: ' . url('raeume'));
-                exit;
-            }
-
-            $db->rollBack();
-
-            // Beim Anlegen gibt es die ID nach dem rollBack nicht mehr.
-            if (!$istBearbeiten) {
-                $raumId = null;
-            }
-        } catch (PDOException $e) {
-            if ($db->inTransaction()) {
-                $db->rollBack();
-            }
-            if (!$istBearbeiten) {
-                $raumId = null;
-            }
-            $fehler[] = 'Der Raum konnte nicht gespeichert werden. Bitte erneut versuchen.';
-        }
-    }
+    $fehler       = $ergebnis['fehler'];
+    $hatKonflikte = $ergebnis['konflikte'];
 }
 
 $seitentitel   = $istBearbeiten ? 'Raum bearbeiten' : 'Neuen Raum anlegen';
@@ -217,15 +114,7 @@ $ohneKopfzeile = true;
     <div class="karte">
       <h2 class="karte-titel"><?php echo h($seitentitel); ?></h2>
 
-      <?php if (!empty($fehler)): ?>
-      <div class="fehler">
-        <ul>
-          <?php foreach ($fehler as $einzelnerFehler): ?>
-          <li><?php echo h($einzelnerFehler); ?></li>
-          <?php endforeach; ?>
-        </ul>
-      </div>
-      <?php endif; ?>
+      <?php echo fehler_liste($fehler); ?>
 
       <?php /* Bei Konflikten mit bestehenden Buchungen hilft der Blick in die
                Belegung des Raums - deshalb dann den Link dorthin einblenden. */ ?>
@@ -274,10 +163,7 @@ $ohneKopfzeile = true;
         </fieldset>
         <?php endif; ?>
 
-        <div class="knopf-reihe">
-          <button type="submit" class="knopf">Speichern</button>
-          <a class="link-abbrechen" href="<?php echo h(url('raeume')); ?>">Abbrechen</a>
-        </div>
+        <?php echo knopf_reihe('Speichern', 'raeume'); ?>
       </form>
 
       <p class="regel-hinweis">
