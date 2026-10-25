@@ -230,8 +230,13 @@ function kurs_speichern($kursId, $eingabe, $benutzerId, $istAdmin)
 {
     $fehler = array();
 
+    // Die Spalte kurs.titel ist VARCHAR(100). Ohne diese Pruefung wuerde
+    // MariaDB (ohne Strict-Mode) einen laengeren Titel still abschneiden.
+    // mb_strlen zaehlt Zeichen, nicht Bytes ("ü" = 1 Zeichen).
     if ($eingabe['titel'] === '') {
         $fehler[] = 'Bitte einen Kurstitel eingeben.';
+    } elseif (mb_strlen($eingabe['titel'], 'UTF-8') > 100) {
+        $fehler[] = 'Der Kurstitel darf höchstens 100 Zeichen lang sein.';
     }
 
     $maxTeilnehmer = kurs_teilnehmerzahl($eingabe['max_teilnehmer']);

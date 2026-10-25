@@ -4,7 +4,6 @@
  */
 
 body {
-  font-family: Arial, Helvetica, sans-serif;
   color: #222;
   background: #f2f5f7;
 }
@@ -12,7 +11,7 @@ body {
 .kopf {
   position: relative;
   background: linear-gradient(135deg, var(--teal), var(--blue));
-  color: #fff;
+  color: var(--card-bg);
   padding: 56px 20px 100px;
   text-align: center;
 }
@@ -36,13 +35,16 @@ body {
 }
 
 .inhalt {
+  /* position: relative, damit die Karte ueber dem Kopf liegt: .kopf ist
+     positioniert und wuerde sonst ueber den oberen Kartenrand gemalt */
+  position: relative;
   max-width: 380px;
   margin: -64px auto 40px;
   padding: 0 16px;
 }
 
 .karte {
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 12px;
   box-shadow: 0 12px 30px rgba(20, 40, 60, .15);
   padding: 32px 28px;
@@ -63,6 +65,7 @@ body {
   border: 1px solid #ccd3d8;
   border-radius: 6px;
   font-size: 14px;
+  font-family: inherit;
 }
 
 .karte input[type="text"]:focus,
@@ -76,9 +79,9 @@ body {
   padding: 10px 12px;
   border-radius: 6px;
   font-size: 12.5px;
-  background: #eef6f7;
-  border: 1px solid #cfe6e9;
-  color: #3a6b72;
+  background: var(--hinweis-bg);
+  border: 1px solid var(--hinweis-rand);
+  color: var(--hinweis-text);
 }
 
 .knopf {
@@ -88,7 +91,7 @@ body {
   border: none;
   border-radius: 6px;
   background: var(--orange);
-  color: #fff;
+  color: var(--card-bg);
   font-size: 15px;
   font-weight: bold;
   cursor: pointer;
@@ -103,9 +106,9 @@ body {
   padding: 10px 12px;
   border-radius: 6px;
   font-size: 13px;
-  background: #fdeceb;
-  border: 1px solid #f0b3ae;
-  color: #a13a2f;
+  background: var(--fehler-bg);
+  border: 1px solid var(--fehler-rand);
+  color: var(--fehler-text);
 }
 
 .meldung-erfolg {
@@ -113,9 +116,9 @@ body {
   padding: 10px 12px;
   border-radius: 6px;
   font-size: 13px;
-  background: #e6f4ea;
-  border: 1px solid #a8d5b5;
-  color: #205c33;
+  background: var(--erfolg-bg);
+  border: 1px solid var(--erfolg-rand);
+  color: var(--erfolg-text);
 }
 
 .fuss {

@@ -25,6 +25,18 @@
   --border: #dfe6e8;
   --slot-hoehe: 24px;
 
+  /* Statusfarben fuer Hinweis-, Fehler- und Erfolgskaesten
+     (bisher nur in passwort_setzen.css verwendet) */
+  --hinweis-bg: #eef6f7;
+  --hinweis-rand: #cfe6e9;
+  --hinweis-text: #3a6b72;
+  --fehler-bg: #fdeceb;
+  --fehler-rand: #f0b3ae;
+  --fehler-text: #a13a2f;
+  --erfolg-bg: #e6f4ea;
+  --erfolg-rand: #a8d5b5;
+  --erfolg-text: #205c33;
+
   font-family: "Segoe UI", Roboto, Arial, sans-serif;
 }
 

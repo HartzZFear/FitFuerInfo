@@ -98,7 +98,7 @@ $ohneKopfzeile = true;
       <form method="post" action="<?php echo h(url('kurs_bearbeiten', $istBearbeiten ? array('id' => (int) $kursId) : array())); ?>">
         <?php csrf_feld(); ?>
         <label for="titel">Titel</label>
-        <input type="text" id="titel" name="titel" value="<?php echo h($titel); ?>" required>
+        <input type="text" id="titel" name="titel" maxlength="100" value="<?php echo h($titel); ?>" required>
 
         <label for="beschreibung">Beschreibung</label>
         <textarea id="beschreibung" name="beschreibung"><?php echo h($beschreibung); ?></textarea>

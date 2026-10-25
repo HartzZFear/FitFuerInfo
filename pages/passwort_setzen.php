@@ -50,7 +50,7 @@ $seitenCss     = array('passwort_setzen.css');
 $ohneKopfzeile = true;
 ?>
 <div class="kopf">
-  <h1>FitFuerInfo</h1>
+  <h1>FitFürInfo</h1>
   <p>Passwort setzen</p>
   <svg class="welle" viewBox="0 0 500 70" preserveAspectRatio="none">
     <path d="M0,40 C125,80 375,0 500,40 L500,70 L0,70 Z"></path>
