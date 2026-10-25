@@ -1,6 +1,9 @@
 # lokale Zugangsdaten - NIEMALS committen
 /config/config.php
 
+# lokale Berichte (Doku/Fachgespraech) - nicht im Repo
+/Berichte/
+
 # Logs und Dumps
 *.log
 /src/db/dumps/
