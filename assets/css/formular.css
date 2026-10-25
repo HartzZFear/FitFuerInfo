@@ -359,7 +359,8 @@ legend {
   line-height: 1.5;
 }
 
-.seite-raum_bearbeiten .hinweis a {
+.seite-raum_bearbeiten .hinweis a,
+.seite-kurs_bearbeiten .hinweis a {
   color: #17636c;
 }
 

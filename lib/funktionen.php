@@ -223,6 +223,24 @@ function meldung($text, $klasse = 'fehler')
 }
 
 /**
+ * UI-Baustein: Hinweis unter den Fehlern, wenn eine Aenderung an Raum oder
+ * Kurs abgelehnt wurde, weil sie kuenftige Buchungen ungueltig machen
+ * wuerde. Der Link fuehrt zur Buchungsliste mit den betroffenen Terminen.
+ *
+ * @param  string $linkText z. B. 'Belegung dieses Raums anzeigen'
+ * @param  string $ziel     Adresse aus url(), z. B. url('buchungen', array('raum_id' => 3))
+ * @return string HTML
+ */
+function konflikt_hinweis($linkText, $ziel)
+{
+    return '<div class="hinweis">'
+        . 'Es wurde nichts gespeichert. Wer die Änderung trotzdem braucht, muss zuerst die '
+        . 'betroffenen Buchungen anpassen oder löschen: '
+        . '<a href="' . h($ziel) . '">' . h($linkText) . '</a>.'
+        . '</div>';
+}
+
+/**
  * UI-Baustein: Knopfzeile unter einem Formular - Absende-Knopf und Link
  * "Abbrechen" zurueck zur Liste.
  *
