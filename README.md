@@ -14,7 +14,7 @@ Download: `sourceforge.net/projects/xampp/files/XAMPP Windows/5.6.36/`
 
 ---
 
-## Installation von Hand
+## Installation
 
 `<XAMPP>` steht im Folgenden für den XAMPP-Ordner, normalerweise `C:\xampp`.
 
@@ -29,25 +29,39 @@ Download: `sourceforge.net/projects/xampp/files/XAMPP Windows/5.6.36/`
    entsteht.)
 2. **Server starten.** XAMPP Control Panel öffnen, bei **Apache** und **MySQL** auf
    **Start** klicken. Beide müssen grün werden.
-3. **Datenbank anlegen.** Im Browser `http://localhost/phpmyadmin` öffnen.
-   - Oben auf **Importieren** → Datei `src\db\schema.sql` auswählen → **OK**.
-     Das legt die Datenbank `fitfuerinfo` mit allen Tabellen an.
-   - Links auf **fitfuerinfo** klicken, dann wieder **Importieren** →
-     `src\db\seed.sql` → **OK**. Das lädt die Testdaten.
-   - Zeichencodierung beim Import auf **utf-8** lassen (Standard).
-4. **Konfiguration anlegen.** Im Ordner `config` die Datei `config.example.php`
-   kopieren und die Kopie `config.php` nennen. Darin prüfen:
-   - `BASE_URL` steht auf `'/fitfuerinfo'`
-   - `DEBUG` steht auf `false` (so ausgeliefert, richtig für Abgabe und Präsentation;
-     zum Entwickeln auf `true` setzen, siehe „Fehlerseite“ unten)
-   - Datenbank-Benutzer `root` ohne Passwort passt bei einer frischen XAMPP-Installation.
+3. **Einrichtung starten.** Im Browser `http://localhost/fitfuerinfo/einrichtung.php`
+   öffnen und **Einrichtung starten** klicken. Die Seite arbeitet fünf Schritte ab und
+   hakt jeden ab:
+   1. `config/config.php` aus der Vorlage `config/config.example.php` anlegen (eine
+      vorhandene `config.php` bleibt unverändert). `BASE_URL` wird dabei aus der
+      Adresse übernommen, unter der die Seite aufgerufen wurde.
+   2. Verbindung zu MySQL
+   3. Datenbank `fitfuerinfo` mit allen Tabellen anlegen (`src\db\schema.sql`)
+   4. Testdaten laden (`src\db\seed.sql`)
+   5. Prüfung: Tabellen, Benutzer, Anmeldung mit `admin` / `test1`
 
-   In `config.php` stehen nur die Werte, die von Rechner zu Rechner verschieden sind.
-   Was für alle gleich ist (erlaubte Seiten, Versionsnummer für CSS/JS,
-   Passwort-Mindestlänge), steht in `config/app.php` und kommt mit dem Repo.
-5. **Selbsttest:** `http://localhost/fitfuerinfo/tests/test.php` aufrufen. Stehen alle
-   Zeilen auf OK, ist die Installation fertig (siehe „Selbsttest“ unten).
-6. **Aufrufen:** `http://localhost/fitfuerinfo/` – es erscheint die Anmeldeseite.
+   Sind alle fünf grün, führt **Zur Anmeldung** zur Anwendung. Bei einem roten ✗
+   steht darunter, was zu tun ist; danach **Erneut versuchen**. Die Seite funktioniert
+   nur über `localhost` auf dem eigenen Rechner, weil sie alle Daten löscht.
+
+   In `config.php` stehen nur die Werte, die von Rechner zu Rechner verschieden sind:
+   Datenbank-Benutzer (`root` ohne Passwort passt bei einer frischen XAMPP-Installation),
+   `BASE_URL` und `DEBUG` (`false`, richtig für Abgabe und Präsentation; zum Entwickeln
+   auf `true` setzen, siehe „Häufige Fehler“ unten). Was für alle gleich ist (erlaubte
+   Seiten, Versionsnummer für CSS/JS, Passwort-Mindestlänge), steht in `config/app.php`
+   und kommt mit dem Repo.
+4. **Aufrufen:** `http://localhost/fitfuerinfo/` – es erscheint die Anmeldeseite.
+   Zur Kontrolle gibt es zusätzlich den Selbsttest (siehe „Selbsttest“ unten).
+
+### Alternative von Hand
+
+Statt Schritt 3 geht es auch ohne die Einrichtungsseite:
+
+- `http://localhost/phpmyadmin` öffnen, oben **Importieren** → `src\db\schema.sql` → **OK**,
+  dann links auf **fitfuerinfo** klicken und wieder **Importieren** → `src\db\seed.sql`
+  → **OK**. Zeichencodierung beim Import auf **utf-8** lassen (Standard).
+- Im Ordner `config` die Datei `config.example.php` kopieren und die Kopie `config.php`
+  nennen. Liegt das Projekt nicht unter `htdocs\fitfuerinfo`, darin `BASE_URL` anpassen.
 
 ## Testzugänge
 
@@ -64,9 +78,10 @@ Aus `src\db\seed.sql`:
 Es gibt genau einen Admin. Die Rolle wird nicht über die Oberfläche vergeben oder entzogen,
 neue Benutzer sind immer Mitarbeiter, und das Admin-Konto kann nicht gesperrt werden.
 
-Die Testbuchungen werden beim Import relativ zum heutigen Datum angelegt (kommende Woche
-und vorletzte Woche). Wer den Kalender vor einer Präsentation wieder frisch haben will,
-importiert `schema.sql` und `seed.sql` einfach noch einmal.
+Die Testbuchungen werden bei der Einrichtung relativ zum heutigen Datum angelegt (kommende
+Woche und vorletzte Woche). Wer den Kalender vor einer Präsentation wieder frisch haben
+will, ruft `http://localhost/fitfuerinfo/einrichtung.php` auf und klickt noch einmal
+**Einrichtung starten** – das setzt alle Daten auf die Testdaten zurück.
 
 ## Adressen der Seiten
 
@@ -80,7 +95,8 @@ http://localhost/fitfuerinfo/index.php?seite=passwort_setzen
 
 Ohne `seite` zeigt `index.php` die Belegung (angemeldet) bzw. die Anmeldung. Erlaubt sind
 nur die Seiten aus der Liste `ERLAUBTE_SEITEN` in `config/app.php`; jeder andere Name führt
-zur Seite „Seite nicht gefunden“. Die Dateien in `pages/` direkt aufzurufen
+zur Seite „Seite nicht gefunden“. Einzige Ausnahme ist `einrichtung.php`, die
+eigenständig läuft (siehe Installation). Die Dateien in `pages/` direkt aufzurufen
 (`.../pages/kurse.php`) zeigt bewusst nur eine leere Seite.
 
 ## Projektstruktur
@@ -88,10 +104,13 @@ zur Seite „Seite nicht gefunden“. Die Dateien in `pages/` direkt aufzurufen
 ```
 fitfuerinfo/
 ├── index.php        einziger Einstiegspunkt (Front-Controller), bindet die Seiten ein
+├── einrichtung.php  Einrichtung auf einem frischen Rechner (config.php + Datenbank);
+│                    läuft ohne index.php, weil es vorher weder config.php noch DB gibt
 ├── config/          app.php (für alle gleich, im Repo), config.example.php (Vorlage),
 │                    config.php (eigene Kopie, nicht im Repo)
 ├── lib/             PHP-Funktionen mit dem SQL und der Fachlogik (db.php, auth.php,
-│                    kurs_*, raum_*, buchung_*, benutzer_*, kalender_*, funktionen.php)
+│                    kurs_*, raum_*, buchung_*, benutzer_*, kalender_*, einrichtung_*,
+│                    funktionen.php, ausgabe.php mit h())
 ├── templates/       Kopf, Fuß und wiederkehrende Layout-Teile
 ├── pages/           die eigentlichen Seiten, nur der Inhalt (kein SQL)
 ├── assets/          css/, js/, imgs/
@@ -168,19 +187,17 @@ geändert, ein neuer Import ist nicht nötig.
 | Problem | Ursache / Lösung |
 |---------|------------------|
 | **404 Not Found** | Projekt liegt im falschen Ordner oder die URL stimmt nicht. Es muss `<XAMPP>\htdocs\fitfuerinfo\index.php` geben und die Adresse `http://localhost/fitfuerinfo/` lauten. |
-| **„Fehler: config/config.php fehlt“** | Schritt 4 vergessen: `config/config.example.php` nach `config/config.php` kopieren. |
+| **„Fehler: config/config.php fehlt“** | Einrichtung noch nicht ausgeführt: `einrichtung.php` aufrufen (Installation Schritt 3). |
+| **Einrichtung: Schritt 1 rot, „BASE_URL in config/config.php ist …“** | Der Projektordner heißt anders als beim Anlegen von `config.php`. In `config/config.php` `BASE_URL` auf den genannten Wert setzen (oder `config.php` löschen, dann legt die Einrichtung sie neu an) oder den Ordner in `fitfuerinfo` umbenennen. |
+| **Einrichtung: „nur direkt auf diesem Rechner … erlaubt“** | Die Seite wurde über die IP-Adresse oder von einem anderen Rechner aufgerufen. Am Rechner selbst `http://localhost/fitfuerinfo/einrichtung.php` öffnen. |
 | **„Notice: Constant ASSET_VERSION already defined“** (oder `PW_MIN_LAENGE`) | Ältere `config.php`: die Zeilen mit `ASSET_VERSION` und `PW_MIN_LAENGE` dort löschen, sie stehen jetzt in `config/app.php`. `tests/test.php` zeigt, welche Zeile stört. |
 | **„Es ist ein Fehler aufgetreten“** | Fehlerseite bei einem unerwarteten technischen Fehler (z. B. Datenbankfehler). Mit `DEBUG = false` stehen bewusst keine Details darauf, sie landen im Apache-Fehlerlog `<XAMPP>\apache\logs\error.log`. Zum Entwickeln in `config.php` `DEBUG = true` setzen, dann stehen sie direkt unter der Meldung. |
 | **Leere weiße Seite** | Eine Datei aus `pages/` wurde direkt aufgerufen (alter Link oder Lesezeichen). Stattdessen `http://localhost/fitfuerinfo/index.php?seite=<name>` verwenden. |
 | **Apache startet nicht** | Port 80 ist belegt (z. B. Skype, IIS, VMware). In `<XAMPP>\apache\conf\httpd.conf` `Listen 80` in `Listen 8080` ändern; dann `http://localhost:8080/fitfuerinfo/` aufrufen. |
-| **„Datenbankverbindung fehlgeschlagen“** | MySQL läuft nicht (Control Panel) oder `schema.sql` wurde nicht importiert. |
-| **Umlaute kaputt** (z. B. „Ã¼“ statt „ü“) | `seed.sql` wurde nicht als UTF-8 importiert. Beim Import Zeichencodierung **utf-8** wählen, dann `schema.sql` und `seed.sql` erneut importieren. |
+| **„Datenbankverbindung fehlgeschlagen“** | MySQL läuft nicht (Control Panel) oder die Datenbank fehlt: `einrichtung.php` aufrufen. |
+| **Umlaute kaputt** (z. B. „Ã¼“ statt „ü“) | `seed.sql` wurde von Hand nicht als UTF-8 importiert. `einrichtung.php` aufrufen (oder beim Import Zeichencodierung **utf-8** wählen und `schema.sql` und `seed.sql` erneut importieren). |
 | **Anmeldung klappt nicht** | Passwort ist `test1`; `sabine` ist absichtlich gesperrt. |
 
-## Hinweis zu den Skripten
+## Weitere Unterlagen
 
-`init.ps1`, `start.ps1` und `end.ps1` im Ordner `tests\` sind **veraltet**: Sie erwarten noch
-die alte Ordnerstruktur (`web\`, `db\`) und einen anderen XAMPP-Pfad und werden nicht
-verwendet. Bitte nur die Installation von Hand oben benutzen.
-
-Weitere Unterlagen (Projektdokumentation, Bedienungsanleitung): `tests\docs\`.
+Projektdokumentation und Bedienungsanleitung: `tests\docs\`.

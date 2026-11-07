@@ -21,11 +21,13 @@ Kurs- und Raumverwaltung, Schulprojekt LF12. Diese Regeln gelten für jede Ände
 ## Ordnerstruktur
 
 Der Repo-Hauptordner ist der Webroot. Aufruf: `http://localhost/fitfuerinfo/`. Alle Seiten werden ausschließlich über `index.php` aufgerufen.
+Einzige Ausnahme: `einrichtung.php` läuft eigenständig (ohne `lib/db.php`, `BASE_URL` und `db()`, mit relativen Links und eigener Verbindung ohne Datenbanknamen), weil vor der Einrichtung weder `config.php` noch Datenbank existieren und `index.php`/`lib/db.php` dann abbrechen.
 
 ```
 fitfuerinfo/
 │
 ├── index.php              Front-Controller: einziger Einstiegspunkt
+├── einrichtung.php        Einrichtung (config.php + Datenbank), läuft ohne index.php (s. o.)
 ├── CLAUDE.md, README.md
 │
 ├── config/
@@ -36,13 +38,15 @@ fitfuerinfo/
 │                          nur rechnerspezifische Werte: DB-Zugang, BASE_URL, DEBUG
 │
 ├── lib/                   Wiederverwendbare PHP-Funktionen – KEINE Ausgabe beim Einbinden
-│   ├── db.php             db(), abfrage(), h()
+│   ├── db.php             db(), abfrage(); bindet ausgabe.php ein
+│   ├── ausgabe.php        h() – ohne config.php nutzbar (für einrichtung.php, tests/test.php)
 │   ├── auth.php           Login, Session, CSRF, Rechteprüfung
 │   ├── cache.php          Funktionen für Cache-Header
 │   ├── funktionen.php     Allgemeine Helfer und UI-Bausteine (z. B. button(), meldung())
 │   └── <bereich>_*.php    Fachliche Funktionen je Bereich, enthalten das SQL
 │                          (bestehende Namen bleiben: buchung_logik.php, kalender_logik.php,
-│                          benutzer_logik.php, kurs_rechte.php, raum_rechte.php;
+│                          benutzer_logik.php, kurs_rechte.php, raum_rechte.php,
+│                          einrichtung_logik.php;
 │                          neue Dateien nach demselben Muster, z. B. kurs_logik.php)
 │
 ├── templates/             Wiederkehrende Layout-Elemente
