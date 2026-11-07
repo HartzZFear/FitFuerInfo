@@ -2,7 +2,8 @@
 /**
  * Datenbankverbindung (PDO).
  *
- * Wird von index.php eingebunden. Verwendung in Funktionen:
+ * Wird von index.php eingebunden und bindet selbst config/config.php,
+ * config/app.php und lib/ausgabe.php (h()) ein. Verwendung in Funktionen:
  *   $db = db();
  *
  * db() baut die Verbindung beim ersten Aufruf auf und gibt bei weiteren
@@ -24,6 +25,10 @@ require_once __DIR__ . '/../config/config.php';
 
 // Projektweite Konstanten (Seiten-Whitelist, ASSET_VERSION, PW_MIN_LAENGE) - im Repo.
 require_once __DIR__ . '/../config/app.php';
+
+// h() steht in einer eigenen Datei, damit einrichtung.php und tests/test.php
+// sie auch ohne config.php nutzen koennen.
+require_once __DIR__ . '/ausgabe.php';
 
 if (defined('DEBUG') && DEBUG) {
     error_reporting(E_ALL);
@@ -89,16 +94,4 @@ function abfrage($sql, $parameter = array())
     $stmt = db()->prepare($sql);
     $stmt->execute($parameter);
     return $stmt;
-}
-
-/**
- * Text sicher fuer die Ausgabe in HTML aufbereiten (Schutz vor XSS).
- * Jede Ausgabe von Daten aus der Datenbank durch diese Funktion schicken.
- *
- * @param  string $text
- * @return string
- */
-function h($text)
-{
-    return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
 }
