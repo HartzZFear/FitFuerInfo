@@ -14,11 +14,14 @@
  */
 
 // config.php laden. Fehlt sie, ist die Einrichtung nicht abgeschlossen.
+// Der Link ist relativ: Diese Meldung erscheint nur ueber index.php, und
+// einrichtung.php liegt im selben Ordner (BASE_URL gibt es hier noch nicht).
 if (!file_exists(__DIR__ . '/../config/config.php')) {
     die(
         'Fehler: config/config.php fehlt. '
-        . 'Bitte config/config.example.php kopieren und als config/config.php speichern. '
-        . 'Details stehen in README.md, Installation Schritt 4.'
+        . 'Bitte die <a href="einrichtung.php">Einrichtung</a> aufrufen (einrichtung.php im Projektordner), '
+        . 'sie legt config.php und die Datenbank an. '
+        . 'Details stehen in README.md, Abschnitt Installation.'
     );
 }
 require_once __DIR__ . '/../config/config.php';
