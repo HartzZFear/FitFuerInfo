@@ -1,0 +1,109 @@
+/* Einrichtungsseite (einrichtung.php): Liste der fünf Schritte mit
+ * Häkchen. Welle, Karte, Logo und Knopf kommen aus style.css (Klassen der
+ * Login-Seite, body trägt dafür auch "seite-login") - hier steht nur, was
+ * es dort nicht gibt.
+ */
+
+.einrichtung-text {
+  margin: 0 0 20px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-dark);
+}
+
+/* ---- Schrittliste ---- */
+.schritte {
+  list-style: none;
+  margin: 0 0 24px;
+  padding: 0;
+  text-align: left;
+}
+
+.schritt {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.schritt:last-child {
+  border-bottom: none;
+}
+
+/* Kreis mit Nummer (nicht ausgeführt), ✓ (erledigt) oder ✗ (Fehler) */
+.schritt-zeichen {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--page-bg);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.schritt-erledigt .schritt-zeichen {
+  background: var(--erfolg-bg);
+  border-color: var(--erfolg-rand);
+  color: var(--erfolg-text);
+}
+
+.schritt-fehler .schritt-zeichen {
+  background: var(--fehler-bg);
+  border-color: var(--fehler-rand);
+  color: var(--fehler-text);
+}
+
+/* min-width: 0, damit lange Meldungen von MySQL im Flex-Element umbrechen
+   statt die Karte zu verbreitern */
+.schritt-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.schritt-titel {
+  display: block;
+  font-size: 14px;
+  line-height: 24px;
+  color: var(--text-dark);
+}
+
+.schritt-offen .schritt-titel {
+  color: var(--text-muted);
+}
+
+.schritt-meldung {
+  display: block;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-muted);
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+.schritt-fehler .schritt-meldung {
+  color: var(--fehler-text);
+}
+
+/* ---- Ergebnis ---- */
+.einrichtung-erfolg {
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--erfolg-bg);
+  border: 1px solid var(--erfolg-rand);
+  color: var(--erfolg-text);
+  font-size: 13px;
+  text-align: left;
+}
+
+/* "Zur Anmeldung" ist ein Link im Stil des Anmelde-Knopfs */
+.seite-einrichtung a.btn-login {
+  display: block;
+  text-decoration: none;
+}

@@ -6,8 +6,14 @@
  *
  * Prueft PHP-Version, Datenbankverbindung, Tabellen und Testdaten.
  * Diese Datei ist nur ein Hilfsmittel fuer die Einrichtung und
- * gehoert NICHT in die fertige Abgabe.
+ * gehoert NICHT in die fertige Abgabe. Fehlt etwas, hilft meist die
+ * Einrichtung (einrichtung.php im Projektordner).
  */
+
+// h() und die Liste der Tabellen gibt es auch ohne config.php - so zeigt
+// die Seite auch dann ein Ergebnis, wenn config.php noch fehlt.
+require_once __DIR__ . '/../lib/ausgabe.php';
+require_once __DIR__ . '/../lib/einrichtung_logik.php';
 
 $ergebnisse = array();
 
@@ -42,7 +48,8 @@ pruefe(
     $configOk,
     $configOk
         ? 'gefunden'
-        : 'fehlt – config/config.example.php kopieren und als config/config.php speichern'
+        : 'fehlt – einrichtung.php im Projektordner aufrufen '
+            . '(oder config/config.example.php kopieren und als config/config.php speichern)'
 );
 
 // --- 3b. config/app.php (im Repo) ---------------------------------------
@@ -114,10 +121,7 @@ if ($configOk && $appOk && $pdoOk) {
 }
 
 // --- 5. Tabellen -------------------------------------------------------
-$erwartet = array(
-    'benutzer', 'buchung', 'kurs', 'kurs_eigentuemer', 'kurs_software',
-    'raum', 'raum_bearbeiter', 'raum_software', 'software'
-);
+$erwartet = einrichtung_tabellen();
 
 if ($db !== null) {
     $vorhanden = array();
@@ -127,11 +131,11 @@ if ($db !== null) {
     }
     $fehlend = array_diff($erwartet, $vorhanden);
     pruefe(
-        'Tabellen (9 erwartet)',
+        'Tabellen (' . count($erwartet) . ' erwartet)',
         count($fehlend) === 0,
         count($fehlend) === 0
             ? count($vorhanden) . ' Tabellen gefunden'
-            : 'Es fehlen: ' . implode(', ', $fehlend) . ' – bitte src/db/schema.sql importieren'
+            : 'Es fehlen: ' . implode(', ', $fehlend) . ' – bitte einrichtung.php aufrufen (oder src/db/schema.sql importieren)'
     );
 
     // --- 6. Testdaten --------------------------------------------------
@@ -147,7 +151,7 @@ if ($db !== null) {
             $seedOk,
             $seedOk
                 ? implode('  |  ', $zaehler)
-                : 'keine Daten – bitte src/db/seed.sql importieren'
+                : 'keine Daten – bitte einrichtung.php aufrufen (oder src/db/seed.sql importieren)'
         );
 
         // --- 7. Passworthash testen ------------------------------------
@@ -156,7 +160,7 @@ if ($db !== null) {
         pruefe(
             'Passwortpruefung (admin / test1)',
             $pwOk,
-            $pwOk ? 'password_verify funktioniert' : 'Hash passt nicht – seed.sql neu importieren'
+            $pwOk ? 'password_verify funktioniert' : 'Hash passt nicht – einrichtung.php aufrufen (oder seed.sql neu importieren)'
         );
     }
 }
@@ -199,7 +203,8 @@ foreach ($ergebnisse as $e) {
 <?php else: ?>
 <div class="box schlecht">
   Mindestens eine Pruefung ist fehlgeschlagen. Die Ursache steht in der Spalte
-  Ergebnis. Weitere Hinweise stehen in <code>SETUP.md</code>.
+  Ergebnis. Meist hilft es, <a href="../einrichtung.php">einrichtung.php</a>
+  aufzurufen. Weitere Hinweise stehen in <code>README.md</code>.
 </div>
 <?php endif; ?>
 

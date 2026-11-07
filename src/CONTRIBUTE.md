@@ -112,6 +112,11 @@ Einstieg völlig in Ordnung.
 
 ## 4. Datenbank einrichten
 
+**Am schnellsten:** `http://localhost/fitfuerinfo/einrichtung.php` öffnen und
+**Einrichtung starten** klicken. Die Seite legt auch `config/config.php` an
+(Abschnitt 5) und setzt die Datenbank auf die Testdaten zurück. Der Import von
+Hand geht so:
+
 Jeder hat seine **eigene lokale Datenbank**. Es gibt keine zentrale DB auf
 einem Rechner – das wäre bei der Abgabe auf dem Schulrechner nicht
 erreichbar. Synchronisiert wird über die SQL-Dateien im Repo.
@@ -257,7 +262,8 @@ für `schema.sql` (Kommentare, Reihenfolge der Tabellen) – beide Dateien
 werden deshalb nur von Hand geändert.
 
 **2. SQL immer über `abfrage()`, Ausgaben immer über `h()`.**
-Beide Funktionen stehen in `lib/db.php` und sind auf jeder Seite verfügbar
+`abfrage()` steht in `lib/db.php`, `h()` in `lib/ausgabe.php` (bindet `lib/db.php`
+ein); beide sind auf jeder Seite verfügbar
 (`index.php` bindet `lib/` ein). SQL steht nur in Funktionen in `lib/`, nie
 in einer Seite:
 
